@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jungle Rhythm Safari</title>
+<style>
+  :root{
+    --canopy-deep:#1f3d2e;
+    --canopy-mid:#2e5c41;
+    --leaf:#4f8a5b;
+    --leaf-light:#7fb878;
+    --banana:#f6c453;
+    --banana-dark:#d99e2b;
+    --bark:#6b4a3a;
+    --cream:#fbf3df;
+    --berry:#e2654b;
+    --sky:#cfe8c8;
+    --ink:#23321f;
+    --shadow: rgba(20,35,20,0.35);
+    --pitch-do:#e2654b;
+    --pitch-re:#e9924a;
+    --pitch-mi:#f0c049;
+    --pitch-so:#6fb072;
+    --pitch-la:#5a9bd4;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin:0; padding:0;
+    width:100%; height:100%;
+    font-family: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(180deg, var(--sky) 0%, var(--canopy-mid) 55%, var(--canopy-deep) 100%);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  #app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 14px 30px;
+    position: relative;
+  }
+
+  .canopy-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 140px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .title-wrap { text-align: center; position: relative; z-index: 2; margin-bottom: 6px; }
+
+  h1 {
+    font-family: 'Baloo 2', 'Comic Sans MS', 'Trebuchet MS', sans-serif;
+    font-size: clamp(24px, 4.6vw, 38px);
+    margin: 8px 0 2px;
+    color: var(--cream);
+    text-shadow: 2px 3px 0 var(--canopy-deep), 0 0 18px rgba(0,0,0,0.25);
+    letter-spacing: 0.5px;
+  }
+
+  .subtitle { color: var(--sky); font-size: 14px; opacity: 0.9; margin-bottom: 10px; }
+
+  .stage {
+    background: var(--cream);
+    border-radius: 28px;
+    width: min(900px, 96vw);
+    padding: 20px clamp(12px, 3vw, 34px) 26px;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 18px 0 rgba(0,0,0,0.12), 0 24px 40px var(--shadow);
+    border: 4px solid var(--banana-dark);
+  }
+
+  .hud { display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+  .hud-group { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+
+  .pill {
+    background: var(--leaf-light); color: var(--canopy-deep); font-weight: 700;
+    border-radius: 999px; padding: 6px 14px; font-size: 13.5px;
+    display:flex; align-items:center; gap:6px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
+    white-space: nowrap;
+  }
+  .pill.streak { background: var(--banana); }
+  .pill.level { background: var(--berry); color: var(--cream); }
+  .pill.warn { background: #f0a04b; color: var(--canopy-deep); }
+  .pill.tempo { background: var(--leaf); color: var(--cream); }
+
+  button.iconbtn {
+    background: var(--canopy-mid); color: var(--cream); border: none; border-radius: 999px;
+    width: 36px; height: 36px; font-size: 15px; cursor: pointer;
+    box-shadow: 0 3px 0 var(--canopy-deep); transition: transform 0.08s ease;
+  }
+  button.iconbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--canopy-deep); }
+
+  .track-wrap {
+    position: relative; height: 140px; margin: 6px 0 16px; border-radius: 18px;
+    background: linear-gradient(180deg, #e9f3df 0%, #d9ecd0 100%);
+    overflow: hidden; border: 3px dashed var(--leaf);
+  }
+  .track-ground { position:absolute; bottom:0; left:0; width:100%; height: 36%; background: var(--leaf); border-top: 4px solid var(--canopy-mid); }
+
+  #monkey {
+    position: absolute; bottom: 30%; left: 18px; width: 60px; height: 60px;
+    transition: left 0.5s ease, transform 0.18s ease;
+    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.25)); z-index: 5;
+  }
+  #monkey.hop { animation: hop 0.32s ease; }
+  @keyframes hop { 0%{transform:translateY(0) rotate(0deg);} 40%{transform:translateY(-20px) rotate(-6deg);} 100%{transform:translateY(0) rotate(0deg);} }
+  #monkey.sad { animation: wobble 0.4s ease; }
+  @keyframes wobble { 0%,100%{transform:rotate(0deg);} 25%{transform:rotate(-8deg);} 75%{transform:rotate(8deg);} }
+
+  .checkpoint { position: absolute; bottom: 30%; width: 36px; height: 36px; transform: translateX(-50%); }
+
+  .rhythm-rail {
+    display:flex; align-items: flex-end; justify-content: center; gap: 10px; min-height: 130px;
+    margin: 10px 0 14px; flex-wrap: wrap; padding: 10px 6px;
+    background: repeating-linear-gradient(to bottom, transparent 0px, transparent 78px, rgba(107,74,58,0.18) 78px, rgba(107,74,58,0.18) 80px);
+    border-radius: 14px;
+  }
+
+  .beat-group { display:flex; gap: 4px; align-items: flex-end; padding: 6px 7px; border-radius: 12px; transition: background 0.15s ease; }
+  .beat-group.active-listen { background: rgba(246,196,83,0.55); }
+  .beat-group.active-tap { background: rgba(127,184,120,0.5); }
+
+  .syl-card { width: 50px; display:flex; flex-direction: column; align-items: center; gap: 4px; }
+  .syl-icon { width: 44px; height: 52px; }
+  .syl-label { font-size: 11.5px; font-weight: 700; color: var(--bark); text-align:center; line-height:1.1; }
+  .pitch-tag {
+    font-size: 11px; font-weight: 900; color: var(--cream);
+    border-radius: 6px; padding: 1px 6px; margin-top: 1px;
+  }
+
+  .syl-card.result-correct .syl-label { color: #2e7d4f; }
+  .syl-card.result-wrong .syl-label { color: var(--berry); }
+  .syl-card.result-correct::after, .syl-card.result-wrong::after { font-size: 17px; margin-top: -2px; }
+  .syl-card.result-correct::after { content: "✓"; color: #2e7d4f; font-weight:900; }
+  .syl-card.result-wrong::after { content: "✗"; color: var(--berry); font-weight:900; }
+
+  .controls { display:flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 6px; }
+  .status-line { font-size: 16px; font-weight: 700; color: var(--canopy-deep); min-height: 24px; text-align: center; }
+  .countin-display {
+    font-family: 'Baloo 2', 'Comic Sans MS', sans-serif;
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--berry);
+    text-shadow: 2px 3px 0 rgba(0,0,0,0.12);
+    min-height: 70px;
+    line-height: 70px;
+    animation: countinPulse 0.25s ease;
+    max-width: 90%;
+    margin: 0 auto;
+    white-space: nowrap;
+  }
+  .countin-display.is-word {
+    font-size: 40px; /* "ready" is wider than a single digit — scale down so it never overflows */
+  }
+  @keyframes countinPulse {
+    0% { transform: scale(1.4); opacity: 0.4; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .btn-row { display:flex; gap: 12px; flex-wrap: wrap; justify-content:center; }
+
+  .big-btn {
+    font-family: inherit; font-weight: 800; font-size: 16px; padding: 12px 24px; border-radius: 16px;
+    border: none; cursor: pointer; color: var(--cream); background: var(--leaf);
+    box-shadow: 0 5px 0 var(--canopy-deep); transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .big-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--canopy-deep); }
+  .big-btn.primary { background: var(--berry); box-shadow: 0 5px 0 #a23f2c; }
+  .big-btn.primary:active { box-shadow: 0 1px 0 #a23f2c; }
+  .big-btn.ghost { background: #cfc3a9; color: var(--ink); box-shadow: 0 5px 0 #a89a78; }
+  .big-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .key-hint-row { display:flex; gap: 10px; flex-wrap: wrap; justify-content:center; }
+  .key-chip {
+    display:flex; flex-direction: column; align-items:center; gap: 4px;
+    background: var(--canopy-mid); color: var(--cream); padding: 8px 14px; border-radius: 14px;
+    font-size: 12.5px; font-weight: 700;
+  }
+  .key-chip.tappable {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: transform 0.08s ease;
+  }
+  .key-chip.tappable:hover { background: var(--leaf); }
+  .key-chip.tappable:active { transform: translateY(2px); }
+  .key-chip .keycap {
+    background: var(--cream); color: var(--canopy-deep); border-radius: 8px;
+    padding: 4px 14px; font-weight: 900; box-shadow: 0 3px 0 rgba(0,0,0,0.2); font-size: 15px;
+  }
+  .key-chip .keycap.pressed { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.2); }
+  .key-chip.do .keycap { border: 2px solid var(--pitch-do); }
+  .key-chip.re .keycap { border: 2px solid var(--pitch-re); }
+  .key-chip.mi .keycap { border: 2px solid var(--pitch-mi); }
+  .key-chip.so .keycap { border: 2px solid var(--pitch-so); }
+  .key-chip.la .keycap { border: 2px solid var(--pitch-la); }
+
+  .level-select { display:flex; gap: 9px; flex-wrap: wrap; justify-content: center; margin: 12px 0 4px; }
+  .level-card {
+    background: var(--leaf-light); border: 3px solid var(--leaf); border-radius: 16px; padding: 9px 14px;
+    cursor: pointer; font-weight: 800; color: var(--canopy-deep); text-align: center; min-width: 104px;
+    transition: transform 0.08s ease; font-size: 13.5px;
+  }
+  .level-card:hover { transform: translateY(-2px); }
+  .level-card.selected { background: var(--banana); border-color: var(--banana-dark); }
+  .level-card small { display:block; font-weight: 600; font-size: 10.5px; margin-top: 3px; }
+
+  .legend { display:flex; flex-wrap:wrap; gap: 12px; justify-content:center; margin-top: 14px; padding-top: 14px; border-top: 2px dashed var(--leaf-light); }
+  .legend-item { display:flex; flex-direction:column; align-items:center; gap:4px; font-size: 10.5px; font-weight: 700; color: var(--bark); min-width: 64px; }
+  .legend-item .syl-icon { width: 34px; height: 40px; }
+
+  .end-banner { text-align:center; padding: 18px; }
+  .end-banner h2 { color: var(--berry); font-family:'Baloo 2','Comic Sans MS',sans-serif; font-size: 26px; }
+
+  footer.note { color: var(--sky); font-size: 12px; text-align:center; margin-top: 14px; opacity: 0.85; max-width: 620px; z-index:2; }
+
+  @media (max-width: 480px) {
+    .syl-card { width: 42px; }
+    .syl-icon { width: 36px; height: 44px; }
+    .beat-group { padding: 4px 5px; gap: 3px; }
+  }
+</style>
+</head>
+<body>
+<a href="../games.html" style="position:fixed;top:14px;left:14px;z-index:9999;font-family:'Source Sans 3',sans-serif;font-size:13px;font-weight:600;color:#fff;background:rgba(0,0,0,0.45);padding:7px 14px;border-radius:100px;text-decoration:none;backdrop-filter:blur(4px);">&larr; Level Up Musicianship</a>
+
+<svg class="canopy-bg" viewBox="0 0 1000 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0,0 L0,60 Q60,100 130,55 Q190,95 260,50 Q330,90 400,45 Q470,85 540,40 Q610,80 680,42 Q750,82 820,38 Q890,78 960,40 L1000,55 L1000,0 Z" fill="#173a25"/>
+  <path d="M0,0 L0,40 Q80,75 160,35 Q230,68 310,30 Q390,65 460,28 Q540,62 620,30 Q700,60 780,26 Q860,58 940,28 L1000,38 L1000,0 Z" fill="#21492f" opacity="0.9"/>
+</svg>
+
+<div id="app">
+  <div class="title-wrap">
+    <h1>🐒 Jungle Rhythm Safari</h1>
+    <div class="subtitle">Listen to the rhythm, then tap it back — the pace picks up as you go!</div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <footer class="note">Rhythms: <em>ta, ti-ti, tika-tika, ti-tika, tika-ti, too-oo</em>. Best on a computer keyboard — tap SPACE in time with the beat.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ===================== AUDIO ENGINE ===================== */
+  let audioCtx = null;
+  function ensureAudio(){
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  // Track every oscillator we schedule so we can immediately silence them all
+  // when the player takes a new action (replay, skip, level change, etc.) —
+  // otherwise overlapping clicks/tones stack up and play over each other.
+  let activeOscillators = [];
+  function trackOscillator(osc, gain){
+    activeOscillators.push({ osc, gain });
+  }
+  function stopAllSounds(){
+    const ctx = audioCtx;
+    activeOscillators.forEach(({ osc, gain }) => {
+      try {
+        // Snap gain to silence immediately, then stop the oscillator right
+        // away — avoids an audible click from a hard stop on a live node.
+        if (ctx) gain.gain.cancelScheduledValues(ctx.currentTime);
+        gain.gain.setValueAtTime(0.0001, ctx ? ctx.currentTime : 0);
+        osc.stop();
+      } catch (e) { /* already stopped or finished — ignore */ }
+    });
+    activeOscillators = [];
+    stopMetronome();
+  }
+
+  // Solfège -> frequency (movable do, using C major: do=C5 for a bright, clearly-audible register)
+  const SOLFEGE_FREQ = {
+    do: 523.25, // C5
+    re: 587.33, // D5
+    mi: 659.25, // E5
+    so: 783.99, // G5
+    la: 880.00  // A5
+  };
+
+  function playPitchClick(time, solfege, accent){
+    const ctx = ensureAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = solfege ? SOLFEGE_FREQ[solfege] : (accent ? 1100 : 820);
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(accent ? 0.5 : 0.34, time + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.32);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(time);
+    osc.stop(time + 0.34);
+    trackOscillator(osc, gain);
+  }
+
+  function playTapSound(solfege){
+    const ctx = ensureAudio();
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.value = solfege ? SOLFEGE_FREQ[solfege] : 520;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.35, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.12);
+    trackOscillator(osc, gain);
+  }
+
+  function playChime(success){
+    const ctx = ensureAudio();
+    const t = ctx.currentTime;
+    const freqs = success ? [523.25, 659.25, 783.99] : [392, 349.23];
+    freqs.forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = success ? "triangle" : "sawtooth";
+      osc.frequency.value = f;
+      const start = t + i * (success ? 0.09 : 0.06);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(success ? 0.28 : 0.18, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + (success ? 0.35 : 0.25));
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(start); osc.stop(start + 0.4);
+      trackOscillator(osc, gain);
+    });
+  }
+
+  // continuous metronome (background pulse during listening + tapping)
+  let metronomeTimer = null;
+  let metronomeStartTimeout = null;
+  function startMetronome(bpm, syncStartTime){
+    stopMetronome();
+    const ctx = ensureAudio();
+    const secPerBeat = 60/bpm;
+    let beatCount = 0;
+    function tick(){
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.value = 1300; // same pitch for every beat, accent uses volume only
+      const isDownbeat = (beatCount % 4 === 0);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(isDownbeat ? 0.13 : 0.07, t + 0.003);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.05);
+      trackOscillator(osc, gain);
+      beatCount++;
+    }
+    // align the first tick to the same epoch the rhythm pattern uses, so the
+    // background pulse and the pattern share one beat grid rather than drifting.
+    const delayMs = syncStartTime ? Math.max(0, (syncStartTime - ctx.currentTime) * 1000) : 0;
+    metronomeStartTimeout = setTimeout(() => {
+      metronomeStartTimeout = null;
+      tick();
+      metronomeTimer = setInterval(tick, secPerBeat * 1000);
+    }, delayMs);
+  }
+  function stopMetronome(){
+    if (metronomeStartTimeout) { clearTimeout(metronomeStartTimeout); metronomeStartTimeout = null; }
+    if (metronomeTimer) { clearInterval(metronomeTimer); metronomeTimer = null; }
+  }
+
+  /* ===================== RHYTHM VOCABULARY ===================== */
+  const UNITS = {
+    "ta":        { label: "ta",        onsets: [0],               beats: 1 },
+    "titi":      { label: "ti-ti",     onsets: [0, 0.5],          beats: 1 },
+    "tikatika":  { label: "tika-tika", onsets: [0,0.25,0.5,0.75], beats: 1 },
+    "titika":    { label: "ti-tika",   onsets: [0, 0.5, 0.75],    beats: 1 },
+    "tikati":    { label: "tika-ti",   onsets: [0, 0.25, 0.5],    beats: 1 },
+    "tooo":      { label: "too-oo",    onsets: [0],               beats: 2 }
+  };
+
+  // Pitch key mapping — number keys matching scale-degree numbers (do=1, re=2,
+  // mi=3, so=5, la=6), which is more intuitive for students than arbitrary letters.
+  const PITCH_KEYS = {
+    "Digit1": "do",
+    "Digit2": "re",
+    "Digit3": "mi",
+    "Digit5": "so",
+    "Digit6": "la"
+  };
+  const KEY_LABEL = { "Digit1":"1", "Digit2":"2", "Digit3":"3", "Digit5":"5", "Digit6":"6" };
+  const PITCH_ORDER = ["do","re","mi","so","la"];
+
+  /* ===================== LEVELS ===================== */
+  // Rhythm-only safari: every level taps on SPACE. Difficulty increases via
+  // rhythmic vocabulary first, then pattern length, then tempo.
+  const LEVELS = [
+    { id:1, name:"Riverbank",         sub:"ta + ti-ti",                 units:["ta","titi"],                                     pitches:null, length:8,  bpm:66, usesPitch:false },
+    { id:2, name:"Vine Bridge",       sub:"+ too-oo",                    units:["ta","titi","tooo"],                              pitches:null, length:8,  bpm:71, usesPitch:false },
+    { id:3, name:"Bamboo Grove",      sub:"+ tika-tika",                 units:["ta","titi","tikatika","tooo"],                   pitches:null, length:8,  bpm:75, usesPitch:false },
+    { id:4, name:"Canopy Climb",      sub:"+ ti-tika & tika-ti",          units:["ta","titi","tikatika","titika","tikati","tooo"], pitches:null, length:8,  bpm:80, usesPitch:false },
+    { id:5, name:"Temple Ruins",      sub:"all rhythms, longer",          units:["ta","titi","tikatika","titika","tikati","tooo"], pitches:null, length:10, bpm:85, usesPitch:false },
+    { id:6, name:"Misty Summit",      sub:"all rhythms, faster",          units:["ta","titi","tikatika","titika","tikati","tooo"], pitches:null, length:10, bpm:89, usesPitch:false },
+    { id:7, name:"Ancient Treehouse", sub:"all rhythms, fastest!",        units:["ta","titi","tikatika","titika","tikati","tooo"], pitches:null, length:12, bpm:94, usesPitch:false }
+  ];
+
+  /* ===================== STATE ===================== */
+  let state = {
+    levelIndex: 0,
+    round: 0,
+    roundsPerLevel: 6,
+    streak: 0,
+    bestStreak: 0,
+    pattern: [],        // array of {unit, solfege|null}
+    flatOnsets: [],      // {time(beats), unitIndex, solfege|null}
+    totalBeats: 0,
+    perUnitResult: [],
+    monkeyPos: 0,
+    wrongCount: 0,       // wrong attempts on the CURRENT round
+    maxWrongBeforeSkip: 5,
+    roundBeatEpoch: 0,   // audio-clock time the current round's beat grid started on
+    roundToken: 0,       // incremented every time we leave a round/screen early, so
+                          // any setTimeout scheduled by the old round can recognise
+                          // it's stale and silently no-op instead of acting on a
+                          // screen it no longer belongs to.
+    inputLocked: true    // true until the tapping phase truly begins; while locked,
+                          // keypresses are consumed with no effect (no recording,
+                          // no penalty) instead of being treated as a wrong answer.
+  };
+
+  // Call this whenever we abandon the current round/screen before its
+  // scheduled callbacks (count-in numbers, highlight timers, the eventual
+  // transition into tapping) have finished firing — e.g. going to the menu,
+  // retrying, or replaying. Any callback that captured the old token value
+  // will see it no longer matches and do nothing.
+  function invalidateRoundCallbacks(){
+    state.roundToken++;
+    state.inputLocked = true;
+  }
+
+  const stageEl = document.getElementById("stage");
+
+  /* ===================== ICONS ===================== */
+  function pitchColor(solfege){
+    return { do:"var(--pitch-do)", re:"var(--pitch-re)", mi:"var(--pitch-mi)", so:"var(--pitch-so)", la:"var(--pitch-la)" }[solfege] || "var(--banana)";
+  }
+
+  function iconSVG(unitKey, solfege){
+    const fruitColor = solfege ? pitchColor(solfege) : "var(--banana)";
+    // Filled noteheads want a slightly darker outline of the same hue for
+    // definition; open noteheads (too-oo) have no fill, so their outline
+    // must BE the pitch color itself to stay identifiable at a glance.
+    const filledStroke = solfege ? "rgba(0,0,0,0.35)" : "var(--banana-dark)";
+    const openStroke = fruitColor;
+    const stemColor = "var(--leaf)";
+    // Notation geometry: notehead sits at the BOTTOM (cy=40), stem rises UP
+    // from the notehead's right edge toward the top of the icon. Beams join
+    // stem tops and stack upward (further beams sit higher, away from the
+    // notehead) — this matches real notation for stems-up notation.
+    function note(cx, filled, big){
+      const rx = big ? 7.5 : 5;
+      const ry = big ? 5.5 : 3.8;
+      const fill = filled ? fruitColor : "var(--cream)";
+      const stroke = filled ? filledStroke : openStroke;
+      const strokeW = filled ? (big ? 1.6 : 1.3) : 2.6;
+      return `<ellipse cx="${cx}" cy="40" rx="${rx}" ry="${ry}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>`;
+    }
+    function stem(cx, big){
+      const sw = big ? 2.8 : 2.1;
+      const x = cx + (big ? 7.5 : 5) - sw;
+      return `<rect x="${x}" y="8" width="${sw}" height="32" fill="${stemColor}"/>`;
+    }
+    function stemX(cx, big){ return cx + (big ? 7.5 : 5) - (big ? 2.8 : 2.1)/2; }
+    // Beams must sit flush with the stem's top (y=8) so there's no bare stem
+    // "antenna" poking out above the beam. A second beam (for sixteenths)
+    // stacks toward the notehead from there, i.e. slightly further down.
+    const BEAM_PRIMARY_Y = 8;
+    const BEAM_SECONDARY_Y = 13.5;
+
+    switch(unitKey){
+      case "ta":
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="20" cy="48" rx="13" ry="4.5" fill="rgba(0,0,0,0.08)"/>
+          ${stem(17,true)}${note(17,true,true)}
+        </svg>`;
+      case "tooo":
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="20" cy="48" rx="13" ry="4.5" fill="rgba(0,0,0,0.08)"/>
+          ${stem(17,true)}${note(17,false,true)}
+        </svg>`;
+      case "titi": {
+        const c1=8, c2=33;
+        const x1 = stemX(c1,false), x2 = stemX(c2,false);
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="22" cy="48" rx="16" ry="4.5" fill="rgba(0,0,0,0.08)"/>
+          ${stem(c1,false)}${note(c1,true,false)}
+          ${stem(c2,false)}${note(c2,true,false)}
+          <rect x="${x1}" y="${BEAM_PRIMARY_Y}" width="${x2-x1}" height="3.6" fill="${stemColor}"/>
+        </svg>`;
+      }
+      case "tikatika": {
+        const cs = [4,15.5,27,38.5];
+        const xs = cs.map(c => stemX(c,false));
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="22" cy="48" rx="18" ry="4.5" fill="rgba(0,0,0,0.08)"/>
+          ${cs.map(c => stem(c,false)+note(c,true,false)).join("")}
+          <rect x="${xs[0]}" y="${BEAM_PRIMARY_Y}" width="${xs[3]-xs[0]}" height="3.2" fill="${stemColor}"/>
+          <rect x="${xs[0]}" y="${BEAM_SECONDARY_Y}" width="${xs[3]-xs[0]}" height="3" fill="${stemColor}"/>
+        </svg>`;
+      }
+      case "titika": {
+        // eighth (big) + two sixteenths (small): stub (2nd beam) on the RIGHT,
+        // between the two sixteenths, since they're the shorter pair.
+        const c1=6, c2=25, c3=37;
+        const x1 = stemX(c1,true), x2 = stemX(c2,false), x3 = stemX(c3,false);
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="22" cy="48" rx="18" ry="4.5" fill="rgba(0,0,0,0.08)"/>
+          ${stem(c1,true)}${note(c1,true,true)}
+          ${stem(c2,false)}${note(c2,true,false)}
+          ${stem(c3,false)}${note(c3,true,false)}
+          <rect x="${x1}" y="${BEAM_PRIMARY_Y}" width="${x3-x1}" height="3.4" fill="${stemColor}"/>
+          <rect x="${x2}" y="${BEAM_SECONDARY_Y}" width="${x3-x2}" height="3" fill="${stemColor}"/>
+        </svg>`;
+      }
+      case "tikati": {
+        // two sixteenths (small) + eighth (big): stub (2nd beam) on the LEFT,
+        // between the two sixteenths, since they're the shorter pair.
+        const c1=4, c2=15.5, c3=35;
+        const x1 = stemX(c1,false), x2 = stemX(c2,false), x3 = stemX(c3,true);
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="22" cy="48" rx="18" ry="4.5" fill="rgba(0,0,0,0.08)"/>
+          ${stem(c1,false)}${note(c1,true,false)}
+          ${stem(c2,false)}${note(c2,true,false)}
+          ${stem(c3,true)}${note(c3,true,true)}
+          <rect x="${x1}" y="${BEAM_PRIMARY_Y}" width="${x3-x1}" height="3.4" fill="${stemColor}"/>
+          <rect x="${x1}" y="${BEAM_SECONDARY_Y}" width="${x2-x1}" height="3" fill="${stemColor}"/>
+        </svg>`;
+      }
+      default: return "";
+    }
+  }
+
+  function monkeySVG(){
+    return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="60" height="60">
+      <ellipse cx="32" cy="58" rx="16" ry="4" fill="rgba(0,0,0,0.15)"/>
+      <circle cx="32" cy="34" r="20" fill="#a9714c"/>
+      <circle cx="32" cy="36" r="14" fill="#e3b48a"/>
+      <circle cx="14" cy="28" r="8" fill="#a9714c"/>
+      <circle cx="14" cy="28" r="5" fill="#e3b48a"/>
+      <circle cx="50" cy="28" r="8" fill="#a9714c"/>
+      <circle cx="50" cy="28" r="5" fill="#e3b48a"/>
+      <circle cx="24" cy="32" r="3.4" fill="#2b1c12"/>
+      <circle cx="40" cy="32" r="3.4" fill="#2b1c12"/>
+      <ellipse cx="32" cy="42" rx="6" ry="4" fill="#c98f64"/>
+      <path d="M27,44 Q32,49 37,44" stroke="#2b1c12" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>`;
+  }
+
+  /* ===================== HELPERS ===================== */
+  function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function generatePattern(level){
+    let pattern = [];
+    let beatsUsed = 0;
+    const maxBeats = level.length;
+    let prevSolfege = null;
+    while (beatsUsed < maxBeats) {
+      const remaining = maxBeats - beatsUsed;
+      let candidates = level.units.filter(u => UNITS[u].beats <= remaining);
+      if (candidates.length === 0) break;
+      const unitKey = pickRandom(candidates);
+      const u = UNITS[unitKey];
+
+      // assign a solfège syllable per onset if this level uses pitch;
+      // keep melodic movement gentle by avoiding big repeated jumps every time
+      let solfegeSeq = null;
+      if (level.usesPitch) {
+        solfegeSeq = u.onsets.map(() => {
+          let choice = pickRandom(level.pitches);
+          // mildly discourage immediate repeats of the same pitch for melodic variety
+          let attempts = 0;
+          while (choice === prevSolfege && level.pitches.length > 1 && attempts < 4) {
+            choice = pickRandom(level.pitches);
+            attempts++;
+          }
+          prevSolfege = choice;
+          return choice;
+        });
+      }
+
+      pattern.push({ unit: unitKey, solfege: solfegeSeq });
+      beatsUsed += u.beats;
+    }
+    return pattern;
+  }
+
+  function flattenOnsets(pattern){
+    let onsets = [];
+    let beatCursor = 0;
+    pattern.forEach((entry, uIdx) => {
+      const u = UNITS[entry.unit];
+      u.onsets.forEach((frac, sIdx) => {
+        onsets.push({
+          time: beatCursor + frac,
+          unitIndex: uIdx,
+          subIndex: sIdx,
+          solfege: entry.solfege ? entry.solfege[sIdx] : null
+        });
+      });
+      beatCursor += u.beats;
+    });
+    return { onsets, totalBeats: beatCursor };
+  }
+
+  function countTaps(pattern){
+    return pattern.reduce((sum, e) => sum + UNITS[e.unit].onsets.length, 0);
+  }
+
+  /* ===================== RENDER: MENU ===================== */
+  function renderMenu(){
+    invalidateRoundCallbacks();
+    stopAllSounds();
+    cleanupTapListener();
+    cleanupEarlyTapAbsorber();
+    stageEl.innerHTML = `
+      <div class="hud">
+        <div class="hud-group"><span class="pill">🍌 Best streak: ${state.bestStreak}</span></div>
+      </div>
+      <div style="text-align:center; margin-bottom:6px;">
+        <div style="font-size:46px;">🐒🌴</div>
+        <p style="max-width:580px; margin: 4px auto 0; color: var(--bark); font-size:14.5px; line-height:1.5;">
+          Help the monkey trek through the jungle! Listen to the rhythm pattern,
+          then tap <strong>SPACE</strong> back in the same rhythm. The trek gets
+          faster and trickier the further you go!
+        </p>
+      </div>
+      <div class="level-select" id="levelSelect"></div>
+      <div class="legend">
+        ${Object.keys(UNITS).map(k => `
+          <div class="legend-item">
+            <div class="syl-icon">${iconSVG(k, null)}</div>
+            <span>${UNITS[k].label}</span>
+          </div>
+        `).join("")}
+      </div>
+      <div class="controls" style="margin-top:16px;">
+        <button class="big-btn primary" id="startBtn">Start Trek 🐾</button>
+      </div>
+    `;
+
+    const sel = document.getElementById("levelSelect");
+    LEVELS.forEach((lvl, i) => {
+      const card = document.createElement("div");
+      card.className = "level-card" + (i === state.levelIndex ? " selected" : "");
+      card.innerHTML = `${lvl.name}<small>${lvl.sub}</small>`;
+      card.addEventListener("click", () => { state.levelIndex = i; renderMenu(); });
+      sel.appendChild(card);
+    });
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      ensureAudio();
+      startLevel();
+    });
+  }
+
+  /* ===================== LEVEL FLOW ===================== */
+  function startLevel(){
+    state.round = 0;
+    state.streak = 0;
+    state.monkeyPos = 0;
+    nextRound();
+  }
+
+  function nextRound(){
+    if (state.round >= state.roundsPerLevel) { renderLevelComplete(); return; }
+    invalidateRoundCallbacks();
+    stopAllSounds();
+    const level = LEVELS[state.levelIndex];
+    state.pattern = generatePattern(level);
+    const flat = flattenOnsets(state.pattern);
+    state.flatOnsets = flat.onsets;
+    state.totalBeats = flat.totalBeats;
+    state.perUnitResult = state.pattern.map(()=>null);
+    state.wrongCount = 0;
+    renderRound("listening");
+    // Pattern plays immediately — no artificial pre-roll delay. Metronome
+    // shares the exact same start epoch so the two stay phase-locked, and we
+    // remember that epoch so later phases (count-in, tapping highlight) can
+    // stay on the same beat grid rather than drifting onto their own clock.
+    const ctx = ensureAudio();
+    const startTime = ctx.currentTime + 0.05;
+    state.roundBeatEpoch = startTime;
+    startMetronome(level.bpm, startTime);
+    scheduleListenPlayback(level.bpm, level.usesPitch, startTime);
+  }
+
+  function beatSecToReal(bpm){ return 60/bpm; }
+
+  function replayCurrentPattern(level){
+    invalidateRoundCallbacks();
+    stopAllSounds();
+    const ctx = ensureAudio();
+    const startTime = ctx.currentTime + 0.05;
+    state.roundBeatEpoch = startTime;
+    startMetronome(level.bpm, startTime);
+    scheduleListenPlayback(level.bpm, level.usesPitch, startTime);
+  }
+
+  function scheduleListenPlayback(bpm, usesPitch, startTime){
+    const ctx = ensureAudio();
+    const secPerBeat = beatSecToReal(bpm);
+    state.flatOnsets.forEach((o) => {
+      playPitchClick(startTime + o.time*secPerBeat, usesPitch ? o.solfege : null, false);
+    });
+    highlightPattern(startTime, secPerBeat, "active-listen");
+
+    const totalDur = state.totalBeats*secPerBeat;
+    const myToken = state.roundToken;
+    setTimeout(() => {
+      if (state.roundToken !== myToken) return; // round was abandoned — don't force a transition
+      transitionToTapping();
+    }, (startTime - ctx.currentTime + totalDur)*1000 + 200);
+  }
+
+  function highlightPattern(startTime, secPerBeat, className){
+    const ctx = audioCtx;
+    const myToken = state.roundToken;
+    state.pattern.forEach((entry, idx) => {
+      const u = UNITS[entry.unit];
+      const groupStartBeat = state.flatOnsets.find(o => o.unitIndex===idx).time;
+      const delay = (startTime - ctx.currentTime) + groupStartBeat*secPerBeat;
+      const dur = u.beats*secPerBeat;
+      setTimeout(()=>{
+        if (state.roundToken !== myToken) return; // stale — this round/play was abandoned
+        document.querySelectorAll(".beat-group").forEach(g=>g.classList.remove(className));
+        const g = document.querySelector(`.beat-group[data-idx="${idx}"]`);
+        if (g) g.classList.add(className);
+      }, Math.max(0,delay*1000));
+      setTimeout(()=>{
+        if (state.roundToken !== myToken) return;
+        const g = document.querySelector(`.beat-group[data-idx="${idx}"]`);
+        if (g) g.classList.remove(className);
+      }, Math.max(0,(delay+dur)*1000));
+    });
+  }
+
+  function transitionToTapping(){
+    renderRound("countin");
+  }
+
+  function runCountIn(level){
+    const ctx = ensureAudio();
+    const secPerBeat = beatSecToReal(level.bpm);
+    const myToken = state.roundToken;
+
+    // Continue the SAME beat grid the metronome and the pattern playback
+    // have been running on (state.roundBeatEpoch), rather than starting an
+    // independent clock — so "1... 2... ready... GO!" lands exactly in time
+    // with the audible metronome ticks, picking up right where the
+    // pattern's beats left off.
+    const patternEndTime = state.roundBeatEpoch + state.totalBeats * secPerBeat;
+    const startTime = patternEndTime;
+    const countWords = ["1", "2", "ready", "GO!"]; // 4 beats of lead-in before tapping begins
+
+    countWords.forEach((word, i) => {
+      const t = startTime + i*secPerBeat;
+      // Visual-only countdown — no audible click here, so it doesn't compete
+      // with or get confused for the metronome or the pattern itself.
+      const delayMs = Math.max(0, (t - ctx.currentTime) * 1000);
+      setTimeout(() => {
+        if (state.roundToken !== myToken) return; // round was abandoned/replayed — stale callback
+        const el = document.getElementById("countinNumber");
+        if (el) {
+          el.textContent = word;
+          el.classList.toggle("is-word", word.length > 2);
+          el.style.animation = "none";
+          requestAnimationFrame(() => { el.style.animation = "countinPulse 0.25s ease"; });
+        }
+      }, delayMs);
+    });
+
+    const goTime = startTime + (countWords.length - 1)*secPerBeat;
+    const goDelayMs = Math.max(0, (goTime - ctx.currentTime) * 1000);
+
+    setTimeout(() => {
+      if (state.roundToken !== myToken) return; // round was abandoned/replayed — don't force a transition
+      state.inputLocked = false; // tapping truly begins now — only here do keypresses count
+      renderRound("tapping");
+    }, goDelayMs + 280);
+  }
+
+  /* ===================== RENDER: ROUND ===================== */
+  function renderRound(mode){
+    const level = LEVELS[state.levelIndex];
+    stageEl.innerHTML = `
+      <div class="hud">
+        <div class="hud-group">
+          <span class="pill level">${level.name}</span>
+          <span class="pill">Round ${state.round+1} / ${state.roundsPerLevel}</span>
+          <span class="pill tempo">♩ ${level.bpm} bpm</span>
+        </div>
+        <div class="hud-group">
+          <span class="pill streak">🔥 Streak ${state.streak}</span>
+          ${state.wrongCount > 0 ? `<span class="pill warn">Tries: ${state.wrongCount}/${state.maxWrongBeforeSkip}</span>` : ``}
+          <button class="iconbtn" id="quitBtn" title="Back to map">🏠</button>
+        </div>
+      </div>
+
+      <div class="track-wrap" id="trackWrap">
+        ${renderTrackCheckpoints()}
+        <div class="track-ground"></div>
+        <div id="monkey" style="left:${18 + state.monkeyPos*0.78*100}%;">${monkeySVG()}</div>
+      </div>
+
+      <div class="rhythm-rail" id="rhythmRail">
+        ${state.pattern.map((entry, i) => renderBeatGroup(entry, i)).join("")}
+      </div>
+
+      <div class="controls">
+        <div class="status-line" id="statusLine">
+          ${mode === "listening" ? "👂 Listen carefully..." : mode === "countin" ? "Get ready..." : (level.usesPitch ? "🎵 Your turn — tap the matching key in rhythm!" : "🥁 Your turn — tap SPACE!")}
+        </div>
+        ${mode === "countin" ? `
+          <div class="countin-display" id="countinNumber">1</div>
+        ` : ``}
+        ${mode === "tapping" ? `
+          ${level.usesPitch ? renderKeyHints(level.pitches) : `
+            <div class="key-hint-row">
+              <div class="key-chip tappable" data-key-code="Space"><span class="keycap" id="spaceKeyVisual">SPACE</span>tap the beat</div>
+            </div>
+          `}
+          <div class="btn-row">
+            <button class="big-btn" id="replayBtn">🔁 Hear it again</button>
+            ${state.wrongCount >= state.maxWrongBeforeSkip ? `<button class="big-btn ghost" id="skipBtn">⏭️ Skip this one</button>` : ``}
+          </div>
+        ` : ``}
+        ${mode === "listening" ? `
+          <div class="btn-row"><button class="big-btn" id="skipListenBtn" disabled>👂 Listening...</button></div>
+        ` : ``}
+      </div>
+    `;
+
+    document.getElementById("quitBtn").addEventListener("click", () => { renderMenu(); });
+
+    if (mode === "listening" || mode === "countin") {
+      // Input stays fully suspended through listening and the count-in —
+      // any stray keypress here is swallowed with zero effect.
+      setupEarlyTapAbsorber();
+    }
+
+    if (mode === "countin") {
+      runCountIn(level);
+    }
+
+    if (mode === "tapping") {
+      document.getElementById("replayBtn").addEventListener("click", () => {
+        cleanupTapListener();
+        renderRound("listening");
+        replayCurrentPattern(level);
+      });
+      const skipBtn = document.getElementById("skipBtn");
+      if (skipBtn) {
+        skipBtn.addEventListener("click", () => {
+          cleanupTapListener();
+          state.streak = 0;
+          state.round++;
+          nextRound();
+        });
+      }
+      setupTapListening(level);
+
+      // Let touch/tablet users tap the on-screen SPACE button instead of
+      // needing a physical keyboard. This calls straight into the same
+      // registerTap() logic the keyboard path uses (via tapButtonHandler,
+      // set up inside setupTapListening) — no synthetic keyboard event
+      // round-trip, which keeps this reliable across browsers/devices.
+      document.querySelectorAll(".key-chip[data-key-code]").forEach(chip => {
+        chip.addEventListener("click", () => {
+          if (!tapButtonHandler) return;
+          const code = chip.getAttribute("data-key-code");
+          const solfege = code === "Space" ? null : (PITCH_KEYS[code] || null);
+          tapButtonHandler(solfege);
+        });
+      });
+    }
+  }
+
+  function renderKeyHints(pitches){
+    return `<div class="key-hint-row">
+      ${PITCH_ORDER.filter(p => pitches.includes(p)).map(p => {
+        const keyCode = Object.keys(PITCH_KEYS).find(k => PITCH_KEYS[k] === p);
+        const label = KEY_LABEL[keyCode];
+        return `<div class="key-chip ${p}"><span class="keycap" id="keyVisual-${p}">${label}</span>${p}</div>`;
+      }).join("")}
+    </div>`;
+  }
+
+  function renderTrackCheckpoints(){
+    let html = "";
+    const total = state.roundsPerLevel;
+    for (let i=0;i<total;i++){
+      const pct = 18 + (i+1)/total*0.78*100;
+      const passed = i < state.round;
+      html += `<div class="checkpoint" style="left:${pct}%;">
+        <svg viewBox="0 0 40 40" width="30" height="30">
+          ${passed
+            ? `<circle cx="20" cy="20" r="13" fill="var(--banana)" stroke="var(--banana-dark)" stroke-width="2"/><text x="20" y="26" font-size="16" text-anchor="middle">✓</text>`
+            : `<circle cx="20" cy="20" r="13" fill="var(--leaf-light)" stroke="var(--leaf)" stroke-width="2" opacity="0.7"/>`
+          }
+        </svg>
+      </div>`;
+    }
+    return html;
+  }
+
+  function renderBeatGroup(entry, idx){
+    const u = UNITS[entry.unit];
+    const showPitchTag = entry.solfege ? entry.solfege.join("-") : null;
+    return `<div class="beat-group" data-idx="${idx}">
+      <div class="syl-card" data-unit-idx="${idx}">
+        <div class="syl-icon">${iconSVG(entry.unit, entry.solfege ? entry.solfege[0] : null)}</div>
+        <div class="syl-label">${u.label}</div>
+        ${showPitchTag ? `<div class="pitch-tag" style="background:${pitchColor(entry.solfege[0])}">${showPitchTag}</div>` : ``}
+      </div>
+    </div>`;
+  }
+
+  /* ===================== TAP CAPTURE ===================== */
+  let tapKeyHandler = null;
+  let tapKeyUpHandler = null;
+  let earlyTapAbsorber = null;
+  let tapButtonHandler = null; // set by setupTapListening; called directly by on-screen key-chip clicks
+
+  function cleanupTapListener(){
+    if (tapKeyHandler) window.removeEventListener("keydown", tapKeyHandler);
+    if (tapKeyUpHandler) window.removeEventListener("keyup", tapKeyUpHandler);
+    tapKeyHandler = null;
+    tapKeyUpHandler = null;
+    tapButtonHandler = null;
+  }
+
+  // While state.inputLocked is true (listening + count-in), this absorbs any
+  // Space/number-key press so it has zero effect — no recording, no penalty,
+  // nothing happens at all. It's deliberately separate from the real tap
+  // capture in setupTapListening, which only ever exists once tapping mode
+  // truly begins, so this is a second, defensive layer for the explicit
+  // requirement that input stays fully suspended until the count-in ends.
+  function setupEarlyTapAbsorber(){
+    cleanupEarlyTapAbsorber();
+    earlyTapAbsorber = function(e){
+      if (!state.inputLocked) return; // tapping has begun — let the real handler take over
+      const isRelevantKey = (e.code === "Space" || e.key === " " || Object.prototype.hasOwnProperty.call(PITCH_KEYS, e.code));
+      if (isRelevantKey) e.preventDefault(); // swallow it; otherwise do nothing at all
+    };
+    window.addEventListener("keydown", earlyTapAbsorber);
+  }
+  function cleanupEarlyTapAbsorber(){
+    if (earlyTapAbsorber) window.removeEventListener("keydown", earlyTapAbsorber);
+    earlyTapAbsorber = null;
+  }
+
+  function setupTapListening(level){
+    cleanupTapListener();
+    cleanupEarlyTapAbsorber(); // the real handler takes over now — stop absorbing
+    const ctx = ensureAudio();
+    const secPerBeat = beatSecToReal(level.bpm);
+    const expectedTaps = countTaps(state.pattern);
+    const myToken = state.roundToken; // capture which round this listening session belongs to
+    let collected = []; // {time, solfege|null}
+    let firstTapAt = null;
+    let locked = false;
+    let safetyTimer = null;
+    let lastHighlightOnsetIdx = -1; // tracks furthest onset reached, so the highlight never jumps backward
+
+    function finish(){
+      if (locked) return;
+      locked = true;
+      cleanupTapListener();
+      if (safetyTimer) clearTimeout(safetyTimer);
+      // If the player has since left this round (gone home, retried, moved
+      // on), this safety timer or trailing tap is stale — don't evaluate it
+      // against whatever round/pattern is now active, and don't show any
+      // feedback for a round the player already walked away from.
+      if (state.roundToken !== myToken) return;
+      setTimeout(()=> {
+        if (state.roundToken !== myToken) return;
+        evaluateTaps(collected, secPerBeat, level);
+      }, 120);
+    }
+
+    function flashKeyVisual(id){
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add("pressed");
+      setTimeout(()=>el.classList.remove("pressed"), 110);
+    }
+
+    // Shared core of "a tap happened" — called from the real keydown handler
+    // AND directly from the on-screen button's click handler, so touch/tablet
+    // taps get byte-for-byte identical behavior without round-tripping
+    // through a synthetic keyboard event (which isn't reliably constructable
+    // the same way across all browsers/engines).
+    function registerTap(solfege){
+      const now = ctx.currentTime;
+      if (firstTapAt === null) firstTapAt = now;
+      const tapElapsed = now - firstTapAt;
+      collected.push({ time: tapElapsed, solfege });
+      playTapSound(solfege);
+
+      // Highlight follows the player's own tapping pace: each tap lights up
+      // whichever onset's EXPECTED TIME is closest to this tap, searching
+      // only forward from the last highlighted onset. This keeps the guide
+      // self-correcting — an accidental extra tap re-highlights the onset
+      // it's actually closest to (often the same one just shown) instead of
+      // permanently shifting every later tap's highlight by one position,
+      // and a missed tap lets the next real tap jump ahead to where the
+      // player actually is rather than staying stuck behind.
+      const baseline = state.flatOnsets.length ? state.flatOnsets[0].time : 0;
+      let bestIdx = -1, bestDiff = Infinity;
+      for (let i = lastHighlightOnsetIdx + 1; i < state.flatOnsets.length; i++) {
+        const expectedElapsed = (state.flatOnsets[i].time - baseline) * secPerBeat;
+        const diff = Math.abs(expectedElapsed - tapElapsed);
+        if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
+        else break; // diffs only grow further forward once we've passed the closest point
+      }
+      // Also allow re-matching the most recent onset (in case this tap is an
+      // accidental extra one landing right after it), without ever going
+      // earlier than that.
+      if (lastHighlightOnsetIdx >= 0) {
+        const expectedElapsed = (state.flatOnsets[lastHighlightOnsetIdx].time - baseline) * secPerBeat;
+        const diff = Math.abs(expectedElapsed - tapElapsed);
+        if (diff < bestDiff) { bestDiff = diff; bestIdx = lastHighlightOnsetIdx; }
+      }
+
+      if (bestIdx !== -1) {
+        lastHighlightOnsetIdx = bestIdx;
+        const onsetInfo = state.flatOnsets[bestIdx];
+        document.querySelectorAll(".beat-group").forEach(g => g.classList.remove("active-tap"));
+        const g = document.querySelector(`.beat-group[data-idx="${onsetInfo.unitIndex}"]`);
+        if (g) g.classList.add("active-tap");
+      }
+
+      if (level.usesPitch) {
+        flashKeyVisual(`keyVisual-${solfege}`);
+      } else {
+        flashKeyVisual("spaceKeyVisual");
+      }
+
+      const monkey = document.getElementById("monkey");
+      if (monkey) { monkey.classList.remove("hop"); requestAnimationFrame(()=>monkey.classList.add("hop")); }
+
+      // rolling safety window: if the student stalls partway through, resolve
+      // with whatever was collected rather than hanging forever.
+      if (safetyTimer) clearTimeout(safetyTimer);
+      safetyTimer = setTimeout(finish, secPerBeat * 4 * 1000);
+
+      if (collected.length >= expectedTaps) finish();
+    }
+
+    tapKeyHandler = function(e){
+      if (locked) return;
+      if (state.roundToken !== myToken) return; // this round was abandoned — ignore any trailing input
+      if (e.repeat) return; // ignore OS key auto-repeat from a held key
+
+      let solfege = null;
+      let isValidKey = false;
+
+      if (level.usesPitch) {
+        if (PITCH_KEYS[e.code]) {
+          solfege = PITCH_KEYS[e.code];
+          // only accept keys belonging to this level's available pitches
+          if (level.pitches.includes(solfege)) isValidKey = true;
+        }
+      } else {
+        if (e.code === "Space" || e.key === " ") isValidKey = true;
+      }
+
+      if (!isValidKey) return; // don't swallow/derail on irrelevant keys
+      e.preventDefault();
+      registerTap(solfege);
+    };
+
+    // Touch/click path for the on-screen key-chip buttons: calls the exact
+    // same registerTap() the keyboard path uses, so behavior is identical —
+    // just gated by the same locked/roundToken checks the keyboard path has.
+    tapButtonHandler = function(solfege){
+      if (locked) return;
+      if (state.roundToken !== myToken) return;
+      registerTap(solfege);
+    };
+
+    tapKeyUpHandler = function(){};
+
+    window.addEventListener("keydown", tapKeyHandler);
+    window.addEventListener("keyup", tapKeyUpHandler);
+
+    // overall safety net if the student never taps at all
+    safetyTimer = setTimeout(finish, (state.totalBeats + 6) * secPerBeat * 1000);
+  }
+
+  /* ===================== EVALUATION ===================== */
+  function evaluateTaps(taps, secPerBeat, level){
+    stopMetronomeBriefly();
+
+    const tapsBeats = taps.map(t => t.time/secPerBeat);
+    const expectedBeats = state.flatOnsets.map(o => o.time);
+    const baseline = expectedBeats.length ? expectedBeats[0] : 0;
+    const expectedNorm = expectedBeats.map(t => t - baseline);
+    const tolerance = 0.30; // beats
+
+    // Strict sequential matching: tap #i is judged against expected onset #i,
+    // in order. This matches how a teacher would actually grade a performance
+    // by ear, and avoids confusing cross-matches where an earlier mistake
+    // makes a later, perfectly-fine tap get marked wrong (or vice versa).
+    const onsetOk = expectedNorm.map((expected, i) => {
+      const tap = taps[i];
+      if (!tap) return false; // student didn't tap this far
+      if (level.usesPitch && tap.solfege !== state.flatOnsets[i].solfege) return false;
+      const diff = Math.abs(tapsBeats[i] - expected);
+      return diff <= tolerance;
+    });
+
+    let flatIdx = 0;
+    state.pattern.forEach((entry, unitIdx) => {
+      const u = UNITS[entry.unit];
+      let unitOk = true;
+      u.onsets.forEach(() => { if (!onsetOk[flatIdx]) unitOk = false; flatIdx++; });
+      state.perUnitResult[unitIdx] = unitOk;
+    });
+
+    const extraTaps = taps.length > expectedNorm.length;
+    const allCorrect = onsetOk.every(Boolean) && !extraTaps;
+    renderFeedback(allCorrect, level);
+  }
+
+  function stopMetronomeBriefly(){ /* kept running between rounds; placeholder hook for future tuning */ }
+
+  /* ===================== FEEDBACK ===================== */
+  function renderFeedback(allCorrect, level){
+    if (allCorrect) {
+      state.streak++;
+      state.bestStreak = Math.max(state.bestStreak, state.streak);
+      state.monkeyPos = Math.min(1, (state.round+1)/state.roundsPerLevel);
+      state.wrongCount = 0;
+    } else {
+      state.streak = 0;
+      state.wrongCount++;
+    }
+
+    playChime(allCorrect);
+
+    const reachedSkipLimit = !allCorrect && state.wrongCount >= state.maxWrongBeforeSkip;
+
+    stageEl.innerHTML = `
+      <div class="hud">
+        <div class="hud-group">
+          <span class="pill level">${level.name}</span>
+          <span class="pill">Round ${state.round+1} / ${state.roundsPerLevel}</span>
+        </div>
+        <div class="hud-group"><span class="pill streak">🔥 Streak ${state.streak}</span></div>
+      </div>
+
+      <div class="track-wrap" id="trackWrap">
+        ${renderTrackCheckpoints()}
+        <div class="track-ground"></div>
+        <div id="monkey" class="${allCorrect ? 'hop' : 'sad'}" style="left:${18 + state.monkeyPos*0.78*100}%;">${monkeySVG()}</div>
+      </div>
+
+      <div class="rhythm-rail" id="rhythmRail">
+        ${state.pattern.map((entry, i) => `
+          <div class="beat-group">
+            <div class="syl-card ${state.perUnitResult[i] ? 'result-correct' : 'result-wrong'}">
+              <div class="syl-icon">${iconSVG(entry.unit, entry.solfege ? entry.solfege[0] : null)}</div>
+              <div class="syl-label">${UNITS[entry.unit].label}</div>
+              ${entry.solfege ? `<div class="pitch-tag" style="background:${pitchColor(entry.solfege[0])}">${entry.solfege.join("-")}</div>` : ``}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="controls">
+        <div class="status-line" style="color:${allCorrect ? '#2e7d4f' : 'var(--berry)'};">
+          ${allCorrect ? pickRandom(["Bananas! Perfect! 🍌","The monkey swings on! 🐒","Great ears!","Spot on!"])
+                        : (reachedSkipLimit ? "Tricky one! You can skip it or try once more." : pickRandom(["Almost! Listen again and try once more.","So close — give it another listen.","Not quite — let's hear it again."]))}
+        </div>
+        <div class="btn-row">
+          ${allCorrect
+            ? `<button class="big-btn primary" id="continueBtn">Continue 🌴</button>`
+            : `<button class="big-btn" id="retryBtn">🔁 Try again</button>
+               ${reachedSkipLimit ? `<button class="big-btn ghost" id="skipBtn2">⏭️ Skip this one</button>` : ``}`
+          }
+        </div>
+      </div>
+    `;
+
+    if (allCorrect) {
+      document.getElementById("continueBtn").addEventListener("click", () => { state.round++; nextRound(); });
+    } else {
+      document.getElementById("retryBtn").addEventListener("click", () => {
+        cleanupTapListener();
+        renderRound("listening");
+        replayCurrentPattern(level);
+      });
+      const skipBtn2 = document.getElementById("skipBtn2");
+      if (skipBtn2) {
+        skipBtn2.addEventListener("click", () => { state.round++; nextRound(); });
+      }
+    }
+  }
+
+  /* ===================== LEVEL COMPLETE ===================== */
+  function renderLevelComplete(){
+    invalidateRoundCallbacks();
+    stopAllSounds();
+    cleanupEarlyTapAbsorber();
+    const level = LEVELS[state.levelIndex];
+    const isLastLevel = state.levelIndex >= LEVELS.length - 1;
+    playChime(true);
+
+    stageEl.innerHTML = `
+      <div class="end-banner">
+        <div style="font-size:56px;">🐒🎉🌴</div>
+        <h2>${level.name} complete!</h2>
+        <p style="color:var(--bark); font-size:15px;">Best streak so far: <strong>${state.bestStreak}</strong></p>
+        <div class="btn-row" style="margin-top:16px; justify-content:center;">
+          <button class="big-btn" id="backToMapBtn">🗺️ Back to map</button>
+          ${!isLastLevel ? `<button class="big-btn primary" id="nextLevelBtn">Next clearing →</button>` : ``}
+        </div>
+      </div>
+    `;
+
+    document.getElementById("backToMapBtn").addEventListener("click", renderMenu);
+    if (!isLastLevel) {
+      document.getElementById("nextLevelBtn").addEventListener("click", () => { state.levelIndex++; startLevel(); });
+    }
+  }
+
+  /* ===================== INIT ===================== */
+  // Ensure the page can always receive keyboard events even after button
+  // clicks shift focus — click anywhere blurs the active element back to body.
+  document.addEventListener("click", (e) => {
+    if (document.activeElement && document.activeElement !== document.body) {
+      document.activeElement.blur();
+    }
+  });
+
+  renderMenu();
+
+})();
+</script>
+</body>
+</html>

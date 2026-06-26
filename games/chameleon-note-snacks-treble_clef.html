@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chameleon Note Snacks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Music&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#bdf0ff;
+    --sky-bottom:#eafff0;
+    --leaf-dark:#2f7a3d;
+    --leaf-mid:#4caf5a;
+    --leaf-light:#8fe39a;
+    --bark:#6b4a2f;
+    --ink:#1f2d20;
+    --card:#ffffffee;
+    --gold:#ffcf4d;
+    --coral:#ff6f59;
+    --sky-accent:#3aa9c9;
+    --wrong:#e85d5d;
+    --right:#3fae5a;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    height:100%;
+    font-family:'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+    background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bottom) 70%);
+    color:var(--ink);
+    overflow:hidden;
+  }
+  #app{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .cloud{
+    position:absolute;
+    background:#ffffff;
+    border-radius:50%;
+    opacity:.8;
+    filter:blur(.5px);
+  }
+
+  header{
+    width:100%;
+    max-width:1040px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    padding:14px 22px 6px;
+    z-index:5;
+  }
+  h1{
+    font-size:1.4rem;
+    margin:0;
+    color:var(--leaf-dark);
+    text-shadow:1px 1px 0 #fff;
+  }
+  @media (max-width: 480px){
+    h1{ font-size:1.1rem; }
+    .stat-pill{ font-size:.8rem; padding:6px 10px; gap:7px 10px; }
+    .hearts-row{ font-size:.9rem; }
+  }
+  .stat-pill{
+    background:var(--card);
+    border-radius:999px;
+    padding:8px 16px;
+    font-weight:bold;
+    box-shadow:0 3px 0 rgba(0,0,0,.08);
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 14px;
+    align-items:center;
+    font-size:.95rem;
+    max-width:100%;
+  }
+  .stat-pill span.label{font-weight:normal; color:#666; margin-right:4px;}
+  #score{color:var(--coral);}
+  .hearts-row{
+    display:flex;
+    gap:3px;
+    align-items:center;
+  }
+  .hearts-row.heart-shake{ animation: heartShake .4s; }
+  @keyframes heartShake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-4px);}
+    75%{transform:translateX(4px);}
+  }
+  .heart-slot{
+    width:1.15em;
+    height:1.15em;
+    flex-shrink:0;
+  }
+  .heart-slot rect{ transition: y .25s ease-out, height .25s ease-out; }
+  .final-stats{
+    display:flex;
+    gap:24px;
+    justify-content:center;
+    margin:14px 0;
+    font-weight:bold;
+    font-size:1.1rem;
+  }
+  .final-stats .label{ font-weight:normal; color:#666; display:block; font-size:.8rem; }
+  #streak{color:var(--sky-accent);}
+
+  #stage-wrap{
+    position:relative;
+    flex:1;
+    width:100%;
+    max-width:1080px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:3;
+  }
+
+  #stageSvg{
+    width:100%;
+    height:100%;
+    max-height:64vh;
+  }
+
+  .staff-line{
+    stroke:#3a3a3a;
+    stroke-width:2.2;
+  }
+
+  .feedback-flash{
+    position:absolute;
+    font-size:2.1rem;
+    font-weight:bold;
+    pointer-events:none;
+    animation:floatUp 0.9s ease-out forwards;
+    z-index:10;
+    text-shadow:0 2px 0 rgba(0,0,0,.15);
+  }
+  @keyframes floatUp{
+    0%{transform:translateY(0) scale(.6); opacity:0;}
+    15%{transform:translateY(-6px) scale(1.15); opacity:1;}
+    100%{transform:translateY(-70px) scale(1); opacity:0;}
+  }
+
+  #controls{
+    width:100%;
+    max-width:1040px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    padding:8px 18px 22px;
+    z-index:5;
+  }
+
+  #answerForm{
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  #letterInput{
+    width:88px;
+    font-size:2rem;
+    text-align:center;
+    text-transform:uppercase;
+    border:4px solid var(--leaf-mid);
+    border-radius:16px;
+    padding:6px 0;
+    background:#fffef8;
+    color:var(--ink);
+    outline:none;
+    font-weight:bold;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.08);
+    transition:border-color .15s, transform .15s;
+  }
+  #letterInput:focus{ border-color:var(--sky-accent); }
+  #letterInput.shake{ border-color:var(--wrong); animation:shake .35s; }
+  #letterInput.good{ border-color:var(--right); }
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-8px);}
+    40%{transform:translateX(8px);}
+    60%{transform:translateX(-6px);}
+    80%{transform:translateX(6px);}
+  }
+
+  .letter-btns{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .letter-btns button{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    border:none;
+    background:var(--card);
+    font-weight:bold;
+    font-size:1.05rem;
+    color:var(--leaf-dark);
+    box-shadow:0 3px 0 rgba(0,0,0,.1);
+    cursor:pointer;
+    transition:transform .08s;
+  }
+  .letter-btns button:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.1); }
+
+  #hint{
+    font-size:.85rem;
+    color:#3d5a3f;
+    opacity:.85;
+    min-height:1.1em;
+  }
+
+  #startOverlay, #pauseOverlay, #gameOverOverlay{
+    position:absolute;
+    inset:0;
+    background:rgba(20,40,20,.55);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    text-align:center;
+    color:#fff;
+    padding:20px;
+    overflow-y:auto;
+  }
+  #startOverlay .card, #pauseOverlay .card, #gameOverOverlay .card{
+    background:var(--card);
+    color:var(--ink);
+    border-radius:24px;
+    padding:28px 32px;
+    max-width:560px;
+    box-shadow:0 10px 0 rgba(0,0,0,.15);
+  }
+  #startOverlay h2, #pauseOverlay h2, #gameOverOverlay h2{ margin-top:0; color:var(--leaf-dark); }
+  #startOverlay button, #pauseOverlay button, #gameOverOverlay button{
+    margin-top:14px;
+    font-size:1.1rem;
+    font-weight:bold;
+    padding:12px 28px;
+    border:none;
+    border-radius:999px;
+    background:var(--coral);
+    color:#fff;
+    cursor:pointer;
+    box-shadow:0 4px 0 #c44b3c;
+  }
+  #startOverlay button:hover, #pauseOverlay button:hover, #gameOverOverlay button:hover{ filter:brightness(1.06); }
+
+  .bug-key{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:10px;
+  }
+  .bug-key div{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-size:.7rem;
+    width:54px;
+  }
+  .bug-key svg{ width:34px; height:34px; }
+
+  select, .difficulty-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  select{
+    font-size:1rem;
+    padding:6px 10px;
+    border-radius:10px;
+    border:2px solid var(--leaf-mid);
+    background:#fffef8;
+  }
+
+  footer{
+    font-size:.7rem;
+    color:#3d5a3f88;
+    text-align:center;
+    padding-bottom:6px;
+  }
+</style>
+</head>
+<body>
+<a href="../games.html" style="position:fixed;top:14px;left:14px;z-index:9999;font-family:'Source Sans 3',sans-serif;font-size:13px;font-weight:600;color:#fff;background:rgba(0,0,0,0.45);padding:7px 14px;border-radius:100px;text-decoration:none;backdrop-filter:blur(4px);">&larr; Level Up Musicianship</a>
+<div id="app">
+
+  <div id="bg-dressing"></div>
+
+  <header>
+    <h1>🦎 Chameleon Note Snacks</h1>
+    <div class="stat-pill">
+      <div id="healthHearts" class="hearts-row"></div>
+      <div><span class="label">Score</span><span id="score">0</span></div>
+      <div><span class="label">Streak</span><span id="streak">0</span></div>
+      <div><span class="label">Best</span><span id="best">0</span></div>
+    </div>
+  </header>
+
+  <div id="stage-wrap">
+    <svg id="stageSvg" viewBox="0 0 1040 460" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div id="controls">
+    <form id="answerForm" autocomplete="off">
+      <input id="letterInput" maxlength="1" placeholder="?" autocapitalize="characters" />
+    </form>
+    <div class="letter-btns" id="letterButtons"></div>
+    <div id="hint">Type the natural note name (A–G) — it submits instantly, no Enter needed.</div>
+  </div>
+
+  <footer>Natural notes only · no sharps or flats · made for treble-clef practice</footer>
+
+  <div id="startOverlay">
+    <div class="card">
+      <h2>Feed the chameleon the right note!</h2>
+      <p>A colourful bug lands on the treble clef staff and crawls toward the chameleon. Each bug shape always stands for the same note name. Type the letter (A, B, C, D, E, F or G) — it submits the instant you press the key. Name it correctly before it reaches him and he gulps it down. Let it crawl all the way and it falls off — and you lose a heart. Your first wrong guess on each bug is always free, but keep guessing wrong and you'll start losing health too. The crawl speeds up the more you get right, so stay sharp!</p>
+      <div class="bug-key" id="bugKey"></div>
+      <div class="difficulty-row">
+        <label for="rangeSelect">Note range:</label>
+        <select id="rangeSelect">
+          <option value="easy">Easy — lines &amp; spaces near the staff</option>
+          <option value="full" selected>Full — middle C to high G</option>
+        </select>
+      </div>
+      <button id="startBtn">Start feeding 🐛</button>
+    </div>
+  </div>
+
+  <div id="pauseOverlay" style="display:none;">
+    <div class="card">
+      <h2 id="pauseTitle">Paused</h2>
+      <p id="pauseMsg"></p>
+      <button id="resumeBtn">Keep playing</button>
+    </div>
+  </div>
+
+  <div id="gameOverOverlay" style="display:none;">
+    <div class="card">
+      <h2>Out of hearts!</h2>
+      <p>The chameleon's had a few too many escape — but here's how you did:</p>
+      <div class="final-stats">
+        <div><span class="label">Final score</span><span id="finalScore">0</span></div>
+        <div><span class="label">Best streak</span><span id="finalBest">0</span></div>
+      </div>
+      <button id="restartBtn">Try again 🦎</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------
+     MUSIC DATA
+     Treble clef, natural notes only (no sharps/flats).
+  --------------------------------------------------------- */
+
+  const STAFF_TOP_Y = 165;      // y of top staff line (line 5, F5)
+  const STAFF_LINE_GAP = 18;    // gap between staff lines
+  const STAFF_LEFT_X = 130;
+  const STAFF_RIGHT_X = 760;
+  const STEP = STAFF_LINE_GAP / 2; // one diatonic step = half a line-gap
+
+  const LETTERS = ['C','D','E','F','G','A','B'];
+
+  // Absolute diatonic index: C4 (middle C) = 0, D4=1 ... B4=6, C5=7, etc.
+  function diatonicIndex(letter, octave){
+    return LETTERS.indexOf(letter) + (octave - 4) * 7;
+  }
+  const F5_INDEX = diatonicIndex('F',5);
+
+  // steps (svg-down-positive) from F5 (the top line) for a given note
+  function stepsFromF5(letter, octave){
+    return F5_INDEX - diatonicIndex(letter, octave);
+  }
+  function yForNote(letter, octave){
+    return STAFF_TOP_Y + stepsFromF5(letter, octave) * STEP;
+  }
+  // Ledger lines needed between the staff and a note above/below it
+  function ledgerStepsNeeded(letter, octave){
+    const s = stepsFromF5(letter, octave);
+    const lines = [];
+    if(s > 8){ for(let L=10; L<=s; L+=2) lines.push(L); }
+    else if (s < 0){ for(let L=-2; L>=s; L-=2) lines.push(L); }
+    return lines;
+  }
+
+  /* ---------------------------------------------------------
+     BUG DEFINITIONS
+     Every shape is drawn perfectly centred on (0,0) and kept
+     within a tight ~13px vertical radius (matching a semibreve
+     notehead) so it always sits unambiguously ON a line or
+     dead-centre IN a space — nothing droops above or below
+     that radius, and there is no vertical bob animation.
+  --------------------------------------------------------- */
+
+  const BUGS = {
+    C: { name:'Ladybird',  color:'#e8453c', spots:'#2b2b2b', draw: drawLadybird },
+    D: { name:'Bee',       color:'#ffce3d', spots:'#2b2b2b', draw: drawBee },
+    E: { name:'Beetle',    color:'#3a8f4a', spots:'#1f5a2a', draw: drawBeetle },
+    F: { name:'Butterfly', color:'#7c5cff', spots:'#5436c9', draw: drawButterfly },
+    G: { name:'Dragonfly', color:'#36b6c9', spots:'#1f7c8a', draw: drawDragonfly },
+    A: { name:'Caterpillar', color:'#8fce4d', spots:'#5a9a2a', draw: drawCaterpillar },
+    B: { name:'Spider',    color:'#9a6a3c', spots:'#5e3f23', draw: drawSpider },
+  };
+
+  // All shapes below are bounded to roughly x:[-13,13] y:[-13,13], centred on 0,0.
+
+  function drawLadybird(c){
+    return `<g>
+      <circle cx="0" cy="0" r="13" fill="${c.color}" stroke="#222" stroke-width="1.5"/>
+      <line x1="0" y1="-13" x2="0" y2="13" stroke="#222" stroke-width="1.5"/>
+      <circle cx="-5.5" cy="-4" r="2" fill="${c.spots}"/>
+      <circle cx="5.5" cy="-4" r="2" fill="${c.spots}"/>
+      <circle cx="-6" cy="5" r="2" fill="${c.spots}"/>
+      <circle cx="6" cy="5" r="2" fill="${c.spots}"/>
+      <circle cx="0" cy="9" r="1.8" fill="${c.spots}"/>
+      <path d="M -6 -10 A 6 5 0 0 1 6 -10 L 6 -13 L -6 -13 Z" fill="${c.spots}"/>
+      <circle cx="-2" cy="-11.5" r="0.9" fill="#fff"/>
+      <circle cx="2" cy="-11.5" r="0.9" fill="#fff"/>
+    </g>`;
+  }
+
+  function drawBee(c){
+    return `<g>
+      <ellipse cx="0" cy="0" rx="13" ry="11" fill="${c.color}" stroke="#222" stroke-width="1.4"/>
+      <rect x="-13" y="-4.5" width="26" height="3" fill="${c.spots}"/>
+      <rect x="-13" y="2.5" width="26" height="3" fill="${c.spots}"/>
+      <ellipse cx="-14" cy="-7" rx="6" ry="4.2" fill="#fff" opacity=".85" transform="rotate(-25 -14 -7)"/>
+      <ellipse cx="14" cy="-7" rx="6" ry="4.2" fill="#fff" opacity=".85" transform="rotate(25 14 -7)"/>
+      <circle cx="0" cy="-11.5" r="3.4" fill="#333"/>
+      <line x1="-1.6" y1="-13.5" x2="-3.2" y2="-15.8" stroke="#333" stroke-width="1"/>
+      <line x1="1.6" y1="-13.5" x2="3.2" y2="-15.8" stroke="#333" stroke-width="1"/>
+    </g>`;
+  }
+
+  function drawBeetle(c){
+    return `<g>
+      <circle cx="0" cy="0" r="13" fill="${c.color}" stroke="#16331c" stroke-width="1.5"/>
+      <line x1="0" y1="-9" x2="0" y2="12" stroke="#16331c" stroke-width="1.3"/>
+      <ellipse cx="0" cy="-9" rx="5.4" ry="3.6" fill="#16331c"/>
+      <ellipse cx="-4.5" cy="-1" rx="2" ry="3" fill="#ffffff55"/>
+      <ellipse cx="4.5" cy="-1" rx="2" ry="3" fill="#ffffff55"/>
+      <line x1="-12" y1="4" x2="-16.5" y2="8" stroke="#16331c" stroke-width="1.3"/>
+      <line x1="12" y1="4" x2="16.5" y2="8" stroke="#16331c" stroke-width="1.3"/>
+      <line x1="-13" y1="-1" x2="-17.5" y2="-1" stroke="#16331c" stroke-width="1.3"/>
+      <line x1="13" y1="-1" x2="17.5" y2="-1" stroke="#16331c" stroke-width="1.3"/>
+    </g>`;
+  }
+
+  function drawButterfly(c){
+    return `<g>
+      <path d="M -1.5 -8 C -16 -16 -19 -1 -7 0 C -16 3 -13 14 -1.5 6 Z" fill="${c.color}" stroke="${c.spots}" stroke-width="1.1"/>
+      <path d="M 1.5 -8 C 16 -16 19 -1 7 0 C 16 3 13 14 1.5 6 Z" fill="${c.color}" stroke="${c.spots}" stroke-width="1.1"/>
+      <circle cx="-7" cy="-7" r="1.6" fill="#fff" opacity=".8"/>
+      <circle cx="7" cy="-7" r="1.6" fill="#fff" opacity=".8"/>
+      <rect x="-1.3" y="-9" width="2.6" height="17" rx="1.3" fill="#3a2a1c"/>
+      <circle cx="0" cy="-10" r="2.1" fill="#3a2a1c"/>
+      <line x1="-1.2" y1="-11" x2="-3.2" y2="-14" stroke="#3a2a1c" stroke-width="0.9"/>
+      <line x1="1.2" y1="-11" x2="3.2" y2="-14" stroke="#3a2a1c" stroke-width="0.9"/>
+    </g>`;
+  }
+
+  function drawDragonfly(c){
+    return `<g>
+      <ellipse cx="-10" cy="-3" rx="10.5" ry="3.2" fill="${c.color}" opacity=".75" transform="rotate(-10 -10 -3)"/>
+      <ellipse cx="10" cy="-3" rx="10.5" ry="3.2" fill="${c.color}" opacity=".75" transform="rotate(10 10 -3)"/>
+      <ellipse cx="-9" cy="3" rx="9" ry="2.8" fill="${c.color}" opacity=".6" transform="rotate(8 -9 3)"/>
+      <ellipse cx="9" cy="3" rx="9" ry="2.8" fill="${c.color}" opacity=".6" transform="rotate(-8 9 3)"/>
+      <rect x="-1.8" y="-12" width="3.6" height="24" rx="1.8" fill="${c.spots}"/>
+      <circle cx="0" cy="-12" r="3.6" fill="${c.spots}"/>
+      <circle cx="-1.6" cy="-13" r="0.9" fill="#fff"/>
+      <circle cx="1.6" cy="-13" r="0.9" fill="#fff"/>
+    </g>`;
+  }
+
+  function drawCaterpillar(c){
+    return `<g transform="translate(0,0)">
+      <ellipse cx="-9" cy="2" rx="4.6" ry="5.4" fill="${c.color}" stroke="${c.spots}" stroke-width="1.1"/>
+      <ellipse cx="-1.5" cy="-1" rx="5" ry="5.8" fill="${c.color}" stroke="${c.spots}" stroke-width="1.1"/>
+      <ellipse cx="6" cy="0" rx="5" ry="5.8" fill="${c.color}" stroke="${c.spots}" stroke-width="1.1"/>
+      <ellipse cx="13" cy="2.5" rx="4.4" ry="5" fill="${c.color}" stroke="${c.spots}" stroke-width="1.1"/>
+      <circle cx="-9" cy="-1" r="1" fill="${c.spots}"/>
+      <circle cx="-1.5" cy="-4.5" r="1" fill="${c.spots}"/>
+      <circle cx="6" cy="-3.5" r="1" fill="${c.spots}"/>
+      <circle cx="15.5" cy="0" r="0.9" fill="#222"/>
+      <line x1="15.5" y1="0" x2="18.5" y2="-3" stroke="#222" stroke-width="0.9"/>
+      <line x1="15.5" y1="1.5" x2="18.5" y2="3.5" stroke="#222" stroke-width="0.9"/>
+    </g>`;
+  }
+
+  function drawSpider(c){
+    return `<g>
+      <ellipse cx="0" cy="2" rx="8.5" ry="7.5" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="0" cy="-7" r="5" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="-2" cy="-7.8" r="0.85" fill="#111"/>
+      <circle cx="2" cy="-7.8" r="0.85" fill="#111"/>
+      <g stroke="${c.spots}" stroke-width="1.4" fill="none" stroke-linecap="round">
+        <path d="M -7.5 -1 Q -13 -5 -13 -9"/>
+        <path d="M -8.5 2 Q -13 2 -13 0"/>
+        <path d="M -7.5 5 Q -12 9 -12 12"/>
+        <path d="M 7.5 -1 Q 13 -5 13 -9"/>
+        <path d="M 8.5 2 Q 13 2 13 0"/>
+        <path d="M 7.5 5 Q 12 9 12 12"/>
+      </g>
+    </g>`;
+  }
+
+  function bugSvgString(letter){
+    const b = BUGS[letter];
+    return b.draw(b);
+  }
+
+  /* ---------------------------------------------------------
+     NOTE POOLS
+  --------------------------------------------------------- */
+  const EASY_NOTES = [
+    {letter:'F', octave:4}, {letter:'G', octave:4}, {letter:'A', octave:4},
+    {letter:'B', octave:4}, {letter:'C', octave:5}, {letter:'D', octave:5},
+    {letter:'E', octave:5}, {letter:'F', octave:5},
+  ];
+  const FULL_NOTES = [
+    {letter:'C', octave:4}, {letter:'D', octave:4}, {letter:'E', octave:4},
+    {letter:'F', octave:4}, {letter:'G', octave:4}, {letter:'A', octave:4},
+    {letter:'B', octave:4}, {letter:'C', octave:5}, {letter:'D', octave:5},
+    {letter:'E', octave:5}, {letter:'F', octave:5}, {letter:'G', octave:5},
+  ];
+
+  /* ---------------------------------------------------------
+     STATE
+  --------------------------------------------------------- */
+  let score = 0, streak = 0, best = 0;
+  let pool = FULL_NOTES;
+  let current = null;
+  let awaitingAnswer = false;
+  let gameRunning = false;
+  const bugSpawnX = 300; // fixed spawn x position on the staff (left side)
+
+  // --- Health / difficulty state ---
+  const MAX_HEALTH = 5;
+  const PIPS_PER_HEART = 4; // health is tracked in quarter-heart "pips" so
+                             // small wrong-answer nibbles can show as partial
+                             // hearts, distinct from a full heart lost on a miss
+  const MAX_PIPS = MAX_HEALTH * PIPS_PER_HEART;
+  let healthPips = MAX_PIPS;
+  let wrongStreak = 0; // consecutive wrong guesses on the CURRENT bug only
+  let correctCount = 0; // drives the difficulty ramp
+  const CRAWL_START_MS = 6500;  // how long a bug takes to cross at the very start
+  const CRAWL_FLOOR_MS = 2200;  // fastest the crawl will ever get
+  const CRAWL_RAMP_STEPS = 18;  // number of correct answers to reach the floor speed
+  let crawlRAF = null;
+  let crawlStartTime = 0;
+  let crawlDuration = CRAWL_START_MS;
+  let crawlFromX = bugSpawnX, crawlToX = bugSpawnX;
+  let crawlActive = false;
+
+  const svg = document.getElementById('stageSvg');
+  const scoreEl = document.getElementById('score');
+  const streakEl = document.getElementById('streak');
+  const bestEl = document.getElementById('best');
+  const input = document.getElementById('letterInput');
+
+  function currentCrawlDuration(){
+    // Linearly ramps from CRAWL_START_MS down to CRAWL_FLOOR_MS over
+    // CRAWL_RAMP_STEPS correct answers, then stays at the floor.
+    const t = Math.min(correctCount / CRAWL_RAMP_STEPS, 1);
+    return CRAWL_START_MS + (CRAWL_FLOOR_MS - CRAWL_START_MS) * t;
+  }
+
+  /* ---------------------------------------------------------
+     AUDIO
+  --------------------------------------------------------- */
+  let actx = null;
+  function getCtx(){
+    if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    return actx;
+  }
+  function blip(freqStart, freqEnd, dur, type, gainPeak){
+    try{
+      const ctx = getCtx();
+      const t0 = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freqStart, t0);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd,20), t0+dur);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(gainPeak||0.18, t0+0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0+dur+0.02);
+    }catch(e){ /* audio unavailable */ }
+  }
+  function gulpSound(){
+    blip(200, 70, 0.16, 'square', 0.22);
+    setTimeout(()=>blip(100,45,0.12,'sine',0.18), 70);
+  }
+  function spitSound(){
+    blip(140, 320, 0.16, 'sawtooth', 0.12);
+  }
+  function correctDing(){ blip(660, 880, 0.18, 'triangle', 0.12); }
+
+  /* ---------------------------------------------------------
+     STAFF + TREBLE CLEF
+     The clef uses the real Unicode music glyph (U+1D11E) so the
+     shape is an authentic treble clef rather than a hand-drawn
+     approximation. It's sized and positioned so the curl of the
+     glyph centres on the G4 line (third line from the bottom).
+  --------------------------------------------------------- */
+  function drawStaffStatic(){
+    let s = '';
+    for(let i=0;i<5;i++){
+      const y = STAFF_TOP_Y + i*STAFF_LINE_GAP;
+      s += `<line class="staff-line" x1="${STAFF_LEFT_X}" y1="${y}" x2="${STAFF_RIGHT_X}" y2="${y}"/>`;
+    }
+    const bottomLineY = STAFF_TOP_Y + 4*STAFF_LINE_GAP;
+    s += trebleClefGlyph(STAFF_LEFT_X + 30, bottomLineY);
+    return s;
+  }
+
+  function trebleClefGlyph(originX, bottomLineY){
+    // Uses the real Unicode G-clef glyph (U+1D11E) rendered through the
+    // Noto Music web font -- this is the version confirmed to look like
+    // an authentic, correctly-shaped treble clef. It needs internet
+    // access to fetch the font; if that's unavailable the glyph falls
+    // back to a generic serif rendering, which looks wrong, but in a
+    // normal browser with internet access (i.e. however this file is
+    // actually opened) the real font loads fine.
+    //
+    // Positioned using the standard convention: the bottom of the
+    // clef's lower loop sits ON the bottom staff line. Calibrated by
+    // measuring the rendered glyph's bounding box directly in-browser:
+    // for font-size 150, the loop sits roughly 76% of the way down the
+    // glyph's own bounding box from its top.
+    const fontSize = 150;
+    // Calibrated from direct measurement of the rendered glyph: the loop
+    // sits about 18px below the glyph's own text baseline at this font
+    // size, so the baseline needs to sit ~18px below the bottom staff
+    // line for the loop to land ON the bottom line.
+    const baselineOffset = 18;
+    return `<text x="${originX}" y="${bottomLineY + baselineOffset}"
+        font-family="'Noto Music', 'Bravura Text', serif"
+        font-size="${fontSize}" fill="#27331f" text-anchor="start">&#x1D11E;</text>`;
+  }
+
+  /* ---------------------------------------------------------
+     TREE: canopy across the top, branch reaching in from the
+     right for the chameleon to sit on.
+  --------------------------------------------------------- */
+  function drawTree(){
+    let s = `<g id="tree">`;
+
+    // Canopy: layered leafy blobs arcing across the very top of the scene.
+    // Kept entirely above y=95 (with margin) so it never crowds the highest
+    // playable note, which sits around y=147 (one ledger line above the staff).
+    const blobs = [
+      [40,22,42,'var(--leaf-mid)'], [120,8,50,'var(--leaf-dark)'], [220,24,46,'var(--leaf-light)'],
+      [330,4,54,'var(--leaf-mid)'], [450,20,48,'var(--leaf-dark)'], [570,2,52,'var(--leaf-light)'],
+      [690,18,46,'var(--leaf-mid)'], [800,4,54,'var(--leaf-dark)'], [910,22,44,'var(--leaf-light)'],
+      [1000,6,42,'var(--leaf-mid)']
+    ];
+    blobs.forEach(([cx,cy,r,col])=>{
+      s += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" opacity="0.95"/>`;
+    });
+    // a soft shadow strip under the canopy so it reads as "above" the scene
+    s += `<rect x="0" y="40" width="1040" height="14" fill="var(--leaf-dark)" opacity="0.15"/>`;
+
+    // Branch: a clear horizontal log shape entering from the right edge.
+    // Top surface sits at a consistent y so the chameleon's feet can
+    // reliably land on it. Extends further left to leave room below/behind
+    // for the chameleon's curled tail to read clearly against the sky.
+    const branchTopY = 318, branchBottomY = 346;
+    s += `<path d="M 1040 ${branchTopY}
+                  L 760 ${branchTopY}
+                  Q 740 ${(branchTopY+branchBottomY)/2} 760 ${branchBottomY}
+                  L 1040 ${branchBottomY} Z"
+            fill="var(--bark)" stroke="#4a3219" stroke-width="2.5"/>`;
+    // subtle bark texture lines
+    s += `<path d="M 800 ${branchTopY+6} L 1020 ${branchTopY+6}" stroke="#4a3219" stroke-width="1.5" opacity=".35"/>`;
+    s += `<path d="M 820 ${branchBottomY-6} L 1010 ${branchBottomY-6}" stroke="#4a3219" stroke-width="1.5" opacity=".35"/>`;
+    // a couple of small leaf sprigs for cohesion with the canopy
+    s += `<ellipse cx="970" cy="${branchTopY-12}" rx="16" ry="9" fill="var(--leaf-mid)" transform="rotate(-15 970 ${branchTopY-12})"/>`;
+    s += `<ellipse cx="900" cy="${branchTopY-8}" rx="14" ry="8" fill="var(--leaf-dark)" transform="rotate(10 900 ${branchTopY-8})"/>`;
+
+    s += `</g>`;
+    return s;
+  }
+
+  /* ---------------------------------------------------------
+     CHAMELEON
+     Large, perched on the branch on the right, body and head
+     facing LEFT (toward the staff). Tongue fires left to grab
+     bugs; on a correct answer it gulps the bug down, on a wrong
+     answer it spits the bug back out toward its staff position.
+  --------------------------------------------------------- */
+  const CHAM_X = 885, CHAM_Y = 255, CHAM_SCALE = 1.25;
+  const MOUTH_LOCAL_X = -72, MOUTH_LOCAL_Y = 4;
+  const MOUTH_X = CHAM_X + MOUTH_LOCAL_X * CHAM_SCALE;
+  const MOUTH_Y = CHAM_Y + MOUTH_LOCAL_Y * CHAM_SCALE;
+
+  function drawChameleon(x,y){
+    // Local coordinate space: faces LEFT toward the staff. Redesigned to be
+    // bigger and cuter (rounded chunky body, big expressive eye, a proper
+    // filled spiral tail, and rounded toed feet) rather than the earlier
+    // thin/angular version that read as insect-like.
+    return `<g id="chameleon" transform="translate(${x},${y}) scale(${CHAM_SCALE})">
+
+      <!-- tail: a true spiral coil (computed, not hand-guessed), drawn as
+           an outline pass first, then a slightly narrower colour pass on
+           top so a clean border peeks out, plus two bands for pattern. -->
+      <path id="tailOutline" d="M 53.6 7.1 L 56.6 2.1 L 60.5 -2.0 L 65.2 -5.1 L 70.4 -7.0 L 75.8 -7.7
+               L 81.2 -7.1 L 86.1 -5.4 L 90.5 -2.7 L 94.0 0.9 L 96.6 5.1 L 98.2 9.7
+               L 98.7 14.4 L 98.1 19.0 L 96.5 23.3 L 94.0 27.0 L 90.8 29.9 L 87.2 32.1
+               L 83.2 33.3 L 79.2 33.6 L 75.3 33.0 L 71.7 31.5 L 68.6 29.3 L 66.2 26.6
+               L 64.5 23.5 L 63.6 20.1 L 63.5 16.8 L 64.1 13.6 L 65.4 10.7 L 67.3 8.2
+               L 69.6 6.4 L 72.2 5.1 L 74.9 4.5 L 77.5 4.5 L 80.0 5.1 L 82.2 6.3
+               L 84.1 7.8 L 85.4 9.7 L 86.2 11.7 L 86.6 13.8 L 86.4 15.8 L 85.8 17.6
+               L 84.9 19.1 L 83.6 20.3 L 82.2 21.1 L 80.8 21.5 L 79.4 21.6 L 78.1 21.3
+               L 77.0 20.8 L 76.1 20.0 L 75.5 19.2"
+            fill="none" stroke="#2f6b34" stroke-width="15.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path id="tailFill" d="M 53.6 7.1 L 56.6 2.1 L 60.5 -2.0 L 65.2 -5.1 L 70.4 -7.0 L 75.8 -7.7
+               L 81.2 -7.1 L 86.1 -5.4 L 90.5 -2.7 L 94.0 0.9 L 96.6 5.1 L 98.2 9.7
+               L 98.7 14.4 L 98.1 19.0 L 96.5 23.3 L 94.0 27.0 L 90.8 29.9 L 87.2 32.1
+               L 83.2 33.3 L 79.2 33.6 L 75.3 33.0 L 71.7 31.5 L 68.6 29.3 L 66.2 26.6
+               L 64.5 23.5 L 63.6 20.1 L 63.5 16.8 L 64.1 13.6 L 65.4 10.7 L 67.3 8.2
+               L 69.6 6.4 L 72.2 5.1 L 74.9 4.5 L 77.5 4.5 L 80.0 5.1 L 82.2 6.3
+               L 84.1 7.8 L 85.4 9.7 L 86.2 11.7 L 86.6 13.8 L 86.4 15.8 L 85.8 17.6
+               L 84.9 19.1 L 83.6 20.3 L 82.2 21.1 L 80.8 21.5 L 79.4 21.6 L 78.1 21.3
+               L 77.0 20.8 L 76.1 20.0 L 75.5 19.2"
+            fill="none" stroke="#5fbf66" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- two pale colour bands along the coil for a touch of pattern -->
+      <path d="M 81.2 -7.1 L 86.1 -5.4 L 90.5 -2.7 L 94.0 0.9" fill="none" stroke="#ffd84d" stroke-width="12" stroke-linecap="round"/>
+      <path d="M 83.2 33.3 L 79.2 33.6 L 75.3 33.0" fill="none" stroke="#ffb152" stroke-width="12" stroke-linecap="round"/>
+
+      <!-- back legs (rounded, gripping branch) -->
+      <path d="M 30 28 Q 26 38 16 42" stroke="#4a9650" stroke-width="11" fill="none" stroke-linecap="round"/>
+      <ellipse cx="13" cy="44" rx="8" ry="5.5" fill="#4a9650" stroke="#2f6b34" stroke-width="2"/>
+      <path d="M 8 46 L 4 50 M 13 47 L 12 52 M 18 46 L 20 50" stroke="#2f6b34" stroke-width="1.8" stroke-linecap="round"/>
+
+      <!-- body: big, chunky, rounded oval -->
+      <ellipse cx="8" cy="0" rx="48" ry="30" fill="#5fbf66" stroke="#2f6b34" stroke-width="3"/>
+      <ellipse cx="2" cy="10" rx="34" ry="14" fill="#ffb152" opacity=".85"/>
+      <path d="M -18 -16 Q 10 -26 38 -14" stroke="#7fd486" stroke-width="4" fill="none" opacity=".7" stroke-linecap="round"/>
+
+      <!-- front legs (rounded, gripping branch, in front of body) -->
+      <path d="M -8 26 Q -12 38 -22 43" stroke="#5fbf66" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <ellipse cx="-26" cy="45" rx="8.5" ry="5.8" fill="#5fbf66" stroke="#2f6b34" stroke-width="2.2"/>
+      <path d="M -31 47 L -35 51 M -26 48 L -27 53 M -21 47 L -19 51" stroke="#2f6b34" stroke-width="1.8" stroke-linecap="round"/>
+
+      <!-- spiky frill along the back (small nod to the reference's ridge spikes) -->
+      <path d="M -2 -28 L 4 -36 L 10 -27 Z" fill="#f4a23f" stroke="#2f6b34" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M 14 -27 L 19 -34 L 24 -26 Z" fill="#f4a23f" stroke="#2f6b34" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M 27 -23 L 31 -29 L 35 -22 Z" fill="#f4a23f" stroke="#2f6b34" stroke-width="1.6" stroke-linejoin="round"/>
+
+      <!-- head: large rounded shape with a gentle built-in snout taper
+           at the front (left side), rather than a separate bolted-on
+           nose shape -->
+      <path d="M -16 -8
+               C -16 -28 -30 -38 -47 -38
+               C -64 -38 -72 -26 -71 -13
+               C -70 -4 -76 1 -75 5
+               C -74 10 -67 7 -65 11
+               C -60 23 -45 22 -33 16
+               C -20 9 -16 1 -16 -8 Z"
+            fill="#69ce71" stroke="#2f6b34" stroke-width="3"/>
+
+      <!-- soft fill highlight near the snout tip for gentle dimension -->
+      <ellipse cx="-65" cy="2" rx="6" ry="4.5" fill="#7ed684" opacity=".6"/>
+
+      <!-- small crest on top of the head, echoing the reference -->
+      <path d="M -48 -34 Q -40 -50 -30 -36 Q -38 -38 -48 -34 Z" fill="#ffd84d" stroke="#2f6b34" stroke-width="2"/>
+
+      <!-- BIG cute eye: socket ring, white, big pupil, highlight -->
+      <circle cx="-46" cy="-18" r="15" fill="#69ce71" stroke="#2f6b34" stroke-width="2.4"/>
+      <circle cx="-46" cy="-18" r="11.5" fill="#fffdf2"/>
+      <circle cx="-44" cy="-16" r="7.5" fill="#2a1f14"/>
+      <circle cx="-47" cy="-19.5" r="2.6" fill="#fff"/>
+      <circle cx="-41" cy="-13" r="1.3" fill="#fff" opacity=".8"/>
+
+      <!-- smile -->
+      <path d="M -58 6 Q -46 14 -32 7" stroke="#2f6b34" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+
+      <!-- mouth gap at snout tip, opens left (kept for tongue mechanic) -->
+      <path id="chamMouthTop" d="M -62 2 Q -68 1 -72 3" stroke="#2f6b34" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path id="chamMouthBottom" d="M -62 7 Q -68 8 -72 6" stroke="#2f6b34" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+      <!-- cheerful body spots -->
+      <circle cx="-2" cy="-12" r="4.2" fill="#3fa05a" opacity=".55"/>
+      <circle cx="20" cy="-6" r="3.6" fill="#3fa05a" opacity=".55"/>
+      <circle cx="36" cy="2" r="3" fill="#3fa05a" opacity=".55"/>
+    </g>`;
+  }
+
+  // The tongue is drawn as its own top-level group in ABSOLUTE scene
+  // coordinates (not nested inside #chameleon's local transform), since
+  // fireTongueTo() computes its endpoints in scene space already.
+  function drawTongueLayer(){
+    return `<g id="tongueGroup" opacity="0">
+        <line id="tongueLine" x1="0" y1="0" x2="0" y2="0" stroke="#e85d6b" stroke-width="3.6" stroke-linecap="round"/>
+        <circle id="tongueTip" cx="0" cy="0" r="6.5" fill="#e85d6b" stroke="#c44b5a" stroke-width="1.2"/>
+      </g>`;
+  }
+
+  /* ---------------------------------------------------------
+     RENDER LOOP
+  --------------------------------------------------------- */
+  function renderStaticScene(){
+    svg.innerHTML =
+      drawStaffStatic() +
+      `<g id="bug-layer"></g>` +
+      drawTree() +
+      drawChameleon(CHAM_X, CHAM_Y) +
+      drawTongueLayer() +
+      `<g id="fx-layer"></g>`;
+  }
+
+  function pickNewNote(){
+    let next;
+    do{
+      next = pool[Math.floor(Math.random()*pool.length)];
+    } while(current && next.letter===current.letter && next.octave===current.octave && pool.length>1);
+    current = next;
+    spawnBug(current);
+  }
+
+  function spawnBug(note){
+    wrongStreak = 0; // fresh bug, fresh slate for the wrong-guess tally
+    const layer = document.getElementById('bug-layer');
+    const y = yForNote(note.letter, note.octave);
+    const ledgerSteps = ledgerStepsNeeded(note.letter, note.octave);
+    const ly_list = ledgerSteps.map(Lstep => STAFF_TOP_Y + Lstep*STEP);
+
+    const bugMarkup = bugSvgString(note.letter);
+
+    let ledgerSvg = '';
+    ly_list.forEach(ly=>{
+      ledgerSvg += `<line class="staff-line ledger-line" data-ly="${ly}" x1="${bugSpawnX-20}" y1="${ly}" x2="${bugSpawnX+20}" y2="${ly}"/>`;
+    });
+
+    layer.innerHTML = `
+      <g id="currentBug">
+        ${ledgerSvg}
+        <g id="bugWrap" data-cur-x="${bugSpawnX}" data-cur-y="${y}" transform="translate(${bugSpawnX},${y})">
+          <g id="bugWiggle">${bugMarkup}</g>
+        </g>
+      </g>`;
+
+    animateWiggle();
+    awaitingAnswer = true;
+
+    // Set up and start the horizontal crawl toward the chameleon's mouth.
+    crawlDuration = currentCrawlDuration();
+    crawlFromX = bugSpawnX;
+    crawlToX = MOUTH_X;
+    crawlStartTime = performance.now();
+    crawlActive = true;
+    if(crawlRAF) cancelAnimationFrame(crawlRAF);
+    crawlRAF = requestAnimationFrame(animateCrawlFrame);
+  }
+
+  function animateCrawlFrame(now){
+    if(!crawlActive) return;
+    const bugWrap = document.getElementById('bugWrap');
+    if(!bugWrap){ crawlActive = false; return; }
+
+    const elapsed = now - crawlStartTime;
+    const p = Math.min(elapsed / crawlDuration, 1);
+    const x = crawlFromX + (crawlToX - crawlFromX) * p;
+    const y = parseFloat(bugWrap.getAttribute('data-cur-y'));
+
+    bugWrap.setAttribute('data-cur-x', x);
+    bugWrap.setAttribute('transform', `translate(${x},${y})`);
+
+    // ledger lines (if any) follow the bug's live x position
+    document.querySelectorAll('.ledger-line').forEach(line=>{
+      line.setAttribute('x1', x-20);
+      line.setAttribute('x2', x+20);
+    });
+
+    if(p >= 1){
+      crawlActive = false;
+      bugEscaped();
+      return;
+    }
+    crawlRAF = requestAnimationFrame(animateCrawlFrame);
+  }
+
+  // Subtle rotation-only wiggle — NO vertical translation, so the bug's
+  // centre stays locked exactly on its line/space at all times.
+  let wiggleRAF = null;
+  function animateWiggle(){
+    if(wiggleRAF) cancelAnimationFrame(wiggleRAF);
+    const node = document.getElementById('bugWiggle');
+    if(!node) return;
+    const start = performance.now();
+    function frame(t){
+      if(!document.getElementById('bugWiggle')) return;
+      const elapsed = (t-start)/1000;
+      const rot = Math.sin(elapsed*1.8)*4;
+      node.setAttribute('transform', `rotate(${rot})`);
+      wiggleRAF = requestAnimationFrame(frame);
+    }
+    wiggleRAF = requestAnimationFrame(frame);
+  }
+
+  /* ---------------------------------------------------------
+     TONGUE ANIMATION (shared path-out, used for both gulp & spit)
+  --------------------------------------------------------- */
+  function fireTongueTo(targetX, targetY, onReachTarget, onReturnDone){
+    const tongueGroup = document.getElementById('tongueGroup');
+    const tongueLine = document.getElementById('tongueLine');
+    const tongueTip = document.getElementById('tongueTip');
+
+    const mouthX = MOUTH_X, mouthY = MOUTH_Y;
+
+    const dx = targetX - mouthX, dy = targetY - mouthY;
+    tongueGroup.setAttribute('opacity','1');
+
+    let t0 = performance.now();
+    const outDur = 170, holdDur = 70, backDur = 190;
+
+    function step(now){
+      const elapsed = now - t0;
+      let x2, y2;
+      if(elapsed < outDur){
+        const p = elapsed/outDur;
+        x2 = mouthX + dx*p; y2 = mouthY + dy*p;
+      } else if(elapsed < outDur+holdDur){
+        x2 = targetX; y2 = targetY;
+        if(elapsed - outDur < 4) onReachTarget && onReachTarget();
+      } else if(elapsed < outDur+holdDur+backDur){
+        const p = (elapsed-outDur-holdDur)/backDur;
+        x2 = targetX + (mouthX-targetX)*p; y2 = targetY + (mouthY-targetY)*p;
+      } else {
+        tongueGroup.setAttribute('opacity','0');
+        onReturnDone && onReturnDone();
+        return;
+      }
+      tongueLine.setAttribute('x1', mouthX); tongueLine.setAttribute('y1', mouthY);
+      tongueLine.setAttribute('x2', x2); tongueLine.setAttribute('y2', y2);
+      tongueTip.setAttribute('cx', x2); tongueTip.setAttribute('cy', y2);
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function eatBugCorrect(callback){
+    const bugWrap = document.getElementById('bugWrap');
+    if(!bugWrap){ callback && callback(); return; }
+    crawlActive = false; // stop the crawl — it's been caught
+    if(crawlRAF) cancelAnimationFrame(crawlRAF);
+    const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+    const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+
+    fireTongueTo(curX, curY,
+      ()=>{ // reached the bug — shrink it away (gulped)
+        gulpSound();
+        bugWrap.style.transition = 'opacity .12s, transform .12s';
+        bugWrap.setAttribute('opacity','0');
+      },
+      ()=>{ bugWrap.remove(); callback && callback(); }
+    );
+  }
+
+  function spitBugBack(callback){
+    const bugWrap = document.getElementById('bugWrap');
+    if(!bugWrap){ callback && callback(); return; }
+    const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+    const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+
+    // bug visually rides the tongue tip out and is dropped back at its
+    // current crawl position — a wrong guess doesn't reset progress,
+    // the crawl just keeps going once this brief animation finishes
+    bugWrap.setAttribute('opacity','0'); // hidden while "in" the tongue grab
+
+    fireTongueTo(curX, curY,
+      ()=>{ spitSound(); },
+      ()=>{
+        bugWrap.setAttribute('opacity','1');
+        callback && callback();
+      }
+    );
+  }
+
+  /* ---------------------------------------------------------
+     FEEDBACK TEXT POP
+  --------------------------------------------------------- */
+  function showFlash(text, color, x, y){
+    const wrap = document.getElementById('stage-wrap');
+    const el = document.createElement('div');
+    el.className = 'feedback-flash';
+    el.textContent = text;
+    el.style.color = color;
+    el.style.left = x+'px';
+    el.style.top = y+'px';
+    wrap.appendChild(el);
+    setTimeout(()=>el.remove(), 950);
+  }
+  function svgPointToScreen(x,y){
+    const rect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    const scaleX = rect.width/vb.width, scaleY = rect.height/vb.height;
+    const wrapRect = document.getElementById('stage-wrap').getBoundingClientRect();
+    return { x: rect.left - wrapRect.left + x*scaleX, y: rect.top - wrapRect.top + y*scaleY };
+  }
+
+  /* ---------------------------------------------------------
+     ANSWER HANDLING
+  --------------------------------------------------------- */
+  function submitAnswer(letter){
+    if(!awaitingAnswer || !gameRunning) return;
+    letter = (letter||'').toUpperCase().trim();
+    if(!letter) return;
+
+    const correct = letter === current.letter;
+    awaitingAnswer = false;
+
+    const bugWrap = document.getElementById('bugWrap');
+    let sx=500, sy=200;
+    if(bugWrap){
+      const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+      const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+      const pt = svgPointToScreen(curX, curY);
+      sx = pt.x; sy = pt.y;
+    }
+
+    if(correct){
+      score += 10 + Math.min(streak,10);
+      streak += 1;
+      correctCount += 1; // ramps difficulty — see currentCrawlDuration()
+      wrongStreak = 0; // recovering from a wobble resets the wrong-tally
+      if(streak>best){ best=streak; bestEl.textContent=best; }
+      scoreEl.textContent = score;
+      streakEl.textContent = streak;
+      input.classList.remove('shake');
+      input.classList.add('good');
+      correctDing();
+      showFlash(`${current.letter}! ✓`, 'var(--right)', sx, sy-20);
+      eatBugCorrect(()=>{
+        input.value='';
+        input.classList.remove('good');
+        setTimeout(()=>{ if(gameRunning) { pickNewNote(); input.focus(); } }, 160);
+      });
+    } else {
+      streak = 0;
+      streakEl.textContent = streak;
+      input.classList.remove('good');
+      input.classList.add('shake');
+
+      wrongStreak += 1;
+      // The first wrong guess on a bug is a free pass — typos happen.
+      // From the second consecutive wrong guess onward, each one nibbles
+      // a small bit of health, so genuinely sustained wrong-answering
+      // costs you, without punishing a single slip.
+      const WRONG_FORGIVENESS = 1; // this many free wrong guesses per bug
+      const PIPS_PER_WRONG = 1;    // health pips nibbled per costly wrong guess
+      if(wrongStreak > WRONG_FORGIVENESS && gameRunning){
+        nibbleHealth(PIPS_PER_WRONG);
+      }
+
+      showFlash(`Spat out!`, 'var(--wrong)', sx, sy-20);
+      // pause the crawl clock during the brief spit-back animation so the
+      // bug doesn't silently lose travel time while it's "in" the tongue
+      const pausedElapsed = crawlActive ? performance.now() - crawlStartTime : 0;
+      crawlActive = false;
+      if(crawlRAF) cancelAnimationFrame(crawlRAF);
+      spitBugBack(()=>{
+        input.classList.remove('shake');
+        input.value='';
+        if(gameRunning){
+          awaitingAnswer = true; // same bug, have another go
+          input.focus();
+          // resume the crawl from where it left off
+          crawlStartTime = performance.now() - pausedElapsed;
+          crawlActive = true;
+          crawlRAF = requestAnimationFrame(animateCrawlFrame);
+        }
+      });
+    }
+  }
+
+  /* ---------------------------------------------------------
+     MISS HANDLING — a bug that reaches the chameleon's mouth without
+     being correctly named "falls off": health drops, no score penalty
+     beyond that, and a fresh bug spawns so the game keeps moving.
+  --------------------------------------------------------- */
+  function bugEscaped(){
+    if(!gameRunning) return;
+    awaitingAnswer = false;
+    const bugWrap = document.getElementById('bugWrap');
+
+    streak = 0;
+    streakEl.textContent = streak;
+    loseHealth();
+
+    if(bugWrap){
+      // little "falling off" flourish: drop and fade rather than just vanish
+      bugWrap.style.transition = 'transform .35s ease-in, opacity .35s ease-in';
+      const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+      const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+      bugWrap.setAttribute('transform', `translate(${curX},${curY+40}) rotate(50)`);
+      bugWrap.setAttribute('opacity','0');
+    }
+    showFlash(`Missed!`, 'var(--wrong)', ...(()=>{
+      const pt = svgPointToScreen(MOUTH_X, MOUTH_Y);
+      return [pt.x, pt.y-10];
+    })());
+
+    setTimeout(()=>{
+      const layer = document.getElementById('bug-layer');
+      if(layer) layer.innerHTML = '';
+      if(gameRunning && healthPips>0){ pickNewNote(); input.focus(); }
+    }, 380);
+  }
+
+  /* ---------------------------------------------------------
+     HEALTH SYSTEM
+     Health is tracked internally in quarter-heart "pips" so a wrong
+     guess can nibble away a small sliver of a heart, while a missed
+     bug (escaped uncaught) still costs one whole heart outright. Each
+     heart renders as a grey outline with a red fill clipped to the
+     fraction of that heart's pips remaining.
+  --------------------------------------------------------- */
+  // A small reusable heart path for the custom SVG health icons below —
+  // simple, symmetric, easy to read at tiny sizes.
+  const HEART_PATH = "M12 21 C 12 21 3 14.5 3 8.5 C 3 5 5.5 3 8.5 3 C 10.5 3 12 4.5 12 4.5 C 12 4.5 13.5 3 15.5 3 C 18.5 3 21 5 21 8.5 C 21 14.5 12 21 12 21 Z";
+
+  function renderHealthUI(){
+    const wrap = document.getElementById('healthHearts');
+    if(!wrap) return;
+    let html = '';
+    for(let i=0;i<MAX_HEALTH;i++){
+      const pipsInThisHeart = Math.max(0, Math.min(PIPS_PER_HEART, healthPips - i*PIPS_PER_HEART));
+      const fraction = pipsInThisHeart / PIPS_PER_HEART; // 0, .25, .5, .75, 1
+      // Liquid-fill effect: the red fill rises from the BOTTOM of the
+      // heart as health increases, so a half-lost heart visibly reads
+      // as "half full" rather than just "a chunk is missing".
+      const fillTopY = 21 - fraction*18; // heart spans roughly y=3 to y=21
+      html += `<svg class="heart-slot" viewBox="0 0 24 24" width="1em" height="1em">
+          <path d="${HEART_PATH}" fill="#e0e0e0" stroke="#b0b0b0" stroke-width="0.6"/>
+          <clipPath id="heartClip${i}"><rect x="0" y="${fillTopY}" width="24" height="${24-fillTopY}"/></clipPath>
+          <path d="${HEART_PATH}" fill="#ff5a5f" clip-path="url(#heartClip${i})"/>
+        </svg>`;
+    }
+    wrap.innerHTML = html;
+  }
+
+  function shakeHearts(){
+    const wrap = document.getElementById('healthHearts');
+    if(wrap){
+      wrap.classList.remove('heart-shake');
+      void wrap.offsetWidth; // restart animation
+      wrap.classList.add('heart-shake');
+    }
+  }
+
+  // Full heart lost — used when a bug escapes uncaught.
+  function loseHealth(){
+    healthPips = Math.max(0, healthPips - PIPS_PER_HEART);
+    renderHealthUI();
+    shakeHearts();
+    if(healthPips<=0) endGame();
+  }
+
+  // Small nibble of health lost — used for sustained wrong guessing on
+  // the same bug. Much smaller than a full miss so occasional typos
+  // are forgiven; only repeated wrong answers add up to real damage.
+  function nibbleHealth(pips){
+    healthPips = Math.max(0, healthPips - pips);
+    renderHealthUI();
+    shakeHearts();
+    if(healthPips<=0) endGame();
+  }
+
+  function endGame(){
+    gameRunning = false;
+    crawlActive = false;
+    if(crawlRAF) cancelAnimationFrame(crawlRAF);
+    if(wiggleRAF) cancelAnimationFrame(wiggleRAF);
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalBest').textContent = best;
+    document.getElementById('gameOverOverlay').style.display = 'flex';
+  }
+
+  function resetGameState(){
+    score = 0; streak = 0; best = 0; correctCount = 0; healthPips = MAX_PIPS; wrongStreak = 0;
+    scoreEl.textContent = 0; streakEl.textContent = 0; bestEl.textContent = 0;
+    renderHealthUI();
+  }
+
+  /* ---------------------------------------------------------
+     INPUT WIRING — auto-submits the instant a valid letter (A-G) is
+     typed, no Enter needed. The hidden text input still exists (for
+     mobile on-screen keyboards and the letter buttons) but typing
+     directly into the page also works via a keydown listener.
+  --------------------------------------------------------- */
+  const form = document.getElementById('answerForm');
+  form.addEventListener('submit', (e)=>{ e.preventDefault(); }); // Enter no longer needed, but don't let a stray submit reload the page
+
+  let submitLock = false; // guards against double-fires from key repeat / multiple listeners
+  function trySubmitLetter(letter){
+    if(submitLock) return;
+    submitLock = true;
+    submitAnswer(letter);
+    // release the lock shortly after — submitAnswer itself ignores input
+    // while awaitingAnswer is false, so this just prevents a single
+    // keystroke from double-triggering within the same tick
+    setTimeout(()=>{ submitLock = false; }, 50);
+  }
+
+  input.addEventListener('input', ()=>{
+    const v = input.value.toUpperCase().replace(/[^A-G]/g,'').slice(0,1);
+    input.value = v;
+    if(v) {
+      trySubmitLetter(v);
+      // clear right away so the box is ready for the next letter
+      setTimeout(()=>{ input.value=''; }, 0);
+    }
+  });
+
+  // Also listen at the document level so the person can type without
+  // needing to click into the small input box first.
+  document.addEventListener('keydown', (e)=>{
+    if(!gameRunning) return;
+    if(e.ctrlKey || e.metaKey || e.altKey) return; // ignore shortcuts
+    const key = e.key.toUpperCase();
+    if(key.length===1 && key>='A' && key<='G'){
+      e.preventDefault();
+      trySubmitLetter(key);
+    }
+  });
+
+  const letterButtonsWrap = document.getElementById('letterButtons');
+  ['A','B','C','D','E','F','G'].forEach(L=>{
+    const btn = document.createElement('button');
+    btn.textContent = L;
+    btn.addEventListener('click', ()=>{ trySubmitLetter(L); });
+    letterButtonsWrap.appendChild(btn);
+  });
+
+  /* ---------------------------------------------------------
+     BUG KEY (legend) on start screen
+  --------------------------------------------------------- */
+  function renderBugKey(){
+    const wrap = document.getElementById('bugKey');
+    wrap.innerHTML = '';
+    ['C','D','E','F','G','A','B'].forEach(letter=>{
+      const b = BUGS[letter];
+      const cell = document.createElement('div');
+      cell.innerHTML = `<svg viewBox="-16 -16 32 32">${bugSvgString(letter)}</svg><strong>${letter}</strong><span>${b.name}</span>`;
+      wrap.appendChild(cell);
+    });
+  }
+
+  /* ---------------------------------------------------------
+     BACKGROUND DRESSING (sky clouds only — tree/branch are in-SVG now)
+  --------------------------------------------------------- */
+  function renderBgDressing(){
+    const wrap = document.getElementById('bg-dressing');
+    let html = '';
+    const cloudSpots = [[6,8,90],[18,14,60],[78,6,110],[88,16,70]];
+    cloudSpots.forEach(([leftPct,topPct,size])=>{
+      html += `<div class="cloud" style="left:${leftPct}%; top:${topPct}%; width:${size}px; height:${size*0.55}px;"></div>`;
+    });
+    wrap.innerHTML = html;
+  }
+
+  /* ---------------------------------------------------------
+     START / PAUSE / GAME OVER / RESTART
+  --------------------------------------------------------- */
+  function startGame(){
+    pool = document.getElementById('rangeSelect').value === 'easy' ? EASY_NOTES : FULL_NOTES;
+    resetGameState();
+    gameRunning = true;
+    renderStaticScene();
+    pickNewNote();
+    input.focus();
+  }
+
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    document.getElementById('startOverlay').style.display = 'none';
+    startGame();
+  });
+
+  document.getElementById('resumeBtn').addEventListener('click', ()=>{
+    document.getElementById('pauseOverlay').style.display='none';
+    gameRunning = true;
+    input.focus();
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    document.getElementById('gameOverOverlay').style.display = 'none';
+    startGame();
+  });
+
+  renderBugKey();
+  renderBgDressing();
+  renderHealthUI();
+
+  document.getElementById('stage-wrap').addEventListener('click', ()=>{ if(gameRunning) input.focus(); });
+
+})();
+</script>
+</body>
+</html>

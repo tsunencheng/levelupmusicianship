@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vault Breakers</title>
+<style>
+  :root{
+    --bg-deep:#0b0e14;
+    --bg-mid:#11151f;
+    --panel:#181d29;
+    --panel-edge:#262d3d;
+    --steel:#3a4357;
+    --steel-light:#5a6580;
+    --laser:#ff3b4e;
+    --laser-dim:#7a1c26;
+    --gold:#d4af37;
+    --gold-dim:#7a6420;
+    --cyan:#2dd4d4;
+    --cyan-dim:#155757;
+    --cream:#e8e8e4;
+    --ink:#aab0c0;
+    --shadow: rgba(0,0,0,0.55);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin:0; padding:0;
+    width:100%; height:100%;
+    font-family: 'Courier New', 'Consolas', monospace;
+    background:
+      radial-gradient(ellipse 700px 400px at 50% -10%, rgba(45,212,212,0.07), transparent 60%),
+      linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-mid) 60%, #0a0c11 100%);
+    color: var(--cream);
+    overflow-x: hidden;
+  }
+
+  #app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 14px 30px;
+    position: relative;
+  }
+
+  .scanlines {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events:none; z-index:0; opacity:0.05;
+    background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, #fff 2px, #fff 3px);
+  }
+
+  .title-wrap { text-align: center; position: relative; z-index: 2; margin-bottom: 6px; }
+
+  h1 {
+    font-family: 'Courier New', monospace;
+    font-weight: 800;
+    font-size: clamp(22px, 4.4vw, 34px);
+    margin: 8px 0 2px;
+    color: var(--cream);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    text-shadow: 0 0 14px rgba(45,212,212,0.45), 0 0 2px rgba(255,255,255,0.3);
+  }
+  h1 .blink { color: var(--laser); animation: blink 1.6s steps(1) infinite; }
+  @keyframes blink { 0%,49%{opacity:1;} 50%,100%{opacity:0.25;} }
+
+  .subtitle { color: var(--ink); font-size: 13px; letter-spacing: 0.6px; margin-bottom: 10px; }
+
+  .stage {
+    background: var(--panel);
+    border-radius: 10px;
+    width: min(900px, 96vw);
+    padding: 20px clamp(12px, 3vw, 34px) 26px;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 0 0 1px var(--panel-edge), 0 24px 50px var(--shadow), 0 0 40px rgba(45,212,212,0.05);
+    border: 1px solid var(--panel-edge);
+  }
+
+  .hud { display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+  .hud-group { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+
+  .pill {
+    background: var(--steel); color: var(--cream); font-weight: 700;
+    border-radius: 4px; padding: 6px 12px; font-size: 12.5px;
+    display:flex; align-items:center; gap:6px;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+    white-space: nowrap; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .pill.streak { background: var(--gold-dim); color: var(--gold); }
+  .pill.level { background: var(--laser-dim); color: #ffb3ba; }
+  .pill.warn { background: #5a3a1c; color: #ffcf8a; }
+  .pill.tempo { background: var(--cyan-dim); color: var(--cyan); }
+
+  button.iconbtn {
+    background: var(--steel); color: var(--cream); border: none; border-radius: 6px;
+    width: 36px; height: 36px; font-size: 15px; cursor: pointer;
+    box-shadow: 0 3px 0 #20242f; transition: transform 0.08s ease;
+  }
+  button.iconbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #20242f; }
+
+  /* ===== VAULT DOOR (replaces jungle track) ===== */
+  .vault-wrap {
+    position: relative; height: 150px; margin: 6px 0 16px; border-radius: 10px;
+    background: radial-gradient(circle at 50% 50%, #0d1018 0%, #07090d 100%);
+    overflow: hidden; border: 2px solid var(--panel-edge);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .vault-ring { position:absolute; border-radius:50%; border: 2px solid var(--steel); transition: transform 0.5s cubic-bezier(.4,0,.2,1), border-color 0.3s ease; }
+  .vault-ring.lit { border-color: var(--gold); box-shadow: 0 0 14px rgba(212,175,55,0.5); }
+  .vault-tick { position:absolute; width:3px; height:9px; background: var(--steel-light); left:50%; top:0; transform-origin: 50% 70px; }
+  .vault-core {
+    position:relative; width:46px; height:46px; border-radius:50%;
+    background: radial-gradient(circle, #2a3142, #14171f);
+    border: 2px solid var(--cyan); box-shadow: 0 0 16px rgba(45,212,212,0.4);
+    display:flex; align-items:center; justify-content:center; font-size:18px; z-index:5;
+  }
+  .vault-core.shake { animation: vaultShake 0.4s ease; }
+  @keyframes vaultShake { 0%,100%{transform:rotate(0);} 25%{transform:rotate(-6deg);} 75%{transform:rotate(6deg);} }
+  .vault-core.win { animation: vaultPulse 0.5s ease; }
+  @keyframes vaultPulse { 0%{transform:scale(1);} 50%{transform:scale(1.25);} 100%{transform:scale(1);} }
+
+  .checkpoint-row { position:absolute; bottom: 8px; left:0; width:100%; display:flex; justify-content:center; gap:8px; z-index:5; }
+
+  .rhythm-rail {
+    display:flex; align-items: flex-end; justify-content: center; gap: 10px; min-height: 130px;
+    margin: 10px 0 14px; flex-wrap: wrap; padding: 10px 6px;
+    background: repeating-linear-gradient(to bottom, transparent 0px, transparent 78px, rgba(45,212,212,0.08) 78px, rgba(45,212,212,0.08) 80px);
+    border-radius: 8px; border: 1px solid var(--panel-edge);
+  }
+
+  .beat-group { display:flex; gap: 4px; align-items: flex-end; padding: 6px 7px; border-radius: 8px; transition: background 0.15s ease; }
+  .beat-group.active-listen { background: rgba(45,212,212,0.22); box-shadow: inset 0 0 0 1px rgba(45,212,212,0.4); }
+  .beat-group.active-tap { background: rgba(212,175,55,0.22); box-shadow: inset 0 0 0 1px rgba(212,175,55,0.45); }
+
+  .syl-card { width: 64px; display:flex; flex-direction: column; align-items: center; gap: 4px; }
+  .syl-icon { width: 48px; height: 52px; }
+  .syl-label { font-size: 10px; font-weight: 700; color: var(--ink); text-align:center; line-height:1.15; letter-spacing:0.2px; }
+  .pitch-tag {
+    font-size: 11px; font-weight: 900; color: var(--bg-deep);
+    border-radius: 4px; padding: 1px 6px; margin-top: 1px;
+  }
+
+  .syl-card.result-correct .syl-label { color: var(--gold); }
+  .syl-card.result-wrong .syl-label { color: var(--laser); }
+  .syl-card.result-correct::after, .syl-card.result-wrong::after { font-size: 17px; margin-top: -2px; }
+  .syl-card.result-correct::after { content: "✓"; color: var(--gold); font-weight:900; }
+  .syl-card.result-wrong::after { content: "✗"; color: var(--laser); font-weight:900; }
+
+  .controls { display:flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 6px; }
+  .status-line { font-size: 15px; font-weight: 700; color: var(--cream); min-height: 24px; text-align: center; letter-spacing:0.3px; }
+  .countin-display {
+    font-family: 'Courier New', monospace;
+    font-size: 56px;
+    font-weight: 900;
+    color: var(--laser);
+    text-shadow: 0 0 18px rgba(255,59,78,0.5);
+    min-height: 70px;
+    line-height: 70px;
+    animation: countinPulse 0.25s ease;
+    max-width: 90%;
+    margin: 0 auto;
+    white-space: nowrap;
+    letter-spacing: 2px;
+  }
+  .countin-display.is-word {
+    font-size: 34px;
+  }
+  @keyframes countinPulse {
+    0% { transform: scale(1.4); opacity: 0.4; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .btn-row { display:flex; gap: 12px; flex-wrap: wrap; justify-content:center; }
+
+  .big-btn {
+    font-family: inherit; font-weight: 800; font-size: 14px; padding: 12px 22px; border-radius: 6px;
+    border: none; cursor: pointer; color: var(--bg-deep); background: var(--cyan);
+    box-shadow: 0 5px 0 var(--cyan-dim); transition: transform 0.08s ease, box-shadow 0.08s ease;
+    text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  .big-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--cyan-dim); }
+  .big-btn.primary { background: var(--gold); color: #2a2107; box-shadow: 0 5px 0 var(--gold-dim); }
+  .big-btn.primary:active { box-shadow: 0 1px 0 var(--gold-dim); }
+  .big-btn.ghost { background: var(--steel); color: var(--cream); box-shadow: 0 5px 0 #20242f; }
+  .big-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .key-hint-row { display:flex; gap: 10px; flex-wrap: wrap; justify-content:center; }
+  .key-chip {
+    display:flex; flex-direction: column; align-items:center; gap: 4px;
+    background: var(--steel); color: var(--cream); padding: 8px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .key-chip.tappable {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: transform 0.08s ease;
+  }
+  .key-chip.tappable:hover { background: var(--steel-light); }
+  .key-chip.tappable:active { transform: translateY(2px); }
+  .key-chip .keycap {
+    background: var(--cream); color: var(--bg-deep); border-radius: 6px;
+    padding: 4px 16px; font-weight: 900; box-shadow: 0 3px 0 rgba(0,0,0,0.4); font-size: 15px;
+  }
+  .key-chip .keycap.pressed { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.4); }
+
+  .level-select { display:flex; gap: 9px; flex-wrap: wrap; justify-content: center; margin: 12px 0 4px; }
+  .level-card {
+    background: var(--panel); border: 1px solid var(--panel-edge); border-radius: 8px; padding: 9px 14px;
+    cursor: pointer; font-weight: 800; color: var(--cream); text-align: center; min-width: 108px;
+    transition: transform 0.08s ease, border-color 0.15s ease; font-size: 13px;
+  }
+  .level-card:hover { transform: translateY(-2px); border-color: var(--cyan); }
+  .level-card.selected { background: var(--cyan-dim); border-color: var(--cyan); }
+  .level-card small { display:block; font-weight: 600; font-size: 10px; margin-top: 3px; color: var(--ink); }
+
+  .legend { display:flex; flex-wrap:wrap; gap: 12px; justify-content:center; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--panel-edge); }
+  .legend-item { display:flex; flex-direction:column; align-items:center; gap:4px; font-size: 10px; font-weight: 700; color: var(--ink); min-width: 64px; }
+  .legend-item .syl-icon { width: 36px; height: 40px; }
+
+  .end-banner { text-align:center; padding: 18px; }
+  .end-banner h2 { color: var(--gold); font-family:'Courier New',monospace; font-size: 24px; text-transform: uppercase; letter-spacing:1.5px; }
+
+  footer.note { color: var(--ink); font-size: 11.5px; text-align:center; margin-top: 14px; opacity: 0.85; max-width: 620px; z-index:2; letter-spacing:0.3px; }
+
+  @media (max-width: 480px) {
+    .syl-card { width: 44px; }
+    .syl-icon { width: 38px; height: 44px; }
+    .beat-group { padding: 4px 5px; gap: 3px; }
+  }
+</style>
+</head>
+<body>
+<a href="../games.html" style="position:fixed;top:14px;left:14px;z-index:9999;font-family:'Source Sans 3',sans-serif;font-size:13px;font-weight:600;color:#fff;background:rgba(0,0,0,0.45);padding:7px 14px;border-radius:100px;text-decoration:none;backdrop-filter:blur(4px);">&larr; Level Up Musicianship</a>
+
+<div class="scanlines"></div>
+
+<div id="app">
+  <div class="title-wrap">
+    <h1>🔒 Vault Breakers<span class="blink">_</span></h1>
+    <div class="subtitle">Listen to the rhythm. Crack the dial. SPACE to tap — or tap the screen on tablet.</div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+
+  <footer class="note">6/8 rhythms: <em>tam, ti-ti-ti, ta-ti, ti-ta, tika-tika-tika-tika, ti-tika-tika, tika-ti-tika, ti-tika-ti</em>.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ===================== AUDIO ENGINE ===================== */
+  let audioCtx = null;
+  function ensureAudio(){
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  let activeOscillators = [];
+  function trackOscillator(osc, gain){
+    activeOscillators.push({ osc, gain });
+  }
+  function stopAllSounds(){
+    const ctx = audioCtx;
+    activeOscillators.forEach(({ osc, gain }) => {
+      try {
+        if (ctx) gain.gain.cancelScheduledValues(ctx.currentTime);
+        gain.gain.setValueAtTime(0.0001, ctx ? ctx.currentTime : 0);
+        osc.stop();
+      } catch (e) { /* already stopped or finished — ignore */ }
+    });
+    activeOscillators = [];
+    stopMetronome();
+  }
+
+  function playClick(time, accent){
+    const ctx = ensureAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = accent ? 1100 : 760;
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(accent ? 0.5 : 0.34, time + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.28);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(time);
+    osc.stop(time + 0.3);
+    trackOscillator(osc, gain);
+  }
+
+  function playTapSound(){
+    const ctx = ensureAudio();
+    const t = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.value = 560;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.35, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.12);
+    trackOscillator(osc, gain);
+  }
+
+  function playChime(success){
+    const ctx = ensureAudio();
+    const t = ctx.currentTime;
+    const freqs = success ? [523.25, 659.25, 880.0] : [392, 349.23];
+    freqs.forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = success ? "triangle" : "sawtooth";
+      osc.frequency.value = f;
+      const start = t + i * (success ? 0.09 : 0.06);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(success ? 0.28 : 0.18, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + (success ? 0.35 : 0.25));
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(start); osc.stop(start + 0.4);
+      trackOscillator(osc, gain);
+    });
+  }
+
+  // continuous metronome (background pulse during listening + tapping).
+  // In 6/8, the BEAT is a dotted quarter (2 per bar) — accent every 2nd beat.
+  //
+  // IMPORTANT: every tick must be scheduled directly on the Web Audio clock
+  // (osc.start(exactTime)), the same way playClick() schedules the rhythm
+  // itself. The previous version used setInterval and read ctx.currentTime
+  // only when each callback fired — setInterval/setTimeout are wall-clock
+  // timers with no sample-accuracy guarantee, so they drift relative to the
+  // audio-clock-scheduled pattern clicks (most noticeably on a fresh page
+  // load / first AudioContext resume, where JS-timer startup latency is at
+  // its worst). Pre-scheduling a batch of ticks on the same clock the
+  // pattern uses keeps the metronome and the rhythm sample-locked together.
+  let metronomeStopAt = null;
+  let metronomeRefillTimer = null;
+  let metronomeBeatCounter = 0;
+  let metronomeSecPerBeat = 0.5;
+  let metronomeNextScheduleFrom = 0;
+
+  function scheduleMetronomeTicksUntil(untilTime){
+    const ctx = ensureAudio();
+    while (metronomeNextScheduleFrom < untilTime) {
+      const t = metronomeNextScheduleFrom;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "square";
+      osc.frequency.value = 1300;
+      const isDownbeat = (metronomeBeatCounter % 2 === 0); // 2 dotted-quarter beats per 6/8 bar
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(isDownbeat ? 0.13 : 0.07, t + 0.003);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.05);
+      trackOscillator(osc, gain);
+      metronomeBeatCounter++;
+      metronomeNextScheduleFrom += metronomeSecPerBeat;
+    }
+  }
+
+  function startMetronome(bpm, syncStartTime){
+    stopMetronome();
+    const ctx = ensureAudio();
+    metronomeSecPerBeat = 60/bpm;
+    metronomeBeatCounter = 0;
+    metronomeNextScheduleFrom = syncStartTime != null ? syncStartTime : ctx.currentTime;
+    metronomeStopAt = Infinity;
+    // Schedule a generous lookahead window immediately, then keep topping it
+    // up — this guarantees ticks are always placed on the audio clock well
+    // before they're due, with no dependency on JS-timer firing precision.
+    scheduleMetronomeTicksUntil(ctx.currentTime + 4);
+    metronomeRefillTimer = setInterval(() => {
+      scheduleMetronomeTicksUntil(ctx.currentTime + 4);
+    }, 750);
+  }
+  function stopMetronome(){
+    if (metronomeRefillTimer) { clearInterval(metronomeRefillTimer); metronomeRefillTimer = null; }
+    metronomeStopAt = null;
+    metronomeNextScheduleFrom = 0;
+  }
+
+  /* ===================== RHYTHM VOCABULARY (6/8 — beat = dotted quarter) =====================
+     Each "beats" value below is in dotted-quarter beats (2 per 6/8 bar). Onset fractions
+     are positions within that dotted-quarter beat, in thirds/sixths to match compound time. */
+  const UNITS = {
+    "tam":        { label: "tam",              onsets: [0],                              beats: 1 },
+    "tititi":     { label: "ti-ti-ti",          onsets: [0, 1/3, 2/3],                    beats: 1 },
+    "tati":       { label: "ta-ti",             onsets: [0, 2/3],                         beats: 1 },
+    "titaa":      { label: "ti-ta",             onsets: [0, 1/3],                         beats: 1 },
+    "tikax6":     { label: "tika-tika-tika-tika", onsets: [0, 1/6, 1/3, 1/2, 2/3, 5/6],   beats: 1 },
+    "titikatika": { label: "ti-tika-tika",      onsets: [0, 1/3, 1/2, 2/3, 5/6],          beats: 1 },
+    "tikatitika": { label: "tika-ti-tika",      onsets: [0, 1/6, 1/3, 2/3, 5/6],          beats: 1 },
+    "titikati":   { label: "ti-tika-ti",        onsets: [0, 1/3, 1/2, 2/3],               beats: 1 }
+  };
+
+  /* ===================== LEVELS ===================== */
+  // Rhythm-only, 6/8 throughout. Difficulty increases via vocabulary first,
+  // then pattern length, then tempo — same progression shape as the Year 7 game.
+  const LEVELS = [
+    { id:1, name:"Outer Fence",     sub:"tam + ti-ti-ti",                units:["tam","tititi"],                                                    length:8,  bpm:58, usesPitch:false },
+    { id:2, name:"Laser Grid",      sub:"+ ta-ti",                       units:["tam","tititi","tati"],                                             length:8,  bpm:62, usesPitch:false },
+    { id:3, name:"Camera Loop",     sub:"+ ti-ta",                       units:["tam","tititi","tati","titaa"],                                     length:8,  bpm:66, usesPitch:false },
+    { id:4, name:"Server Room",     sub:"+ tika-tika-tika-tika",         units:["tam","tititi","tati","titaa","tikax6"],                            length:8,  bpm:68, usesPitch:false },
+    { id:5, name:"Vault Antechamber", sub:"+ ti-tika-tika & tika-ti-tika", units:["tam","tititi","tati","titaa","tikax6","titikatika","tikatitika"], length:10, bpm:70, usesPitch:false },
+    { id:6, name:"Combination Lock", sub:"+ ti-tika-ti, all rhythms",    units:["tam","tititi","tati","titaa","tikax6","titikatika","tikatitika","titikati"], length:10, bpm:74, usesPitch:false },
+    { id:7, name:"Vault Breach",    sub:"all rhythms, fastest!",         units:["tam","tititi","tati","titaa","tikax6","titikatika","tikatitika","titikati"], length:12, bpm:78, usesPitch:false }
+  ];
+
+  /* ===================== STATE ===================== */
+  let state = {
+    levelIndex: 0,
+    round: 0,
+    roundsPerLevel: 6,
+    streak: 0,
+    bestStreak: 0,
+    pattern: [],
+    flatOnsets: [],
+    totalBeats: 0,
+    perUnitResult: [],
+    vaultPos: 0,
+    wrongCount: 0,
+    maxWrongBeforeSkip: 5,
+    roundBeatEpoch: 0,
+    roundToken: 0,
+    inputLocked: true
+  };
+
+  function invalidateRoundCallbacks(){
+    state.roundToken++;
+    state.inputLocked = true;
+  }
+
+  const stageEl = document.getElementById("stage");
+
+  /* ===================== ICONS =====================
+     Compound-time beaming: a full dotted-quarter beat of subdivided notes
+     beams together as ONE group (matching real 6/8 notation, where each
+     dotted-quarter beat is its own beamed unit) — this differs from the
+     simple-time icons in the original game, which beamed in pairs of two. */
+  // Notehead fill convention (matches the original game): OPEN = sustained
+  // tone with no further subdivision audible within it (only "tam" here);
+  // FILLED = every struck/subdivided note (eighths, sixteenths, and the
+  // quarter-equivalent "ta" that appears alongside a shorter partner).
+  function note(cx, cy, open, big){
+    const rx = big ? 8 : 5.2;
+    const ry = big ? 5.8 : 4;
+    const fill = open ? "var(--panel)" : "var(--cyan)";
+    const stroke = open ? "var(--cyan)" : "rgba(0,0,0,0.4)";
+    const strokeW = open ? 2.6 : (big ? 1.6 : 1.3);
+    return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>`;
+  }
+  function stem(cx, cy, big){
+    const sw = big ? 2.8 : 2.2;
+    const x = cx + (big ? 8 : 5.2) - sw;
+    return `<rect x="${x}" y="6" width="${sw}" height="${cy-6}" fill="var(--steel-light)"/>`;
+  }
+  function stemX(cx, big){ return cx + (big ? 8 : 5.2) - (big ? 2.8 : 2.2)/2; }
+
+  function iconSVG(unitKey){
+    const CY = 40;
+    const BEAM_Y = [6, 11.5];
+    const baseShadow = `<ellipse cx="28" cy="48" rx="22" ry="4.5" fill="rgba(0,0,0,0.3)"/>`;
+
+    // Draws a beamed run of notes. centers: x positions (evenly spaced, left
+    // to right in performance order). beamLevels: how many beams pass over
+    // each note (1 = eighth, 2 = sixteenth). A single continuous primary beam
+    // spans the whole group; a secondary beam is drawn only over the
+    // consecutive stretch(es) that are sixteenths, exactly as in real
+    // compound-time notation (e.g. ti-tika-tika = one eighth + a run of four
+    // sixteenths, so only the last four get the second beam).
+    function beamedGroup(centers, beamLevels){
+      const xs = centers.map(c => stemX(c, false));
+      let svg = "";
+      centers.forEach((c) => { svg += stem(c, CY, false) + note(c, CY, false, false); });
+      const x0 = xs[0], x1 = xs[xs.length - 1];
+      svg += `<rect x="${x0}" y="${BEAM_Y[0]}" width="${x1 - x0}" height="3.4" fill="var(--steel-light)"/>`;
+      let i = 0;
+      while (i < beamLevels.length) {
+        if (beamLevels[i] >= 2) {
+          let j = i;
+          while (j + 1 < beamLevels.length && beamLevels[j + 1] >= 2) j++;
+          const bx0 = xs[i], bx1 = xs[j];
+          svg += `<rect x="${bx0}" y="${BEAM_Y[1]}" width="${Math.max(bx1 - bx0, 3)}" height="3" fill="var(--steel-light)"/>`;
+          i = j + 1;
+        } else i++;
+      }
+      return svg;
+    }
+
+    // A lone eighth note gets its own short flag-style stub beam (matches
+    // how the original game drew unpaired short notes).
+    function flaggedEighth(cx){
+      const x = stemX(cx, false);
+      return `${stem(cx,CY,false)}${note(cx,CY,false,false)}<rect x="${x}" y="${BEAM_Y[0]}" width="11" height="3.4" fill="var(--steel-light)"/>`;
+    }
+
+    switch(unitKey){
+      case "tam":
+        // Dotted crotchet (filled notehead + augmentation dot) — a sustained
+        // dotted-quarter beat, but notated as a struck note that's held for
+        // the full beat, NOT an open/hollow minim-style notehead.
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">${baseShadow}
+          ${stem(18,CY,true)}${note(18,CY,false,true)}
+          <circle cx="31" cy="${CY}" r="2.2" fill="var(--cyan)"/>
+        </svg>`;
+      case "tititi": {
+        // three even eighths — one continuous beam, no secondary
+        const cs = [9,28,47];
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">${baseShadow}
+          ${beamedGroup(cs, [1,1,1])}
+        </svg>`;
+      }
+      case "tati": {
+        // quarter ("ta", filled, standalone stem, no beam) + eighth ("ti",
+        // flagged) — long-short.
+        const c1=11, c2=42;
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">${baseShadow}
+          ${stem(c1,CY,true)}${note(c1,CY,false,true)}
+          ${flaggedEighth(c2)}
+        </svg>`;
+      }
+      case "titaa": {
+        // eighth ("ti", flagged) + quarter ("ta", filled, standalone) — short-long.
+        const c1=11, c2=42;
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">${baseShadow}
+          ${flaggedEighth(c1)}
+          ${stem(c2,CY,true)}${note(c2,CY,false,true)}
+        </svg>`;
+      }
+      case "tikax6": {
+        // six sixteenths spanning the full beat — one continuous double beam
+        const cs = [6,14,22,30,38,46];
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">${baseShadow}
+          ${beamedGroup(cs, [2,2,2,2,2,2])}
+        </svg>`;
+      }
+      case "titikatika": {
+        // eighth + four sixteenths — secondary beam only over the four sixteenths
+        const cs = [6,16,25,34,43];
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">${baseShadow}
+          ${beamedGroup(cs, [1,2,2,2,2])}
+        </svg>`;
+      }
+      case "tikatitika": {
+        // two sixteenths + eighth + two sixteenths
+        const cs = [6,15,25,35,44];
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">${baseShadow}
+          ${beamedGroup(cs, [2,2,1,2,2])}
+        </svg>`;
+      }
+      case "titikati": {
+        // eighth + two sixteenths + eighth
+        const cs = [7,19,30,42];
+        return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">${baseShadow}
+          ${beamedGroup(cs, [1,2,2,1])}
+        </svg>`;
+      }
+      default: return "";
+    }
+  }
+
+  /* ===================== VAULT DOOR VISUAL ===================== */
+  function vaultDoorSVG(progress, mood){
+    // progress: 0..1 fraction of rounds complete this level. Three rings rotate
+    // toward alignment (0deg) as progress increases — a literal "cracking the
+    // combination" visual, replacing the jungle's left-to-right path.
+    const ringDefs = [
+      { r: 62, startDeg: 70,  speed: 1.0 },
+      { r: 46, startDeg: -55, speed: 1.4 },
+      { r: 30, startDeg: 40,  speed: 0.7 }
+    ];
+    const rings = ringDefs.map((rd, i) => {
+      const deg = rd.startDeg * (1 - progress);
+      const lit = progress >= 0.999;
+      return `<g class="vault-ring${lit ? ' lit' : ''}" style="transform:translate(150px,75px) rotate(${deg}deg);">
+        ${Array.from({length:8}).map((_,k) => {
+          const a = (k/8)*360;
+          return `<rect class="vault-tick" x="${-1.5}" y="${-rd.r}" width="3" height="9" fill="${lit ? 'var(--gold)' : 'var(--steel-light)'}" transform="rotate(${a})"/>`;
+        }).join("")}
+        <circle cx="0" cy="0" r="${rd.r}" fill="none" stroke="${lit ? 'var(--gold)' : 'var(--steel)'}" stroke-width="2" />
+      </g>`;
+    }).join("");
+    return rings;
+  }
+
+  /* ===================== HELPERS ===================== */
+  function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function generatePattern(level){
+    let pattern = [];
+    let beatsUsed = 0;
+    const maxBeats = level.length;
+    while (beatsUsed < maxBeats) {
+      const remaining = maxBeats - beatsUsed;
+      let candidates = level.units.filter(u => UNITS[u].beats <= remaining);
+      if (candidates.length === 0) break;
+      const unitKey = pickRandom(candidates);
+      const u = UNITS[unitKey];
+      pattern.push({ unit: unitKey, solfege: null });
+      beatsUsed += u.beats;
+    }
+    return pattern;
+  }
+
+  function flattenOnsets(pattern){
+    let onsets = [];
+    let beatCursor = 0;
+    pattern.forEach((entry, uIdx) => {
+      const u = UNITS[entry.unit];
+      u.onsets.forEach((frac, sIdx) => {
+        onsets.push({ time: beatCursor + frac, unitIndex: uIdx, subIndex: sIdx, solfege: null });
+      });
+      beatCursor += u.beats;
+    });
+    return { onsets, totalBeats: beatCursor };
+  }
+
+  function countTaps(pattern){
+    return pattern.reduce((sum, e) => sum + UNITS[e.unit].onsets.length, 0);
+  }
+
+  /* ===================== RENDER: MENU ===================== */
+  function renderMenu(){
+    invalidateRoundCallbacks();
+    stopAllSounds();
+    cleanupTapListener();
+    cleanupEarlyTapAbsorber();
+    stageEl.innerHTML = `
+      <div class="hud">
+        <div class="hud-group"><span class="pill">★ Best streak: ${state.bestStreak}</span></div>
+      </div>
+      <div style="text-align:center; margin-bottom:6px;">
+        <div style="font-size:42px;">🔒</div>
+        <p style="max-width:580px; margin: 4px auto 0; color: var(--ink); font-size:14px; line-height:1.5;">
+          Crack the vault in 6/8 time. Listen to the rhythm, then tap <strong>SPACE</strong>
+          (or tap the screen) back in the same rhythm. Each correct round turns the dial —
+          get it fully aligned and the vault opens.
+        </p>
+      </div>
+      <div class="level-select" id="levelSelect"></div>
+      <div class="legend">
+        ${Object.keys(UNITS).map(k => `
+          <div class="legend-item">
+            <div class="syl-icon">${iconSVG(k)}</div>
+            <span>${UNITS[k].label}</span>
+          </div>
+        `).join("")}
+      </div>
+      <div class="controls" style="margin-top:16px;">
+        <button class="big-btn primary" id="startBtn">Begin Heist 🕶️</button>
+      </div>
+    `;
+
+    const sel = document.getElementById("levelSelect");
+    LEVELS.forEach((lvl, i) => {
+      const card = document.createElement("div");
+      card.className = "level-card" + (i === state.levelIndex ? " selected" : "");
+      card.innerHTML = `${lvl.name}<small>${lvl.sub}</small>`;
+      card.addEventListener("click", () => { state.levelIndex = i; renderMenu(); });
+      sel.appendChild(card);
+    });
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      ensureAudio();
+      startLevel();
+    });
+  }
+
+  /* ===================== LEVEL FLOW ===================== */
+  function startLevel(){
+    state.round = 0;
+    state.streak = 0;
+    state.vaultPos = 0;
+    nextRound();
+  }
+
+  function nextRound(){
+    if (state.round >= state.roundsPerLevel) { renderLevelComplete(); return; }
+    invalidateRoundCallbacks();
+    stopAllSounds();
+    const level = LEVELS[state.levelIndex];
+    state.pattern = generatePattern(level);
+    const flat = flattenOnsets(state.pattern);
+    state.flatOnsets = flat.onsets;
+    state.totalBeats = flat.totalBeats;
+    state.perUnitResult = state.pattern.map(()=>null);
+    state.wrongCount = 0;
+    state.roundWallClockStart = performance.now();
+    renderRound("listening");
+    const ctx = ensureAudio();
+    const startTime = ctx.currentTime + 0.05;
+    state.roundBeatEpoch = startTime;
+    startMetronome(level.bpm, startTime);
+    scheduleListenPlayback(level.bpm, startTime);
+  }
+
+  function beatSecToReal(bpm){ return 60/bpm; }
+
+  function replayCurrentPattern(level){
+    invalidateRoundCallbacks();
+    stopAllSounds();
+    state.roundWallClockStart = performance.now();
+    const ctx = ensureAudio();
+    const startTime = ctx.currentTime + 0.05;
+    state.roundBeatEpoch = startTime;
+    startMetronome(level.bpm, startTime);
+    scheduleListenPlayback(level.bpm, startTime);
+  }
+
+  function scheduleListenPlayback(bpm, startTime){
+    const ctx = ensureAudio();
+    const secPerBeat = beatSecToReal(bpm);
+    state.flatOnsets.forEach((o) => {
+      playClick(startTime + o.time*secPerBeat, false);
+    });
+    highlightPattern(startTime, secPerBeat, "active-listen");
+
+    const totalDur = state.totalBeats*secPerBeat;
+    const myToken = state.roundToken;
+    setTimeout(() => {
+      if (state.roundToken !== myToken) return;
+      transitionToTapping();
+    }, (startTime - ctx.currentTime + totalDur)*1000 + 200);
+  }
+
+  function highlightPattern(startTime, secPerBeat, className){
+    const ctx = audioCtx;
+    const myToken = state.roundToken;
+    state.pattern.forEach((entry, idx) => {
+      const u = UNITS[entry.unit];
+      const groupStartBeat = state.flatOnsets.find(o => o.unitIndex===idx).time;
+      const delay = (startTime - ctx.currentTime) + groupStartBeat*secPerBeat;
+      const dur = u.beats*secPerBeat;
+      setTimeout(()=>{
+        if (state.roundToken !== myToken) return;
+        document.querySelectorAll(".beat-group").forEach(g=>g.classList.remove(className));
+        const g = document.querySelector(`.beat-group[data-idx="${idx}"]`);
+        if (g) g.classList.add(className);
+      }, Math.max(0,delay*1000));
+      setTimeout(()=>{
+        if (state.roundToken !== myToken) return;
+        const g = document.querySelector(`.beat-group[data-idx="${idx}"]`);
+        if (g) g.classList.remove(className);
+      }, Math.max(0,(delay+dur)*1000));
+    });
+  }
+
+  function transitionToTapping(){
+    renderRound("countin");
+  }
+
+  function runCountIn(level){
+    const ctx = ensureAudio();
+    const secPerBeat = beatSecToReal(level.bpm);
+    const myToken = state.roundToken;
+
+    const patternEndTime = state.roundBeatEpoch + state.totalBeats * secPerBeat;
+    const startTime = patternEndTime;
+    const countWords = ["1", "2", "ready", "GO!"];
+
+    countWords.forEach((word, i) => {
+      const t = startTime + i*secPerBeat;
+      const delayMs = Math.max(0, (t - ctx.currentTime) * 1000);
+      setTimeout(() => {
+        if (state.roundToken !== myToken) return;
+        const el = document.getElementById("countinNumber");
+        if (el) {
+          el.textContent = word;
+          el.classList.toggle("is-word", word.length > 2);
+          el.style.animation = "none";
+          requestAnimationFrame(() => { el.style.animation = "countinPulse 0.25s ease"; });
+        }
+      }, delayMs);
+    });
+
+    // goTime is when "GO!" is displayed/heard, and is also when the tapping
+    // screen itself appears — that part is unchanged. What changes is that
+    // beat 1's actual DUE time for scoring purposes (tapGridStart, set
+    // inside setupTapListening) is now one full beat AFTER this moment,
+    // not simultaneous with it. Treating "screen appears" and "beat 1 due"
+    // as the same instant assumes zero human reaction time between seeing
+    // the cue and physically tapping, which is unrealistic: a real screen
+    // recording showed a brand-new player's first tap consistently landing
+    // almost exactly one full beat after the tapping screen appeared — a
+    // normal reaction lag, not a mistake — which the matching algorithm
+    // (correctly, by its own logic) then scored against beat 2 instead of
+    // beat 1, since that's genuinely which onset the tap was closest to.
+    // The player still sees "Your turn!" and the rhythm icons right at GO,
+    // exactly as before; they now simply have a full beat of visible lead-
+    // in before their first tap needs to land, the same breathing room a
+    // real conducted count-in gives a performer after saying "go".
+    const goTime = startTime + (countWords.length - 1)*secPerBeat;
+    const goDelayMs = Math.max(0, (goTime - ctx.currentTime) * 1000);
+
+    // Both the tap listener AND the tapping screen's DOM must go live at the
+    // exact same instant (GO) — this part is unchanged from before. What's
+    // different is what happens AFTER that: setupTapListening() now treats
+    // beat 1 as due one full beat later than this moment (see tapGridStart
+    // inside setupTapListening), not simultaneous with it. Previously the
+    // listener and the render were split across two different setTimeouts
+    // entirely (armed at goTime, rendered 280ms later) — a tap landing in
+    // that gap correctly registered and even correctly highlighted beat 1's
+    // group on the OLD count-in DOM, which then got wiped out moments later
+    // when renderRound("tapping") replaced stageEl.innerHTML wholesale.
+    // Firing both at once here closes that specific gap.
+    setTimeout(() => {
+      if (state.roundToken !== myToken) return;
+      state.inputLocked = false;
+      renderRound("tapping");
+      setupTapListening(level);
+    }, goDelayMs);
+  }
+
+  /* ===================== RENDER: ROUND ===================== */
+  function renderRound(mode){
+    const level = LEVELS[state.levelIndex];
+    stageEl.innerHTML = `
+      <div class="hud">
+        <div class="hud-group">
+          <span class="pill level">${level.name}</span>
+          <span class="pill">Round ${state.round+1} / ${state.roundsPerLevel}</span>
+          <span class="pill tempo">♩. ${level.bpm} bpm</span>
+        </div>
+        <div class="hud-group">
+          <span class="pill streak">★ Streak ${state.streak}</span>
+          ${state.wrongCount > 0 ? `<span class="pill warn">Tries: ${state.wrongCount}/${state.maxWrongBeforeSkip}</span>` : ``}
+          <button class="iconbtn" id="quitBtn" title="Back to menu">⏏</button>
+        </div>
+      </div>
+
+      <div class="vault-wrap" id="vaultWrap">
+        <svg width="300" height="150" viewBox="0 0 300 150" style="position:absolute; top:0; left:50%; transform:translateX(-50%);">
+          ${vaultDoorSVG(state.vaultPos)}
+        </svg>
+        <div class="vault-core" id="vaultCore">🔒</div>
+        <div class="checkpoint-row">${renderCheckpoints()}</div>
+      </div>
+
+      <div class="rhythm-rail" id="rhythmRail">
+        ${state.pattern.map((entry, i) => renderBeatGroup(entry, i)).join("")}
+      </div>
+
+      <div class="controls">
+        <div class="status-line" id="statusLine">
+          ${mode === "listening" ? "📡 Scanning rhythm..." : mode === "countin" ? "Stand by..." : "🥁 Your turn — tap SPACE!"}
+        </div>
+        ${mode === "countin" ? `
+          <div class="countin-display" id="countinNumber">1</div>
+        ` : ``}
+        ${mode === "tapping" ? `
+          <div class="key-hint-row">
+            <div class="key-chip tappable" data-key-code="Space"><span class="keycap" id="spaceKeyVisual">SPACE</span>tap the beat</div>
+          </div>
+          <div class="btn-row">
+            <button class="big-btn" id="replayBtn">🔁 Hear it again</button>
+            ${state.wrongCount >= state.maxWrongBeforeSkip ? `<button class="big-btn ghost" id="skipBtn">⏭️ Skip this one</button>` : ``}
+          </div>
+        ` : ``}
+        ${mode === "listening" ? `
+          <div class="btn-row"><button class="big-btn" id="skipListenBtn" disabled>📡 Scanning...</button></div>
+        ` : ``}
+      </div>
+    `;
+
+    document.getElementById("quitBtn").addEventListener("click", () => { renderMenu(); });
+
+    if (mode === "listening" || mode === "countin") {
+      setupEarlyTapAbsorber();
+    }
+
+    if (mode === "countin") {
+      runCountIn(level);
+    }
+
+    if (mode === "tapping") {
+      document.getElementById("replayBtn").addEventListener("click", () => {
+        cleanupTapListener();
+        renderRound("listening");
+        replayCurrentPattern(level);
+      });
+      const skipBtn = document.getElementById("skipBtn");
+      if (skipBtn) {
+        skipBtn.addEventListener("click", () => {
+          cleanupTapListener();
+          state.streak = 0;
+          state.round++;
+          nextRound();
+        });
+      }
+
+      // setupTapListening() runs right after this function returns (see the
+      // GO-instant setTimeout in runCountIn, which calls renderRound("tapping")
+      // then setupTapListening() in the same tick). tapButtonHandler is only
+      // read inside the click/touchstart callbacks below, at the moment the
+      // player actually taps — by then setupTapListening has long since run,
+      // so the reference is always valid. Calling setupTapListening() again
+      // here would tear down and rebuild the listener mid-flight, dropping
+      // any taps that arrived in between and resetting the collected-taps
+      // array.
+
+      // Tablet/touch path: tapping the on-screen SPACE chip calls straight
+      // into the same registerTap() the keyboard path uses.
+      document.querySelectorAll(".key-chip[data-key-code]").forEach(chip => {
+        chip.addEventListener("click", () => {
+          if (!tapButtonHandler) return;
+          tapButtonHandler(null);
+        });
+        // Also handle touchstart directly so tablets get an immediate,
+        // low-latency response rather than waiting on the synthetic click.
+        chip.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          if (!tapButtonHandler) return;
+          tapButtonHandler(null);
+        }, { passive: false });
+      });
+    }
+  }
+
+  function renderCheckpoints(){
+    let html = "";
+    const total = state.roundsPerLevel;
+    for (let i=0;i<total;i++){
+      const passed = i < state.round;
+      html += `<svg viewBox="0 0 28 28" width="22" height="22">
+        ${passed
+          ? `<circle cx="14" cy="14" r="10" fill="var(--gold)" stroke="var(--gold-dim)" stroke-width="2"/><text x="14" y="19" font-size="13" text-anchor="middle" fill="#2a2107">✓</text>`
+          : `<circle cx="14" cy="14" r="10" fill="var(--steel)" stroke="var(--steel-light)" stroke-width="2" opacity="0.6"/>`
+        }
+      </svg>`;
+    }
+    return html;
+  }
+
+  function renderBeatGroup(entry, idx){
+    return `<div class="beat-group" data-idx="${idx}">
+      <div class="syl-card" data-unit-idx="${idx}">
+        <div class="syl-icon">${iconSVG(entry.unit)}</div>
+        <div class="syl-label">${UNITS[entry.unit].label}</div>
+      </div>
+    </div>`;
+  }
+
+  /* ===================== TAP CAPTURE ===================== */
+  let tapKeyHandler = null;
+  let tapKeyUpHandler = null;
+  let earlyTapAbsorber = null;
+  let tapButtonHandler = null;
+
+  // Tracks whether the spacebar is physically held down right now, plus
+  // WHEN it was last pressed, updated by a permanent, round-independent
+  // keydown/keyup pair (registered once, never torn down between rounds).
+  //
+  // This exists for a real, human-specific failure mode: a player often
+  // starts pressing/holding the spacebar WHILE the count-in is still
+  // playing, anticipating the beat. The browser's own e.repeat flag is keyed
+  // to when the key was first pressed, not to which listener is currently
+  // attached — so if the key was already down when setupTapListening() took
+  // over from the count-in's early-tap absorber, the very next keydown the
+  // new listener sees is a repeat of a press it never saw the start of, and
+  // code that skips repeats (to avoid OS key-repeat flooding taps) would
+  // silently swallow what was a perfectly legitimate first tap.
+  //
+  // BUT: naively treating "key is down right now" as "this is a fresh
+  // anticipatory hold for THIS round" has its own failure mode. If a player
+  // taps the final beat of a round and then clicks "Continue"/"Try Again"
+  // while still physically holding the spacebar down a moment longer (a
+  // common, unremarkable habit), spaceKeyPhysicallyDown stays stuck true
+  // across the round boundary. The NEXT round's setupTapListening would
+  // then see "key already down" and silently auto-register beat 1 on the
+  // player's behalf before they've tapped anything for the new round at
+  // all — so their first real tap of the new round lands on beat 2's slot.
+  // Every time, for anyone with that habit — which matches a 100%
+  // reproducible "beat 1 never highlights" report exactly.
+  //
+  // The fix: only treat a currently-held key as a legitimate carried-over
+  // anticipatory hold if the press began AFTER this listener's own
+  // setupTapListening() call started running (i.e. genuinely during this
+  // round's count-in) — never honor hold-state left over from any earlier
+  // point, including a previous round.
+  let spaceKeyPhysicallyDown = false;
+  let spaceKeyLastPressedAt = -Infinity;
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space" || e.key === " ") {
+      if (!spaceKeyPhysicallyDown) spaceKeyLastPressedAt = performance.now();
+      spaceKeyPhysicallyDown = true;
+    }
+  });
+  window.addEventListener("keyup", (e) => {
+    if (e.code === "Space" || e.key === " ") spaceKeyPhysicallyDown = false;
+  });
+
+  function cleanupTapListener(){
+    if (tapKeyHandler) window.removeEventListener("keydown", tapKeyHandler);
+    if (tapKeyUpHandler) window.removeEventListener("keyup", tapKeyUpHandler);
+    tapKeyHandler = null;
+    tapKeyUpHandler = null;
+    tapButtonHandler = null;
+  }
+
+  function setupEarlyTapAbsorber(){
+    cleanupEarlyTapAbsorber();
+    earlyTapAbsorber = function(e){
+      if (!state.inputLocked) return;
+      const isRelevantKey = (e.code === "Space" || e.key === " ");
+      if (isRelevantKey) e.preventDefault();
+    };
+    window.addEventListener("keydown", earlyTapAbsorber);
+  }
+  function cleanupEarlyTapAbsorber(){
+    if (earlyTapAbsorber) window.removeEventListener("keydown", earlyTapAbsorber);
+    earlyTapAbsorber = null;
+  }
+
+  function setupTapListening(level){
+    cleanupTapListener();
+    cleanupEarlyTapAbsorber();
+    const ctx = ensureAudio();
+    const secPerBeat = beatSecToReal(level.bpm);
+    const myToken = state.roundToken;
+    let collected = [];
+    let locked = false;
+    let safetyTimer = null;
+    let lastHighlightOnsetIdx = -1;
+
+    // tapGridStart is beat 1's actual due time — one beat AFTER "GO!" is
+    // displayed, not "GO!" itself (see runCountIn's tapStartTime). That gap
+    // is the player's reaction time: a real screen recording showed a
+    // brand-new player's first tap landing almost exactly one beat after
+    // seeing "GO!", which is normal human reaction lag, not error. Treating
+    // "GO!" itself as beat 1's due instant left no room for that lag, so
+    // the tap was — correctly, given that wrong assumption — scored against
+    // beat 2 instead, every time. "1, 2, ready, GO!" is 4 words / 3 beat-
+    // intervals from "1" to "GO!", plus the 1 extra beat of reaction room
+    // added after "GO!", giving 4 beat-intervals total from "1" to beat 1.
+    const tapGridStart = state.roundBeatEpoch + state.totalBeats * secPerBeat + 4 * secPerBeat;
+
+    // The round must end once enough TIME has passed for every onset to have
+    // occurred — not once a certain NUMBER of taps has been collected. Using
+    // a tap-count threshold means a missed beat (the player simply doesn't
+    // tap) permanently leaves collected.length short, so the round never
+    // finishes on its own and instead limps along on rolling safety timers.
+    // A small grace window after the last expected onset gives a late final
+    // tap a chance to register before evaluation locks in.
+    const graceBeats = 1.0;
+    const roundEndAt = tapGridStart + (state.totalBeats + graceBeats) * secPerBeat;
+
+    function finish(){
+      if (locked) return;
+      locked = true;
+      cleanupTapListener();
+      if (safetyTimer) clearTimeout(safetyTimer);
+      if (state.roundToken !== myToken) return;
+      setTimeout(()=> {
+        if (state.roundToken !== myToken) return;
+        evaluateTaps(collected, secPerBeat, level);
+      }, 120);
+    }
+
+    function scheduleEnd(){
+      if (safetyTimer) clearTimeout(safetyTimer);
+      const msLeft = Math.max(0, (roundEndAt - ctx.currentTime) * 1000);
+      safetyTimer = setTimeout(finish, msLeft);
+    }
+
+    function flashKeyVisual(id){
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add("pressed");
+      setTimeout(()=>el.classList.remove("pressed"), 110);
+    }
+
+    function registerTap(){
+      const now = ctx.currentTime;
+      const tapElapsed = now - tapGridStart;
+      collected.push({ time: tapElapsed, solfege: null });
+      playTapSound();
+
+      // Highlight whichever expected onset this tap landed closest to in
+      // absolute time (only looking at onsets not already highlighted-and-
+      // passed), rather than assuming taps always advance exactly one onset
+      // at a time. The old version walked forward one step per tap and bailed
+      // out as soon as the gap started growing — correct only if every prior
+      // tap landed cleanly with no gaps. After a missed beat that assumption
+      // breaks and the highlight can lag or jump to the wrong group.
+      const baseline = state.flatOnsets.length ? state.flatOnsets[0].time : 0;
+      let bestIdx = -1, bestDiff = Infinity;
+      for (let i = lastHighlightOnsetIdx + 1; i < state.flatOnsets.length; i++) {
+        const expectedElapsed = (state.flatOnsets[i].time - baseline) * secPerBeat;
+        const diff = Math.abs(expectedElapsed - tapElapsed);
+        if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
+      }
+
+      if (bestIdx !== -1) {
+        lastHighlightOnsetIdx = bestIdx;
+        const onsetInfo = state.flatOnsets[bestIdx];
+        document.querySelectorAll(".beat-group").forEach(g => g.classList.remove("active-tap"));
+        const g = document.querySelector(`.beat-group[data-idx="${onsetInfo.unitIndex}"]`);
+        if (g) g.classList.add("active-tap");
+      }
+
+      flashKeyVisual("spaceKeyVisual");
+
+      const core = document.getElementById("vaultCore");
+      if (core) { core.classList.remove("shake"); requestAnimationFrame(()=>{}); }
+
+      // A tap landing very close to the round's natural end can finish
+      // immediately rather than waiting out the remaining grace window.
+      if (now >= roundEndAt - 0.05) finish();
+    }
+
+    // Tracks, for THIS listener instance, whether we've already counted the
+    // current physical key-press. This is deliberately separate from
+    // e.repeat: e.repeat only tells us whether the BROWSER thinks a key was
+    // already down, which is keyed to when the press physically started,
+    // not to when this listener was attached. Using our own up/down
+    // tracking means a press that began during the count-in (before this
+    // listener existed) and is still held when GO arrives gets correctly
+    // counted as one fresh tap here, instead of arriving as a "repeat" this
+    // listener never saw the start of and silently ignoring it.
+    let spaceCountedThisPress = false;
+
+    // If the player is currently holding the spacebar down AND that press
+    // began at or after THIS round's own start (i.e. sometime during this
+    // round's listening/count-in — a legitimate anticipatory hold), treat
+    // it as their first tap right now. A hold that started before this
+    // round began must NOT be honored — most commonly, this is a press left
+    // over from tapping the previous round's last beat and then clicking
+    // Continue/Try Again without releasing the key first. Honoring stale
+    // holds like that would silently auto-register beat 1 of the new round
+    // before the player has tapped anything at all for it.
+    if (spaceKeyPhysicallyDown && spaceKeyLastPressedAt >= state.roundWallClockStart) {
+      spaceCountedThisPress = true;
+      registerTap();
+    }
+
+    tapKeyHandler = function(e){
+      if (locked) return;
+      if (state.roundToken !== myToken) return;
+      const isValidKey = (e.code === "Space" || e.key === " ");
+      if (!isValidKey) return;
+      e.preventDefault();
+      if (spaceCountedThisPress) return; // still the same held-down press
+      spaceCountedThisPress = true;
+      registerTap();
+    };
+
+    tapButtonHandler = function(){
+      if (locked) return;
+      if (state.roundToken !== myToken) return;
+      registerTap();
+    };
+
+    tapKeyUpHandler = function(e){
+      const isValidKey = (e.code === "Space" || e.key === " ");
+      if (!isValidKey) return;
+      spaceCountedThisPress = false; // released - next keydown is a fresh tap
+    };
+
+    window.addEventListener("keydown", tapKeyHandler);
+    window.addEventListener("keyup", tapKeyUpHandler);
+
+    // The round always ends at a fixed point on the beat grid — total
+    // pattern duration plus a small grace window — regardless of how many
+    // taps were actually collected. This is what makes a missed beat get
+    // correctly marked wrong instead of stalling the round.
+    scheduleEnd();
+  }
+
+  /* ===================== EVALUATION ===================== */
+  function evaluateTaps(taps, secPerBeat, level){
+    stopMetronomeBriefly();
+
+    const expectedBeats = state.flatOnsets.map(o => o.time);
+    const baseline = expectedBeats.length ? expectedBeats[0] : 0;
+    const expectedNorm = expectedBeats.map(t => t - baseline);
+    const tapsBeats = taps.map(t => t.time/secPerBeat);
+
+    // STAGE 1: nearest-match, but against a SLIDING reference rather than
+    // one fixed global baseline. Comparing every tap to the very first
+    // onset's absolute time means any small, consistent per-beat offset —
+    // a player who is reliably ~15ms behind the click track, say, which is
+    // unremarkable human timing, not a mistake — compounds linearly over a
+    // long round: by beat 10 that's 150ms of "drift" even though the
+    // player's relative timing was perfectly consistent throughout. A
+    // round with several dense units can accumulate enough of this to push
+    // legitimate, correctly-played taps near the end outside a flat
+    // tolerance window, failing units the player actually played right.
+    // Using each tap's drift-corrected position — offset by the running
+    // average difference between matched taps and their onsets so far —
+    // keeps the comparison about RELATIVE timing (is this onset's shape
+    // right, relative to how the player has been tracking the beat) rather
+    // than punishing a steady overall lag or lead that any human will have
+    // to some small degree.
+    const tolerance = 0.30; // beats
+    const claimed = new Array(tapsBeats.length).fill(false);
+    let driftEstimate = 0;
+    let driftInitialized = false;
+    let typicalDiff = 0.05; // running estimate of "normal" match closeness, starts tight
+    const DRIFT_SMOOTHING = 0.4; // weight given to each new offset; higher = adapts faster to recent trend
+    const onsetOk = expectedNorm.map((expected) => {
+      const adjustedExpected = expected + driftEstimate;
+      let bestJ = -1, bestDiff = Infinity;
+      for (let j = 0; j < tapsBeats.length; j++) {
+        if (claimed[j]) continue;
+        const diff = Math.abs(tapsBeats[j] - adjustedExpected);
+        if (diff < bestDiff) { bestDiff = diff; bestJ = j; }
+      }
+      if (bestJ === -1 || bestDiff > tolerance) return false;
+      claimed[bestJ] = true;
+      const observedOffset = tapsBeats[bestJ] - expected;
+      // Only let this match influence the drift estimate if it's a close,
+      // unremarkable match — a much-larger-than-usual diff is itself a
+      // sign that this match may be a misalignment artifact (most
+      // commonly: the tap that actually belonged to the NEXT onset getting
+      // pulled backward to fill a gap left by a missed beat), not genuine
+      // player drift. Folding that kind of match into the drift estimate
+      // would shift every comparison after it, turning one missed beat
+      // into a cascade of failures — exactly the failure mode the nearest-
+      // unclaimed-tap matching above was built to avoid in the first place.
+      if (bestDiff <= Math.max(0.10, typicalDiff * 3)) {
+        driftEstimate = driftInitialized
+          ? driftEstimate + DRIFT_SMOOTHING * (observedOffset - driftEstimate)
+          : observedOffset;
+        driftInitialized = true;
+        typicalDiff = typicalDiff + 0.3 * (bestDiff - typicalDiff);
+      }
+      return true;
+    });
+
+    let flatIdx = 0;
+    state.pattern.forEach((entry, unitIdx) => {
+      const u = UNITS[entry.unit];
+      let unitOk = true;
+      u.onsets.forEach(() => { if (!onsetOk[flatIdx]) unitOk = false; flatIdx++; });
+      state.perUnitResult[unitIdx] = unitOk;
+    });
+
+    // STAGE 2: shape check. Stage 1 only confirms a tap landed somewhere
+    // near each onset — it has no concept of the rhythm's actual SHAPE, so
+    // a player who ignores the syncopation entirely and just taps an even
+    // pulse at roughly the right pace and tap count can still satisfy every
+    // onset's absolute-distance window. Tightening that window enough to
+    // exclude an even pulse (margins as thin as 30-40ms for the densest
+    // rhythms) would also reject genuine, correctly-played taps with
+    // perfectly normal human timing jitter — there usually isn't enough
+    // daylight between "right rhythm, slightly off" and "wrong rhythm,
+    // suspiciously even" to separate them by distance alone.
+    //
+    // What DOES separate them: the relative pattern of gaps between
+    // consecutive taps. A genuinely syncopated rhythm like tika-ti-tika has
+    // gaps that go short-short-LONG-short-short (close, close, far apart,
+    // close, close); an even pulse covering the same span and tap count has
+    // every gap the same size. Comparing each unit's claimed-tap gaps,
+    // normalized to that unit's own span, against its true onset gaps
+    // (also normalized) catches this directly — regardless of overall
+    // tempo or where exactly within tolerance each individual tap landed.
+    // Units with fewer than 3 onsets have no shape to check (a single tap,
+    // or a long-short/short-long pair, can't be "evenly spaced" in a way
+    // that's distinguishable from the real thing) and are skipped here.
+    const SHAPE_TOLERANCE = 0.18; // max allowed difference in normalized gap ratios
+    flatIdx = 0;
+    state.pattern.forEach((entry, unitIdx) => {
+      const u = UNITS[entry.unit];
+      const unitOnsetCount = u.onsets.length;
+      const unitFlatIndices = [];
+      for (let k = 0; k < unitOnsetCount; k++) unitFlatIndices.push(flatIdx + k);
+      flatIdx += unitOnsetCount;
+
+      if (unitOnsetCount < 3 || !state.perUnitResult[unitIdx]) return; // nothing to shape-check, or already wrong
+
+      // Find which tap each onset in this unit actually claimed, in onset order.
+      const claimedTapTimes = unitFlatIndices.map((oi) => {
+        const expected = expectedNorm[oi];
+        let bestJ = -1, bestDiff = Infinity;
+        tapsBeats.forEach((t, j) => {
+          // re-derive the same nearest match Stage 1 made (claimed[] no longer
+          // tells us WHICH onset claimed which tap, only that some tap did)
+          const diff = Math.abs(t - expected);
+          if (diff < bestDiff) { bestDiff = diff; bestJ = j; }
+        });
+        return tapsBeats[bestJ];
+      });
+
+      const trueOnsetTimes = unitFlatIndices.map(oi => expectedNorm[oi]);
+      const trueSpan = trueOnsetTimes[trueOnsetTimes.length - 1] - trueOnsetTimes[0];
+      const tapSpan = claimedTapTimes[claimedTapTimes.length - 1] - claimedTapTimes[0];
+      if (trueSpan <= 0 || tapSpan <= 0) return;
+
+      for (let k = 0; k < unitOnsetCount - 1; k++) {
+        const trueGapNorm = (trueOnsetTimes[k+1] - trueOnsetTimes[k]) / trueSpan;
+        const tapGapNorm = (claimedTapTimes[k+1] - claimedTapTimes[k]) / tapSpan;
+        if (Math.abs(trueGapNorm - tapGapNorm) > SHAPE_TOLERANCE) {
+          state.perUnitResult[unitIdx] = false;
+          break;
+        }
+      }
+    });
+
+    const extraTaps = taps.length > expectedNorm.length;
+    const allCorrect = onsetOk.every(Boolean) && !extraTaps;
+    renderFeedback(allCorrect, level);
+  }
+
+  function stopMetronomeBriefly(){ /* kept running between rounds */ }
+
+  /* ===================== FEEDBACK ===================== */
+  function renderFeedback(allCorrect, level){
+    if (allCorrect) {
+      state.streak++;
+      state.bestStreak = Math.max(state.bestStreak, state.streak);
+      state.vaultPos = Math.min(1, (state.round+1)/state.roundsPerLevel);
+      state.wrongCount = 0;
+    } else {
+      state.streak = 0;
+      state.wrongCount++;
+    }
+
+    playChime(allCorrect);
+
+    const reachedSkipLimit = !allCorrect && state.wrongCount >= state.maxWrongBeforeSkip;
+
+    stageEl.innerHTML = `
+      <div class="hud">
+        <div class="hud-group">
+          <span class="pill level">${level.name}</span>
+          <span class="pill">Round ${state.round+1} / ${state.roundsPerLevel}</span>
+        </div>
+        <div class="hud-group"><span class="pill streak">★ Streak ${state.streak}</span></div>
+      </div>
+
+      <div class="vault-wrap" id="vaultWrap">
+        <svg width="300" height="150" viewBox="0 0 300 150" style="position:absolute; top:0; left:50%; transform:translateX(-50%);">
+          ${vaultDoorSVG(state.vaultPos)}
+        </svg>
+        <div class="vault-core ${allCorrect ? 'win' : 'shake'}" id="vaultCore">${state.vaultPos >= 0.999 ? '🔓' : '🔒'}</div>
+        <div class="checkpoint-row">${renderCheckpoints()}</div>
+      </div>
+
+      <div class="rhythm-rail" id="rhythmRail">
+        ${state.pattern.map((entry, i) => `
+          <div class="beat-group">
+            <div class="syl-card ${state.perUnitResult[i] ? 'result-correct' : 'result-wrong'}">
+              <div class="syl-icon">${iconSVG(entry.unit)}</div>
+              <div class="syl-label">${UNITS[entry.unit].label}</div>
+            </div>
+          </div>
+        `).join("")}
+      </div>
+
+      <div class="controls">
+        <div class="status-line" style="color:${allCorrect ? 'var(--gold)' : 'var(--laser)'};">
+          ${allCorrect ? pickRandom(["Dial cracked! 🔓","Clean read — nice ears!","Lock's turning!","Spot on!"])
+                        : (reachedSkipLimit ? "Tricky one! You can skip it or try once more." : pickRandom(["Almost — listen again and try once more.","So close — give it another listen.","Not quite — let's hear it again."]))}
+        </div>
+        <div class="btn-row">
+          ${allCorrect
+            ? `<button class="big-btn primary" id="continueBtn">Continue 🔓</button>`
+            : `<button class="big-btn" id="retryBtn">🔁 Try again</button>
+               ${reachedSkipLimit ? `<button class="big-btn ghost" id="skipBtn2">⏭️ Skip this one</button>` : ``}`
+          }
+        </div>
+      </div>
+    `;
+
+    if (allCorrect) {
+      document.getElementById("continueBtn").addEventListener("click", () => { state.round++; nextRound(); });
+    } else {
+      document.getElementById("retryBtn").addEventListener("click", () => {
+        cleanupTapListener();
+        renderRound("listening");
+        replayCurrentPattern(level);
+      });
+      const skipBtn2 = document.getElementById("skipBtn2");
+      if (skipBtn2) {
+        skipBtn2.addEventListener("click", () => { state.round++; nextRound(); });
+      }
+    }
+  }
+
+  /* ===================== LEVEL COMPLETE ===================== */
+  function renderLevelComplete(){
+    invalidateRoundCallbacks();
+    stopAllSounds();
+    cleanupEarlyTapAbsorber();
+    const level = LEVELS[state.levelIndex];
+    const isLastLevel = state.levelIndex >= LEVELS.length - 1;
+    playChime(true);
+
+    stageEl.innerHTML = `
+      <div class="end-banner">
+        <div style="font-size:52px;">🔓🕶️💰</div>
+        <h2>${level.name} cracked!</h2>
+        <p style="color:var(--ink); font-size:14px;">Best streak so far: <strong style="color:var(--gold);">${state.bestStreak}</strong></p>
+        <div class="btn-row" style="margin-top:16px; justify-content:center;">
+          <button class="big-btn" id="backToMapBtn">⏏ Back to menu</button>
+          ${!isLastLevel ? `<button class="big-btn primary" id="nextLevelBtn">Next vault →</button>` : ``}
+        </div>
+      </div>
+    `;
+
+    document.getElementById("backToMapBtn").addEventListener("click", renderMenu);
+    if (!isLastLevel) {
+      document.getElementById("nextLevelBtn").addEventListener("click", () => { state.levelIndex++; startLevel(); });
+    }
+  }
+
+  /* ===================== INIT ===================== */
+  document.addEventListener("click", (e) => {
+    if (document.activeElement && document.activeElement !== document.body) {
+      document.activeElement.blur();
+    }
+  });
+
+  renderMenu();
+
+})();
+</script>
+</body>
+</html>

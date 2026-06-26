@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drum Dictation — Listen &amp; Build</title>
+<style>
+  :root{
+    --bg:#15161A;
+    --panel:#1D1F24;
+    --panel-raised:#23252B;
+    --grid-idle:#2A2C33;
+    --grid-line:#34363E;
+    --text:#E8E4DC;
+    --text-dim:#8B8D96;
+    --kick:#FF6B4A;
+    --kick-dim:#5C3328;
+    --snare:#4ADE80;
+    --snare-dim:#235C3A;
+    --hihat:#5EB1FF;
+    --hihat-dim:#2A4D6B;
+    --beat-marker:#3A3C44;
+    --correct:#4ADE80;
+    --incorrect:#FF6B6B;
+    --missing:#FFC15E;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', -apple-system, sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:24px 16px 60px;
+  }
+
+  @font-face{
+    font-family:'JetBrains Mono';
+    src:local('JetBrains Mono');
+  }
+
+  .mono{ font-family:'JetBrains Mono', 'Courier New', monospace; }
+
+  .wrap{
+    width:100%;
+    max-width:880px;
+  }
+
+  /* ===== Header / transport ===== */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:20px;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+
+  .title-block h1{
+    font-size:1.5rem;
+    margin:0 0 2px;
+    letter-spacing:-0.01em;
+    font-weight:700;
+  }
+
+  .title-block .sub{
+    color:var(--text-dim);
+    font-size:0.85rem;
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  .level-badge{
+    background:var(--panel-raised);
+    border:1px solid var(--grid-line);
+    border-radius:6px;
+    padding:8px 14px;
+    text-align:right;
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  .level-badge .lv-num{
+    font-size:1.1rem;
+    font-weight:700;
+    color:var(--text);
+  }
+
+  .level-badge .lv-label{
+    font-size:0.68rem;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+
+  .level-badge .of-q{
+    font-size:0.7rem;
+    font-weight:400;
+    color:var(--text-dim);
+  }
+
+  /* ===== Transport bar ===== */
+  .transport{
+    background:var(--panel);
+    border:1px solid var(--grid-line);
+    border-radius:8px;
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+
+  .btn{
+    border:none;
+    border-radius:6px;
+    padding:10px 18px;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:0.88rem;
+    cursor:pointer;
+    transition:transform 0.08s ease, filter 0.15s ease;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn:disabled{ opacity:0.35; cursor:not-allowed; }
+
+  .btn-play{
+    background:var(--text);
+    color:var(--bg);
+  }
+  .btn-play:hover:not(:disabled){ filter:brightness(1.1); }
+
+  .btn-secondary{
+    background:transparent;
+    color:var(--text);
+    border:1px solid var(--grid-line);
+  }
+  .btn-secondary:hover:not(:disabled){ background:var(--panel-raised); }
+
+  .btn-submit{
+    background:var(--snare);
+    color:#0A150E;
+  }
+  .btn-submit:hover:not(:disabled){ filter:brightness(1.08); }
+
+  .replay-count{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem;
+    color:var(--text-dim);
+    margin-left:auto;
+  }
+
+  .tempo-control{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-left:1px solid var(--grid-line);
+    padding-left:14px;
+  }
+
+  .tempo-control label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+
+  .tempo-control input[type="range"]{
+    width:110px;
+    accent-color:var(--hihat);
+    cursor:pointer;
+  }
+
+  .tempo-control .tempo-value{
+    font-size:0.78rem;
+    color:var(--text);
+    min-width:62px;
+  }
+
+  .backing-toggle{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:0.82rem;
+    color:var(--text-dim);
+    cursor:pointer;
+    user-select:none;
+    border-left:1px solid var(--grid-line);
+    padding-left:14px;
+  }
+  .backing-toggle input[type="checkbox"]{
+    accent-color:var(--kick);
+    width:15px;
+    height:15px;
+    cursor:pointer;
+  }
+
+  .listen-bar{
+    height:4px;
+    background:var(--grid-idle);
+    border-radius:2px;
+    margin-bottom:18px;
+    overflow:hidden;
+  }
+  .listen-bar-fill{
+    height:100%;
+    width:0%;
+    background:var(--text-dim);
+    border-radius:2px;
+    transition:width linear;
+  }
+  .listen-bar-fill.active{
+    background:var(--hihat);
+  }
+
+  /* ===== Grid panel ===== */
+  .grid-panel{
+    background:var(--panel);
+    border:1px solid var(--grid-line);
+    border-radius:8px;
+    padding:20px 18px 22px;
+    margin-bottom:18px;
+  }
+
+  .lane{
+    display:grid;
+    grid-template-columns:84px 1fr;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .lane:last-child{ margin-bottom:0; }
+
+  .lane-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    text-align:right;
+    padding-right:6px;
+    border-radius:4px;
+    padding:6px 8px;
+  }
+  .lane-label.kick{ color:var(--kick); }
+  .lane-label.snare{ color:var(--snare); }
+  .lane-label.hihat{ color:var(--hihat); }
+
+  .steps{
+    display:grid;
+    gap:5px;
+    width:100%;
+  }
+
+  .step{
+    aspect-ratio:1;
+    background:var(--grid-idle);
+    border:1px solid var(--grid-line);
+    border-radius:4px;
+    cursor:pointer;
+    position:relative;
+    transition:background 0.08s ease, transform 0.06s ease;
+    min-height:30px;
+  }
+  .step:hover{ background:#34363E; }
+  .step:active{ transform:scale(0.92); }
+
+  .step.beat-start{
+    border-left:2px solid var(--beat-marker);
+  }
+
+  .step.on.kick{ background:var(--kick); border-color:var(--kick); }
+  .step.on.snare{ background:var(--snare); border-color:var(--snare); }
+  .step.on.hihat{ background:var(--hihat); border-color:var(--hihat); }
+
+  /* Feedback overlay states */
+  .step.fb-correct{
+    box-shadow: inset 0 0 0 2px var(--correct);
+  }
+  .step.fb-incorrect{
+    box-shadow: inset 0 0 0 2px var(--incorrect);
+  }
+  .step.fb-incorrect::before{
+    content:'✕';
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.7rem;
+    color:var(--incorrect);
+    font-weight:700;
+  }
+  .step.fb-missing{
+    box-shadow: inset 0 0 0 2px var(--missing);
+    background:var(--panel-raised) !important;
+  }
+  .step.fb-missing::before{
+    content:'?';
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.75rem;
+    color:var(--missing);
+    font-weight:700;
+  }
+
+  .pattern-name{
+    font-size:0.72rem;
+    color:var(--text-dim);
+    margin:0 0 10px 94px;
+    font-style:italic;
+  }
+
+  .beat-numbers{
+    display:grid;
+    gap:5px;
+    margin:0 0 8px 94px;
+  }
+  .beat-numbers span{
+    text-align:left;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.62rem;
+    color:var(--text-dim);
+  }
+
+  /* ===== Result banner ===== */
+  .result-banner{
+    display:none;
+    background:var(--panel-raised);
+    border:1px solid var(--grid-line);
+    border-radius:8px;
+    padding:16px 18px;
+    margin-bottom:18px;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .result-banner.show{ display:flex; }
+
+  .result-score{
+    font-family:'JetBrains Mono', monospace;
+    font-size:1.4rem;
+    font-weight:700;
+  }
+  .result-score .of{
+    font-size:0.85rem;
+    color:var(--text-dim);
+    font-weight:400;
+  }
+
+  .result-msg{
+    font-size:0.85rem;
+    color:var(--text-dim);
+  }
+
+  .legend{
+    display:flex;
+    gap:16px;
+    font-size:0.72rem;
+    color:var(--text-dim);
+    flex-wrap:wrap;
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:5px; }
+  .legend .dot{ width:9px; height:9px; border-radius:2px; display:inline-block; }
+  .legend .dot.correct{ background:var(--correct); }
+  .legend .dot.incorrect{ background:var(--incorrect); }
+  .legend .dot.missing{ background:var(--missing); }
+
+  /* ===== Footer controls ===== */
+  .footer-controls{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .progress-dots{
+    display:flex;
+    gap:6px;
+    justify-content:center;
+    margin-top:18px;
+    flex-wrap:wrap;
+    max-width:320px;
+  }
+  .progress-dots .pd{
+    width:8px; height:8px;
+    border-radius:50%;
+    background:var(--grid-idle);
+    border:1px solid var(--grid-line);
+  }
+  .progress-dots .pd.done{ background:var(--snare); border-color:var(--snare); }
+  .progress-dots .pd.current{ background:var(--text); border-color:var(--text); }
+
+  @media (max-width:560px){
+    .lane{ grid-template-columns:60px 1fr; }
+    .lane-label{ font-size:0.6rem; padding:4px; }
+    .beat-numbers{ margin-left:70px; }
+    .pattern-name{ margin-left:70px; }
+    header{ flex-direction:column; }
+    .level-badge{ text-align:left; }
+    .tempo-control{ border-left:none; padding-left:0; width:100%; }
+    .tempo-control input[type="range"]{ flex:1; }
+    .backing-toggle{ border-left:none; padding-left:0; }
+    .replay-count{ margin-left:0; width:100%; }
+  }
+</style>
+</head>
+<body>
+<a href="../games.html" style="position:fixed;top:14px;left:14px;z-index:9999;font-family:'Source Sans 3',sans-serif;font-size:13px;font-weight:600;color:#fff;background:rgba(0,0,0,0.45);padding:7px 14px;border-radius:100px;text-decoration:none;backdrop-filter:blur(4px);">&larr; Level Up Musicianship</a>
+
+<div class="wrap">
+  <header>
+    <div class="title-block">
+      <h1>Drum Dictation</h1>
+      <div class="sub">listen → build the beat → check your ears</div>
+    </div>
+    <div class="level-badge">
+      <div class="lv-label">Level <span id="levelNum">1</span>/<span id="levelTotal">6</span></div>
+      <div class="lv-num">Q<span id="qNum">1</span><span class="of-q"> / <span id="qTotal">3</span></span></div>
+    </div>
+  </header>
+
+  <div class="transport">
+    <button class="btn btn-play" id="playBtn">▶ Play pattern</button>
+    <button class="btn btn-secondary" id="resetBtn">Clear grid</button>
+    <div class="tempo-control">
+      <label for="tempoSlider">Tempo</label>
+      <input type="range" id="tempoSlider" min="40" max="160" step="2" value="90">
+      <span class="tempo-value mono" id="tempoValue">90 BPM</span>
+    </div>
+    <label class="backing-toggle">
+      <input type="checkbox" id="backingToggle" checked>
+      <span>Backing beat</span>
+    </label>
+    <div class="replay-count" id="replayCount">Plays used: 0</div>
+  </div>
+
+  <div class="listen-bar" id="listenBar">
+    <div class="listen-bar-fill" id="listenBarFill"></div>
+  </div>
+
+  <div class="grid-panel">
+    <div class="pattern-name" id="patternName">Steady four</div>
+    <div class="beat-numbers" id="beatNumbers"></div>
+
+    <div class="lane">
+      <div class="lane-label kick">Kick</div>
+      <div class="steps" id="kickRow"></div>
+    </div>
+    <div class="lane">
+      <div class="lane-label snare">Snare</div>
+      <div class="steps" id="snareRow"></div>
+    </div>
+    <div class="lane">
+      <div class="lane-label hihat">Hi-Hat</div>
+      <div class="steps" id="hihatRow"></div>
+    </div>
+  </div>
+
+  <div class="result-banner" id="resultBanner">
+    <div>
+      <div class="result-score"><span id="scoreNum">0</span><span class="of"> / <span id="scoreTotal">16</span> steps correct</span></div>
+      <div class="result-msg" id="resultMsg"></div>
+    </div>
+    <div class="legend">
+      <span><span class="dot correct"></span>Correct</span>
+      <span><span class="dot incorrect"></span>Extra (you played, but shouldn't have)</span>
+      <span><span class="dot missing"></span>Missing (should've played, didn't)</span>
+    </div>
+  </div>
+
+  <div class="footer-controls">
+    <button class="btn btn-submit" id="submitBtn">Check my answer</button>
+    <button class="btn btn-secondary" id="nextBtn" style="display:none;">Next level →</button>
+  </div>
+
+  <div class="progress-dots" id="progressDots"></div>
+</div>
+
+<script>
+(function(){
+
+  // ===================== LEVEL DATA =====================
+  // Each level has multiple questions (patterns) of similar difficulty.
+  // bpm here is just the DEFAULT/suggested tempo — students can override with the slider.
+  const LEVELS = [
+    {
+      name: "Steady four",
+      steps: 8,
+      bpm: 80,
+      questions: [
+        { kick:[1,0,0,0,1,0,0,0], snare:[0,0,1,0,0,0,1,0], hihat:[1,1,1,1,1,1,1,1] },
+        { kick:[1,0,1,0,1,0,1,0], snare:[0,0,0,1,0,0,0,1], hihat:[1,1,1,1,1,1,1,1] },
+        { kick:[1,0,0,0,0,0,1,0], snare:[0,0,1,0,0,0,1,0], hihat:[1,0,1,0,1,0,1,0] }
+      ]
+    },
+    {
+      name: "Basic rock beat",
+      steps: 8,
+      bpm: 90,
+      questions: [
+        { kick:[1,0,0,1,0,0,1,0], snare:[0,0,1,0,0,0,1,0], hihat:[1,1,1,1,1,1,1,1] },
+        { kick:[1,0,0,0,1,0,0,1], snare:[0,0,1,0,0,0,1,0], hihat:[1,1,1,1,1,1,1,1] },
+        { kick:[1,0,1,0,0,0,1,0], snare:[0,0,0,0,1,0,0,0], hihat:[1,1,1,1,1,1,1,1] }
+      ]
+    },
+    {
+      name: "Sixteenth hats",
+      steps: 16,
+      bpm: 92,
+      questions: [
+        { kick:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1] },
+        { kick:[1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1] },
+        { kick:[1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1] }
+      ]
+    },
+    {
+      name: "Syncopated kick",
+      steps: 16,
+      bpm: 96,
+      questions: [
+        { kick:[1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] },
+        { kick:[1,0,0,0,0,1,0,0,1,0,0,1,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] },
+        { kick:[1,0,1,0,0,0,1,0,0,1,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0] }
+      ]
+    },
+    {
+      name: "Off-beat hats + ghost",
+      steps: 16,
+      bpm: 100,
+      questions: [
+        { kick:[1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,1], hihat:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1] },
+        { kick:[1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,1], hihat:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1] },
+        { kick:[1,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0], snare:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0], hihat:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1] }
+      ]
+    },
+    {
+      name: "Funk fill",
+      steps: 16,
+      bpm: 104,
+      questions: [
+        { kick:[1,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1], snare:[0,0,0,0,1,0,0,0,1,0,0,1,0,0,1,0], hihat:[1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1] },
+        { kick:[1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0], snare:[0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0], hihat:[1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1] },
+        { kick:[1,0,1,0,0,1,0,0,0,1,0,0,1,0,1,0], snare:[0,0,0,0,1,0,0,1,0,0,0,1,0,0,1,0], hihat:[1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1] }
+      ]
+    }
+  ];
+
+  // A simple boom-bap backing loop: kick on 1 and the syncopated "and of 3",
+  // clap on 2 and 4, ticking 8th-note closed hats throughout (no open hat,
+  // so the backing track never introduces a hi-hat sound that isn't also
+  // represented as an option on the dictation grid).
+  const BACKING_PATTERN = {
+    kick:  [1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],
+    clap:  [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+    hat:   [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]
+  };
+
+  let currentLevel = 0;
+  let currentQuestion = 0;
+  let userGrid = {};
+  let replays = 0;
+  let isPlaying = false;
+  let submitted = false;
+  let audioCtx = null;
+  let currentBpm = LEVELS[0].bpm;
+
+  // ===================== AUDIO =====================
+  function getCtx(){
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtx;
+  }
+
+  function playKick(time){
+    const ctx = getCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.setValueAtTime(150, time);
+    osc.frequency.exponentialRampToValueAtTime(45, time + 0.12);
+    gain.gain.setValueAtTime(1, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(time);
+    osc.stop(time + 0.24);
+  }
+
+  function playSnare(time){
+    const ctx = getCtx();
+    // noise burst
+    const bufferSize = ctx.sampleRate * 0.2;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.pow(1 - i/bufferSize, 2); }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'highpass';
+    noiseFilter.frequency.value = 1000;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.9, time);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noise.start(time);
+    noise.stop(time + 0.2);
+
+    // body tone
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(180, time);
+    oscGain.gain.setValueAtTime(0.5, time);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+    osc.connect(oscGain);
+    oscGain.connect(ctx.destination);
+    osc.start(time);
+    osc.stop(time + 0.1);
+  }
+
+  function playHihat(time){
+    const ctx = getCtx();
+    const bufferSize = ctx.sampleRate * 0.08;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1); }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 7000;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.45, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start(time);
+    noise.stop(time + 0.07);
+  }
+
+  // ---- Backing track sounds (deliberately distinct timbre from the dictation
+  // instruments above, and mixed quieter, so students can still pick the
+  // foreground kick/snare/hi-hat out of the mix) ----
+
+  function playBackingKick(time){
+    const ctx = getCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.setValueAtTime(95, time);
+    osc.frequency.exponentialRampToValueAtTime(38, time + 0.28);
+    gain.gain.setValueAtTime(0.55, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.45);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(time);
+    osc.stop(time + 0.46);
+  }
+
+  function playBackingClap(time){
+    const ctx = getCtx();
+    // three quick noise bursts to emulate a stacked hip-hop clap
+    [0, 0.012, 0.024].forEach(offset => {
+      const bufferSize = ctx.sampleRate * 0.12;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * Math.pow(1 - i/bufferSize, 1.5); }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1500;
+      filter.Q.value = 1.2;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.35, time + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + offset + 0.1);
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start(time + offset);
+      noise.stop(time + offset + 0.11);
+    });
+  }
+
+  function playBackingHat(time){
+    const ctx = getCtx();
+    const dur = 0.045;
+    const bufferSize = ctx.sampleRate * dur;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1); }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 8500;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.18, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + dur);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start(time);
+    noise.stop(time + dur + 0.01);
+  }
+
+  // ===================== BUILD GRID =====================
+  function buildGrid(){
+    const level = LEVELS[currentLevel];
+    const question = level.questions[currentQuestion];
+    const n = level.steps;
+
+    ['kick','snare','hihat'].forEach(inst => {
+      userGrid[inst] = new Array(n).fill(0);
+    });
+
+    document.getElementById('levelNum').textContent = currentLevel + 1;
+    document.getElementById('levelTotal').textContent = LEVELS.length;
+    document.getElementById('qNum').textContent = currentQuestion + 1;
+    document.getElementById('qTotal').textContent = level.questions.length;
+    document.getElementById('patternName').textContent = level.name;
+    document.getElementById('scoreTotal').textContent = n * 3;
+
+    // sync tempo slider/display to this level's default, but don't fight a value
+    // the student already dialled in for this level — only reset on level change.
+    if(!buildGrid._lastLevel || buildGrid._lastLevel !== currentLevel){
+      currentBpm = level.bpm;
+      document.getElementById('tempoSlider').value = currentBpm;
+      document.getElementById('tempoValue').textContent = currentBpm + ' BPM';
+    }
+    buildGrid._lastLevel = currentLevel;
+
+    const colTemplate = 'repeat(' + n + ', 1fr)';
+
+    // beat numbers (group every 4 into a beat for readability)
+    const beatNumbers = document.getElementById('beatNumbers');
+    beatNumbers.style.gridTemplateColumns = colTemplate;
+    beatNumbers.innerHTML = '';
+    for(let i=0;i<n;i++){
+      const span = document.createElement('span');
+      span.textContent = (i % 4 === 0) ? (Math.floor(i/4)+1) : '·';
+      beatNumbers.appendChild(span);
+    }
+
+    ['kick','snare','hihat'].forEach(inst => {
+      const row = document.getElementById(inst + 'Row');
+      row.style.gridTemplateColumns = colTemplate;
+      row.innerHTML = '';
+      for(let i=0;i<n;i++){
+        const cell = document.createElement('div');
+        cell.className = 'step' + (i % 4 === 0 ? ' beat-start' : '');
+        cell.dataset.inst = inst;
+        cell.dataset.idx = i;
+        cell.addEventListener('click', onStepClick);
+        row.appendChild(cell);
+      }
+    });
+
+    // progress dots — one per question across the whole level set, current level highlighted
+    const dots = document.getElementById('progressDots');
+    dots.innerHTML = '';
+    LEVELS.forEach((lv, lvIdx) => {
+      lv.questions.forEach((q, qIdx) => {
+        const d = document.createElement('div');
+        const isPast = lvIdx < currentLevel || (lvIdx === currentLevel && qIdx < currentQuestion);
+        const isCurrent = lvIdx === currentLevel && qIdx === currentQuestion;
+        d.className = 'pd' + (isPast ? ' done' : '') + (isCurrent ? ' current' : '');
+        dots.appendChild(d);
+      });
+    });
+
+    replays = 0;
+    submitted = false;
+    document.getElementById('replayCount').textContent = 'Plays used: 0';
+    document.getElementById('resultBanner').classList.remove('show');
+    document.getElementById('submitBtn').style.display = 'inline-flex';
+    document.getElementById('submitBtn').disabled = false;
+    document.getElementById('nextBtn').style.display = 'none';
+    clearFeedbackClasses();
+  }
+
+  function onStepClick(e){
+    if(submitted) return;
+    const cell = e.currentTarget;
+    const inst = cell.dataset.inst;
+    const idx = parseInt(cell.dataset.idx, 10);
+    userGrid[inst][idx] = userGrid[inst][idx] ? 0 : 1;
+    cell.classList.toggle('on');
+    cell.classList.toggle(inst);
+
+    // instant audio feedback so students can hear what they're placing —
+    // only sound on placement (turning a step ON), not on removal.
+    // A small lead-time (matching playPattern's startTime offset) avoids
+    // clipping the front of the kick's pitch sweep, which otherwise can
+    // make it sound lower/duller than the same sound during full playback.
+    if(userGrid[inst][idx]){
+      const ctx = getCtx();
+      if(ctx.state === 'suspended') ctx.resume();
+      const t = ctx.currentTime + 0.03;
+      if(inst === 'kick')  playKick(t);
+      if(inst === 'snare') playSnare(t);
+      if(inst === 'hihat') playHihat(t);
+    }
+  }
+
+  function clearFeedbackClasses(){
+    document.querySelectorAll('.step').forEach(c => {
+      c.classList.remove('fb-correct','fb-incorrect','fb-missing','on','kick','snare','hihat');
+    });
+  }
+
+  // ===================== PLAYBACK =====================
+  function playPattern(){
+    if(isPlaying) return;
+    const level = LEVELS[currentLevel];
+    const question = level.questions[currentQuestion];
+    const ctx = getCtx();
+    if(ctx.state === 'suspended') ctx.resume();
+
+    isPlaying = true;
+    document.getElementById('playBtn').disabled = true;
+
+    replays++;
+    document.getElementById('replayCount').textContent = 'Plays used: ' + replays;
+
+    const stepDur = 60 / currentBpm / 4; // 16th-note grid feel, scaled to live tempo
+    const startTime = ctx.currentTime + 0.1;
+    const n = level.steps;
+    const backingOn = document.getElementById('backingToggle').checked;
+
+    for(let i=0;i<n;i++){
+      const t = startTime + i * stepDur;
+
+      // dictation instruments (what the student must transcribe)
+      if(question.kick[i])  playKick(t);
+      if(question.snare[i]) playSnare(t);
+      if(question.hihat[i]) playHihat(t);
+
+      // hip-hop backing loop, mixed underneath — purely atmospheric, not part of the answer
+      if(backingOn){
+        const bIdx = i % 16;
+        if(BACKING_PATTERN.kick[bIdx]) playBackingKick(t);
+        if(BACKING_PATTERN.clap[bIdx]) playBackingClap(t);
+        if(BACKING_PATTERN.hat[bIdx])  playBackingHat(t);
+      }
+    }
+
+    // neutral progress bar — shows listening position only, never which
+    // instrument plays where, so it can't be mistaken for an answer reveal
+    const totalMs = n * stepDur * 1000;
+    const fill = document.getElementById('listenBarFill');
+    fill.classList.add('active');
+    fill.style.transition = 'none';
+    fill.style.width = '0%';
+    requestAnimationFrame(() => {
+      fill.style.transition = 'width ' + (totalMs/1000) + 's linear';
+      fill.style.width = '100%';
+    });
+
+    setTimeout(() => {
+      isPlaying = false;
+      document.getElementById('playBtn').disabled = false;
+      fill.classList.remove('active');
+      fill.style.transition = 'none';
+      fill.style.width = '0%';
+    }, totalMs + 150);
+  }
+
+  // ===================== SUBMIT / FEEDBACK =====================
+  function submitAnswer(){
+    const level = LEVELS[currentLevel];
+    const question = level.questions[currentQuestion];
+    const n = level.steps;
+    let correct = 0;
+    const total = n * 3;
+
+    ['kick','snare','hihat'].forEach(inst => {
+      const row = document.getElementById(inst + 'Row');
+      for(let i=0;i<n;i++){
+        const actual = question[inst][i];
+        const guess = userGrid[inst][i];
+        const cell = row.children[i];
+
+        if(actual === 1 && guess === 1){
+          cell.classList.add('fb-correct');
+          correct++;
+        } else if(actual === 0 && guess === 1){
+          cell.classList.add('fb-incorrect');
+        } else if(actual === 1 && guess === 0){
+          cell.classList.add('fb-missing');
+        } else {
+          correct++; // both correctly empty
+        }
+      }
+    });
+
+    submitted = true;
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'inline-flex';
+
+    const pct = Math.round((correct/total)*100);
+    document.getElementById('scoreNum').textContent = correct;
+    document.getElementById('scoreTotal').textContent = total;
+
+    let msg;
+    if(pct === 100) msg = "Perfect dictation. Your ears are locked in.";
+    else if(pct >= 85) msg = "Very close — check the highlighted steps below.";
+    else if(pct >= 60) msg = "Good attempt. Listen again and compare against the highlights.";
+    else msg = "Worth another listen — try replaying and focus on one instrument at a time.";
+    document.getElementById('resultMsg').textContent = msg + ' (used ' + replays + ' play' + (replays===1?'':'s') + ')';
+
+    document.getElementById('resultBanner').classList.add('show');
+
+    const isLastQuestion = currentQuestion === level.questions.length - 1;
+    const isLastLevel = currentLevel === LEVELS.length - 1;
+
+    if(isLastQuestion && isLastLevel){
+      document.getElementById('nextBtn').textContent = 'Restart from level 1 ↺';
+    } else if(isLastQuestion){
+      document.getElementById('nextBtn').textContent = 'Next level →';
+    } else {
+      document.getElementById('nextBtn').textContent = 'Next question →';
+    }
+  }
+
+  function nextLevel(){
+    const level = LEVELS[currentLevel];
+    const isLastQuestion = currentQuestion === level.questions.length - 1;
+    const isLastLevel = currentLevel === LEVELS.length - 1;
+
+    if(isLastQuestion && isLastLevel){
+      currentLevel = 0;
+      currentQuestion = 0;
+    } else if(isLastQuestion){
+      currentLevel++;
+      currentQuestion = 0;
+    } else {
+      currentQuestion++;
+    }
+    buildGrid();
+  }
+
+  function resetGrid(){
+    if(submitted) return;
+    const level = LEVELS[currentLevel];
+    ['kick','snare','hihat'].forEach(inst => {
+      userGrid[inst] = new Array(level.steps).fill(0);
+    });
+    document.querySelectorAll('.step').forEach(c => {
+      c.classList.remove('on','kick','snare','hihat');
+    });
+  }
+
+  // ===================== WIRE UP =====================
+  document.getElementById('playBtn').addEventListener('click', playPattern);
+  document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+  document.getElementById('nextBtn').addEventListener('click', nextLevel);
+  document.getElementById('resetBtn').addEventListener('click', resetGrid);
+  document.getElementById('tempoSlider').addEventListener('input', (e) => {
+    currentBpm = parseInt(e.target.value, 10);
+    document.getElementById('tempoValue').textContent = currentBpm + ' BPM';
+  });
+
+  buildGrid();
+
+})();
+</script>
+
+</body>
+</html>

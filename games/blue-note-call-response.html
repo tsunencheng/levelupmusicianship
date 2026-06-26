@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blue Note — Call & Response</title>
+<style>
+  :root{
+    --club-black:#14171F;
+    --club-navy:#1B2030;
+    --spotlight:#E8A33D;
+    --neon:#E8463B;
+    --brass:#C9A24B;
+    --smoke:#9099A8;
+    --cream:#F2EDE4;
+    --green-go:#5FB67A;
+    --red-no:#D9534F;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: radial-gradient(ellipse at 50% -10%, #2a2440 0%, var(--club-black) 55%, #0c0e14 100%);
+    color: var(--cream);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+  /* film grain / smoke texture */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(232,163,61,0.05), transparent 40%),
+      radial-gradient(circle at 80% 0%, rgba(232,70,59,0.06), transparent 45%);
+    pointer-events:none;
+    z-index:0;
+  }
+  .marquee-font{
+    font-family: 'Impact', 'Arial Narrow', sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  #app{ max-width: 1100px; margin: 0 auto; padding: 22px 18px 60px; position:relative; z-index:1;}
+
+  /* ---------- HEADER / MARQUEE ---------- */
+  header{ text-align:center; margin-bottom: 18px; }
+  .marquee{
+    display:inline-block;
+    font-size: clamp(28px, 5.5vw, 52px);
+    color: var(--neon);
+    text-shadow:
+      0 0 6px rgba(232,70,59,0.9),
+      0 0 18px rgba(232,70,59,0.5),
+      0 0 36px rgba(232,70,59,0.25);
+    animation: flicker 4.2s infinite ease-in-out;
+    padding: 4px 10px;
+  }
+  @keyframes flicker{
+    0%,97%,100%{ opacity:1; }
+    98%{ opacity:0.65; }
+    98.5%{ opacity:0.95; }
+  }
+  .sub-marquee{
+    color: var(--brass);
+    font-size: clamp(12px, 1.8vw, 16px);
+    letter-spacing: 0.25em;
+    margin-top: 4px;
+    font-family: 'Iowan Old Style', Georgia, serif;
+    text-transform: uppercase;
+  }
+
+  /* ---------- 12 BAR LIGHT STRIP ---------- */
+  .form-strip{
+    display:flex;
+    gap: 4px;
+    background: linear-gradient(180deg, #0e1018, #161a26);
+    border: 1px solid #2a3045;
+    border-radius: 10px;
+    padding: 10px 10px;
+    margin: 0 0 20px;
+    overflow-x:auto;
+  }
+  .bar-light{
+    flex: 1 0 0;
+    min-width: 26px;
+    height: 30px;
+    border-radius: 5px;
+    background: #232838;
+    border: 1px solid #333a52;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 10px;
+    color: #5a6178;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    position:relative;
+    transition: background .12s, box-shadow .12s, color .12s;
+  }
+  .bar-light.active{
+    background: var(--spotlight);
+    color: #1b1100;
+    box-shadow: 0 0 12px rgba(232,163,61,0.85);
+    border-color: var(--spotlight);
+  }
+
+  /* ---------- STAGE LAYOUT ---------- */
+  .stage-wrap{
+    display:grid;
+    grid-template-columns: 1fr 280px;
+    gap: 18px;
+  }
+  @media (max-width: 760px){
+    .stage-wrap{ grid-template-columns: 1fr; }
+  }
+
+  .stage{
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(232,163,61,0.16), transparent 60%),
+      linear-gradient(180deg, #1d2230 0%, #14161f 70%);
+    border: 1px solid #2c3146;
+    border-radius: 16px;
+    padding: 22px 20px 26px;
+    position:relative;
+    min-height: 420px;
+    display:flex;
+    flex-direction:column;
+  }
+  .brick-edge{
+    position:absolute; inset:0;
+    border-radius:16px;
+    background-image: repeating-linear-gradient(
+        0deg, rgba(255,255,255,0.015) 0 2px, transparent 2px 18px
+      ),
+      repeating-linear-gradient(
+        90deg, rgba(0,0,0,0.12) 0 1px, transparent 1px 46px
+      );
+    opacity:0.5;
+    pointer-events:none;
+  }
+
+  .status-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom: 14px;
+    position:relative; z-index:2;
+  }
+  .status-label{
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--smoke);
+  }
+  .status-value{
+    font-size: 17px;
+    color: var(--brass);
+    font-weight: bold;
+  }
+  .phase-banner{
+    text-align:center;
+    font-size: clamp(20px,3.4vw,30px);
+    color: var(--cream);
+    margin: 4px 0 18px;
+    min-height: 38px;
+    transition: color .2s;
+  }
+  .phase-banner.call{ color: var(--spotlight); }
+  .phase-banner.response{ color: var(--green-go); }
+  .phase-banner.result-good{ color: var(--green-go); }
+  .phase-banner.result-bad{ color: var(--red-no); }
+
+  /* listening indicator — deliberately content-free (no rhythm shown), since
+     students must copy the rhythm purely by ear (aural dictation) */
+  .notation-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin: 6px 0 22px;
+    min-height: 86px;
+  }
+  .listen-indicator{
+    display:flex;
+    gap: 14px;
+    align-items:center;
+  }
+  .listen-dot{
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #2c3146;
+    border: 1px solid #3a4160;
+    transition: background .15s, box-shadow .15s, transform .15s;
+  }
+  .listen-indicator.pulse .listen-dot{
+    animation: dotPulse 0.45s ease-out;
+  }
+  .listen-indicator.pulse .listen-dot:nth-child(2){ animation-delay: 0.05s; }
+  .listen-indicator.pulse .listen-dot:nth-child(3){ animation-delay: 0.1s; }
+  @keyframes dotPulse{
+    0%{ background:#2c3146; transform:scale(1); box-shadow:none; }
+    35%{ background: var(--spotlight); transform:scale(1.25); box-shadow: 0 0 14px rgba(232,163,61,0.9); }
+    100%{ background:#2c3146; transform:scale(1); box-shadow:none; }
+  }
+
+  /* tap pad */
+  .pad-wrap{
+    margin-top: auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap: 14px;
+    padding-top: 10px;
+    position:relative; z-index:2;
+  }
+  .pad{
+    width: 170px; height: 170px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #5a3d22, #2c1c10 70%);
+    border: 6px solid #7a5230;
+    box-shadow:
+      0 8px 18px rgba(0,0,0,0.6),
+      inset 0 0 30px rgba(0,0,0,0.5);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    text-transform:uppercase;
+    color: var(--brass);
+    cursor:pointer;
+    user-select:none;
+    transition: transform .05s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pad:active{ transform: scale(0.94); }
+  .pad.hot{
+    background: radial-gradient(circle at 35% 30%, #b07a3a, #5a3d1c 70%);
+    box-shadow: 0 0 30px rgba(232,163,61,0.7), inset 0 0 30px rgba(0,0,0,0.4);
+  }
+  .pad.disabled{ opacity:0.35; cursor:default; }
+  .pad-hint{ font-size:12px; color:var(--smoke); font-family:'Helvetica Neue',Arial,sans-serif; text-align:center;}
+
+  /* ---------- SIDEBAR (SET LIST) ---------- */
+  .sidebar{
+    background: linear-gradient(180deg, #1d2230, #14161f);
+    border: 1px solid #2c3146;
+    border-radius: 16px;
+    padding: 18px 16px;
+    display:flex;
+    flex-direction:column;
+    gap: 14px;
+  }
+  .sidebar h3{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform:uppercase;
+    color: var(--smoke);
+    border-bottom: 1px solid #2c3146;
+    padding-bottom: 8px;
+  }
+  .act{
+    border: 1px solid #2c3146;
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor:pointer;
+    transition: border-color .15s, background .15s;
+    background: rgba(255,255,255,0.02);
+  }
+  .act:hover{ border-color: var(--brass); }
+  .act.active{
+    border-color: var(--spotlight);
+    background: rgba(232,163,61,0.08);
+  }
+  .act .act-name{ font-weight:bold; color: var(--cream); font-size:15px;}
+  .act .act-desc{ font-size:11.5px; color: var(--smoke); margin-top:3px; font-family:'Helvetica Neue',Arial,sans-serif;}
+
+  /* encore meter */
+  .encore-wrap{ margin-top: 4px; }
+  .encore-label{
+    display:flex; justify-content:space-between;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size: 10px; letter-spacing:0.15em; text-transform:uppercase;
+    color: var(--smoke); margin-bottom:6px;
+  }
+  .encore-track{
+    height: 16px;
+    border-radius: 8px;
+    background: #0e1018;
+    border: 1px solid #2c3146;
+    overflow:hidden;
+    position:relative;
+  }
+  .encore-fill{
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--neon), var(--spotlight));
+    box-shadow: 0 0 10px rgba(232,70,59,0.6);
+    transition: width .4s ease;
+  }
+  .encore-note{ font-size: 11px; color: var(--brass); text-align:center; margin-top:6px; font-family:'Helvetica Neue',Arial,sans-serif;}
+
+  .controls-row{
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .btn{
+    flex:1;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--brass);
+    background: transparent;
+    color: var(--brass);
+    cursor:pointer;
+    transition: background .15s, color .15s;
+  }
+  .btn:hover{ background: var(--brass); color: #1b1100; }
+  .btn.primary{
+    background: var(--neon);
+    border-color: var(--neon);
+    color: var(--cream);
+  }
+  .btn.primary:hover{ background:#ff5a4d; }
+  .btn:disabled{ opacity:0.4; cursor:default; }
+
+  footer{
+    text-align:center;
+    color: var(--smoke);
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    margin-top: 26px;
+    letter-spacing: 0.08em;
+  }
+
+  .start-overlay{
+    position:fixed; inset:0;
+    background: rgba(10,11,16,0.92);
+    display:flex; align-items:center; justify-content:center;
+    z-index: 50;
+    flex-direction:column;
+    gap: 18px;
+    text-align:center;
+    padding: 20px;
+  }
+  .start-overlay .marquee{ font-size: clamp(26px,7vw,48px); }
+  .start-btn{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    padding: 16px 34px;
+    border-radius: 30px;
+    background: var(--neon);
+    border: none;
+    color: white;
+    cursor:pointer;
+    box-shadow: 0 0 30px rgba(232,70,59,0.5);
+  }
+  .start-overlay p{ color: var(--smoke); max-width: 440px; font-family:Georgia, serif; font-size:14px; line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="start-overlay" id="startOverlay">
+  <div class="marquee marquee-font">Blue Note</div>
+  <div class="sub-marquee">Call &amp; Response Lounge</div>
+  <p>The house band is warming up a 12-bar blues. When the spotlight hits the stage, listen to the 2-bar rhythm, then play it straight back — tap the pad or press the <strong>SPACEBAR</strong>. Stay in the groove — it's all swung eighths in here.</p>
+  <button class="start-btn marquee-font" id="startBtn">Open The Club</button>
+</div>
+
+<div id="app">
+  <header>
+    <div class="marquee marquee-font">Blue Note</div>
+    <div class="sub-marquee">Call &amp; Response Lounge</div>
+  </header>
+
+  <div class="form-strip" id="formStrip"></div>
+
+  <div class="stage-wrap">
+    <div class="stage">
+      <div class="brick-edge"></div>
+      <div class="status-row">
+        <div><div class="status-label">Round</div><div class="status-value" id="roundLabel">1 / 8</div></div>
+        <div style="text-align:center;"><div class="status-label">Act</div><div class="status-value" id="levelLabel">Opening Act</div></div>
+        <div style="text-align:right;"><div class="status-label">Score</div><div class="status-value" id="scoreLabel">0</div></div>
+      </div>
+
+      <div class="phase-banner" id="phaseBanner">Tap "Open The Club" to begin</div>
+
+      <div class="notation-row" id="notationRow"></div>
+
+      <div class="pad-wrap">
+        <div class="pad disabled" id="pad">listen<span style="display:block; font-size:11px; opacity:0.75; margin-top:4px;">(SPACE)</span></div>
+        <div class="pad-hint" id="padHint">The band will call first — get ready to respond</div>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div>
+        <h3>Tonight's Set</h3>
+        <div class="act" id="actLevel1" data-level="1">
+          <div class="act-name">Opening Act</div>
+          <div class="act-desc">ta &amp; ti-ti only — straightforward swung quarters and eighths.</div>
+        </div>
+        <div class="act" id="actLevel2" data-level="2" style="margin-top:8px;">
+          <div class="act-name">Headliner</div>
+          <div class="act-desc">Adds si-ti — catching the off-beat.</div>
+        </div>
+        <div class="act" id="actLevel3" data-level="3" style="margin-top:8px;">
+          <div class="act-name">Encore</div>
+          <div class="act-desc">Adds syn-co-pa — full syncopation, all patterns mixed.</div>
+        </div>
+      </div>
+
+      <div class="encore-wrap">
+        <div class="encore-label"><span>Encore Meter</span><span id="encorePct">0%</span></div>
+        <div class="encore-track"><div class="encore-fill" id="encoreFill"></div></div>
+        <div class="encore-note" id="encoreNote">Nail rounds to fill the room with applause</div>
+      </div>
+
+      <div class="controls-row">
+        <button class="btn" id="replayBtn">Replay Call</button>
+        <button class="btn" id="resetBtn">Reset</button>
+      </div>
+      <button class="btn primary" id="nextLevelBtn" style="display:none;">Next Act →</button>
+    </div>
+  </div>
+
+  <footer>Swing the eighths · ti-ti · ta · syn-co-pa · si-ti · 12-bar blues in C</footer>
+</div>
+
+<script>
+/* =========================================================================
+   BLUE NOTE — CALL & RESPONSE
+   Web Audio API synthesis: walking bass, swung comp chords, ride/hat swing,
+   and a 2-bar call/response rhythm game using Kodály syllables.
+   ========================================================================= */
+
+let audioCtx = null;
+let masterGain = null;
+let bandGain = null;
+let clickGain = null;
+
+function ensureAudio(){
+  if (!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.9;
+    masterGain.connect(audioCtx.destination);
+
+    bandGain = audioCtx.createGain();
+    bandGain.gain.value = 0.55;
+    bandGain.connect(masterGain);
+
+    clickGain = audioCtx.createGain();
+    clickGain.gain.value = 1.1;
+    clickGain.connect(masterGain);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+/* ---------------- TEMPO / SWING GRID ----------------
+   We work in swung eighth-note "slots". Each beat = 2 slots.
+   Slot 0 of a beat (the "downbeat 8th") gets SWING_LONG share of the beat,
+   slot 1 (the "& 8th") gets SWING_SHORT share (long-short, ~2:1 triplet swing).
+*/
+const BPM = 96;
+const beatSec = 60 / BPM;
+const SWING_RATIO = 2/3; // long 8th = 2/3 of the beat, short 8th = 1/3
+function slotDuration(slotIndexInBeat){
+  return slotIndexInBeat === 0 ? beatSec * SWING_RATIO : beatSec * (1 - SWING_RATIO);
+}
+// time offset (sec) of slot `slot` (0-indexed, 8 slots per bar) within a bar
+function slotOffsetInBar(slot){
+  const beat = Math.floor(slot/2);
+  const sub = slot % 2;
+  let t = beat * beatSec;
+  if (sub === 1) t += slotDuration(0);
+  return t;
+}
+const barDuration = 4 * beatSec; // 4 beats per bar (8 swung-8th slots)
+
+/* ---------------- 12 BAR BLUES FORM (key of C) ---------------- */
+const FORM = ['C','C','C','C','F','F','C','C','G','F','C','G'];
+// Plain major triads (no 7ths) — matches the piano voicings in the
+// uploaded reference score: simple sustained root-3rd-5th block chords.
+const CHORD_TONES = {
+  C: { root: 48, triad: [48,52,55] }, // C3, E3, G3
+  F: { root: 41, triad: [53,57,60] }, // F3, A3, C4
+  G: { root: 43, triad: [55,59,62] }, // G3, B3, D4
+};
+// Walking bass line transcribed directly from the uploaded reference score
+// (one 4-note quarter-note phrase per bar, 12 bars). Each bar generally
+// walks root-3rd-5th-6th up through the chord, then descends back down
+// (via the b7 as a passing tone) to set up the next chord — the same
+// idiomatic shape used throughout the original part.
+const BASS_LINE = [
+  [36,40,43,45], // Bar 1  (I)   C2 E2 G2 A2
+  [46,45,43,40], // Bar 2  (I)   Bb2 A2 G2 E2
+  [36,40,43,45], // Bar 3  (I)
+  [46,45,43,40], // Bar 4  (I)
+  [41,45,48,50], // Bar 5  (IV)  F2 A2 C3 D3
+  [51,50,48,45], // Bar 6  (IV)  Eb3 D3 C3 A2
+  [36,40,43,45], // Bar 7  (I)
+  [46,45,43,40], // Bar 8  (I)
+  [31,35,38,40], // Bar 9  (V)   G1 B1 D2 E2
+  [29,33,36,38], // Bar 10 (IV)  F1 A1 C2 D2
+  [36,40,41,42], // Bar 11 (I)   C2 E2 F2 F#2 (chromatic approach into bar 12)
+  [43,41,40,38], // Bar 12 (V)   G2 F2 E2 D2
+];
+function midiToFreq(m){ return 440 * Math.pow(2, (m-69)/12); }
+
+/* Metronome count-in click — deliberately a different timbre from both the
+   low claves (rhythm) and the piano/bass (backing track), so it reads
+   unambiguously as "count-in," not as game content. A simple short sine
+   tick with a fast decay; the first beat of the bar is pitched a bit
+   higher, matching how real metronomes/conductors often accent beat 1. */
+function playMetronomeClick(start, accent=false){
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.value = accent ? 1500 : 1000;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0, start);
+  g.gain.linearRampToValueAtTime(accent?0.5:0.4, start + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.001, start + 0.07);
+  osc.connect(g); g.connect(clickGain);
+  osc.start(start);
+  osc.stop(start + 0.08);
+}
+
+/* Schedules a 4-beat metronome count-in starting at ctxStartTime, and calls
+   onComplete with the ctx time at which beat 1 of the actual piece begins
+   (i.e. right after the 4th click) so the caller can start the backing
+   band and the first call at that exact, musically correct instant. */
+function scheduleCountIn(ctxStartTime, onComplete){
+  for (let beat=0; beat<4; beat++){
+    playMetronomeClick(ctxStartTime + beat*beatSec, beat===0);
+  }
+  const musicStartTime = ctxStartTime + 4*beatSec;
+  const delayMs = Math.max(0, (musicStartTime - audioCtx.currentTime) * 1000);
+  setTimeout(onComplete, delayMs);
+  return musicStartTime;
+}
+
+let bandPlaying = false;
+let bandLoopTimer = null;
+let currentBarGlobal = 0; // 0..11, loops
+let onBarChange = null; // callback(barIndex)
+
+function scheduleOsc({freq, start, dur, type='sawtooth', gain=0.18, destination=bandGain, attack=0.005, release=0.05, detune=0}){
+  const osc = audioCtx.createOscillator();
+  osc.type = type;
+  osc.frequency.value = freq;
+  if (detune) osc.detune.value = detune;
+  const g = audioCtx.createGain();
+  g.gain.value = 0;
+  osc.connect(g);
+  g.connect(destination);
+  const t0 = start;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(gain, t0 + attack);
+  g.gain.setValueAtTime(gain, Math.max(t0+attack, t0 + dur - release));
+  g.gain.linearRampToValueAtTime(0, t0 + dur);
+  osc.start(t0);
+  osc.stop(t0 + dur + 0.02);
+}
+
+function scheduleNoiseHit({start, dur=0.04, gain=0.12, type='hat'}){
+  if (type === 'kick'){
+    // Real kick drums are mostly a pitched low-frequency thump, not noise:
+    // a sine oscillator with a fast downward pitch sweep from a low "click"
+    // frequency down into the sub range, with a fast decay.
+    const osc = audioCtx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(120, start);
+    osc.frequency.exponentialRampToValueAtTime(45, start + 0.09);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(gain, start);
+    g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+    osc.connect(g); g.connect(bandGain);
+    osc.start(start);
+    osc.stop(start + dur + 0.02);
+    return;
+  }
+
+  const bufferSize = Math.floor(audioCtx.sampleRate * dur);
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i=0;i<bufferSize;i++){
+    data[i] = (Math.random()*2-1) * (1 - i/bufferSize);
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+  const filt = audioCtx.createBiquadFilter();
+  if (type === 'hat'){
+    filt.type = 'highpass';
+    filt.frequency.value = 6000;
+  } else if (type === 'snare'){
+    // Snare: broadband noise with a sharper, slightly lower-passed crack
+    // than the ride/hat, giving it a distinct "snap" rather than a shimmer.
+    filt.type = 'highpass';
+    filt.frequency.value = 1800;
+  } else {
+    filt.type = 'bandpass';
+    filt.frequency.value = 1200;
+  }
+  const g = audioCtx.createGain();
+  g.gain.value = gain;
+  src.connect(filt); filt.connect(g); g.connect(bandGain);
+  src.start(start);
+  src.stop(start + dur);
+}
+
+/* Walking bass: quarter notes, transcribed from the uploaded reference
+   score's bass guitar part (see BASS_LINE above) rather than randomized. */
+function scheduleBassForBar(barIndexInForm, barStartTime){
+  const notes = BASS_LINE[barIndexInForm % 12];
+  for (let b=0;b<4;b++){
+    const t = barStartTime + b*beatSec;
+    scheduleOsc({
+      freq: midiToFreq(notes[b]),
+      start: t,
+      dur: beatSec*0.92,
+      type: 'triangle',
+      gain: 0.16,
+      attack: 0.008,
+      release: 0.08
+    });
+  }
+}
+
+/* Piano-style note synthesis: real piano notes are 2-3 strings tuned almost
+   (not quite) in unison, which beat slightly against each other and give
+   the tone its characteristic shimmer; the hammer strike also adds a brief
+   bright/inharmonic transient on top of the body tone. We approximate this
+   with two detuned triangle oscillators (the "strings") plus a short quiet
+   higher partial (the hammer attack), all under a slow exponential decay —
+   much longer than a struck-bar (marimba) decay, matching how piano strings
+   keep ringing after the initial attack. */
+function playPianoNote(start, midiNote, {gain=0.5, dur=1.1}={}){
+  const freq = midiToFreq(midiNote);
+
+  // "String" pair — two triangle oscillators a few cents apart
+  [-4, 4].forEach(centsOffset=>{
+    const osc = audioCtx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    osc.detune.value = centsOffset;
+    const g = audioCtx.createGain();
+    g.gain.value = 0;
+    osc.connect(g); g.connect(bandGain);
+    g.gain.setValueAtTime(0, start);
+    g.gain.linearRampToValueAtTime(gain * 0.5, start + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+    osc.start(start);
+    osc.stop(start + dur + 0.02);
+  });
+
+  // Hammer-strike transient — brief, quiet, an octave-plus above the note
+  const hammer = audioCtx.createOscillator();
+  hammer.type = 'sine';
+  hammer.frequency.value = freq * 2.5;
+  const gH = audioCtx.createGain();
+  gH.gain.value = 0;
+  hammer.connect(gH); gH.connect(bandGain);
+  gH.gain.setValueAtTime(0, start);
+  gH.gain.linearRampToValueAtTime(gain * 0.18, start + 0.002);
+  gH.gain.exponentialRampToValueAtTime(0.001, start + 0.08);
+  hammer.start(start);
+  hammer.stop(start + 0.1);
+}
+
+/* Piano comp: ONE sustained whole-bar triad, matching the reference score's
+   piano part exactly (simple held block chords, not jazz-comp stabs). */
+function scheduleCompForBar(chordName, barStartTime){
+  const tones = CHORD_TONES[chordName].triad;
+  tones.forEach(midi=>{
+    playPianoNote(barStartTime, midi, { gain: 0.065, dur: barDuration*0.97 });
+  });
+}
+
+/* Swing ride pattern transcribed from the reference score's drum kit part:
+   quarter (beat1) - eighth+eighth pair (the "2 and") - quarter (beat3) -
+   eighth+eighth pair (the "4 and") — the classic "ding-ding-da-ding" feel.
+   A quiet snare ghost-note doubles the first eighth of each pair (matching
+   the score's snare+ride combined note-heads), and the kick drum lands on
+   beats 1 and 3 only, resting on 2 and 4. */
+function scheduleRideForBar(barStartTime){
+  // Ride cymbal: beat 1 (quarter), then the swung 8th pair leading into
+  // beat 2, beat 3 (quarter), then the swung 8th pair leading into beat 4.
+  const rideSlots = [0, 2, 3, 4, 6, 7]; // slot 0=beat1, 2&3=2's pickup pair, 4=beat3, 6&7=4's pickup pair
+  rideSlots.forEach(slot=>{
+    const t = barStartTime + slotOffsetInBar(slot);
+    const isQuarterBeat = (slot===0 || slot===4);
+    scheduleNoiseHit({ start:t, dur: isQuarterBeat?0.08:0.05, gain: isQuarterBeat?0.11:0.07, type:'hat' });
+  });
+  // Snare ghost notes — doubles the first eighth of each pickup pair (slots 2 and 6)
+  [2,6].forEach(slot=>{
+    const t = barStartTime + slotOffsetInBar(slot);
+    scheduleNoiseHit({ start:t, dur:0.05, gain:0.05, type:'snare' });
+  });
+  // Kick drum — beats 1 and 3 only
+  [0,2].forEach(beatIdx=>{
+    const t = barStartTime + beatIdx*beatSec;
+    scheduleNoiseHit({ start:t, dur:0.11, gain:0.16, type:'kick' });
+  });
+}
+
+function playBarMusic(barIndexInForm, barStartTime){
+  const chord = FORM[barIndexInForm % 12];
+  scheduleBassForBar(barIndexInForm, barStartTime);
+  scheduleCompForBar(chord, barStartTime);
+  scheduleRideForBar(barStartTime);
+}
+
+/* Continuous 12-bar loop scheduler, runs independently of game rounds */
+let nextBarToSchedule = 0;
+let bandStartCtxTime = 0;
+let bandSchedulerHandle = null;
+function startBand(explicitStartTime){
+  if (bandPlaying) return;
+  ensureAudio();
+  bandPlaying = true;
+  nextBarToSchedule = 0;
+  bandStartCtxTime = explicitStartTime !== undefined ? explicitStartTime : audioCtx.currentTime + 0.15;
+  scheduleAheadLoop();
+}
+function stopBand(){
+  bandPlaying = false;
+  if (bandSchedulerHandle) clearInterval(bandSchedulerHandle);
+}
+const SCHEDULE_AHEAD_BARS = 2;
+let scheduledUpTo = -1;
+function scheduleAheadLoop(){
+  scheduledUpTo = -1;
+  function tick(){
+    if (!bandPlaying) return;
+    const now = audioCtx.currentTime;
+    while (true){
+      const barStart = bandStartCtxTime + nextBarToSchedule * barDuration;
+      if (barStart > now + SCHEDULE_AHEAD_BARS * barDuration) break;
+      const formIdx = nextBarToSchedule % 12;
+      playBarMusic(formIdx, barStart);
+      // notify UI exactly when this bar begins
+      const delayMs = Math.max(0, (barStart - now) * 1000);
+      setTimeout(()=>{ if (onBarChange) onBarChange(formIdx); }, delayMs);
+      nextBarToSchedule++;
+    }
+  }
+  tick();
+  bandSchedulerHandle = setInterval(tick, 250);
+}
+
+/* ---------------- RHYTHM PATTERN BANK (Kodály syllables) ----------------
+   Each pattern = array of 4 beats; each beat is an array of "slot events"
+   relative to that beat using swing-8th subdivision:
+     'ta'      -> 1 slot-group: hit on beat, holds full beat (quarter)
+     'titi'    -> 2 hits: long-8th + short-8th (both struck) = ti-ti
+     'siti'    -> 1 hit on the OFF-beat (short 8th) only, rest on the on-beat
+                  (the "si" is silent, "ti" sounds) — isolates the upbeat
+     'syncopa' -> spans TWO beats: 8th(rest is silent on beat) - actually
+                  syncopa = eighth + quarter + eighth tied figure spanning
+                  one full beat boundary: off-8th, hold through next beat's
+                  on-8th, then off-8th of that same beat. We implement the
+                  classic "syncopa": & of beat1 - hold over beat 2's "1" - 
+                  release on & of beat 2. So syncopa OCCUPIES 2 beats.
+   To keep bar math simple (4 beats/bar), we build patterns as a flat list
+   of HIT EVENTS in slot units (0..7 per bar, swung), each with a duration
+   in slots, syllable label, and rest gaps implied by gaps between hits.
+*/
+
+// Returns array of {slot, slots, syllable} for a 1-bar (8-slot) pattern built from syllable tokens
+// tokens consumed in order, each token fills 2 slots (1 beat) except syncopa which fills 4 slots (2 beats)
+function buildBar(tokens){
+  const events = [];
+  let slot = 0;
+  for (const tok of tokens){
+    if (tok === 'ta'){
+      events.push({slot, slots:2, syllable:'ta'});
+      slot += 2;
+    } else if (tok === 'titi'){
+      events.push({slot, slots:1, syllable:'ti'});
+      events.push({slot:slot+1, slots:1, syllable:'ti'});
+      slot += 2;
+    } else if (tok === 'siti'){
+      // rest on the beat (silent "si"), hit on the off-beat ("ti")
+      events.push({slot:slot+1, slots:1, syllable:'ti', restBefore:true, restSyllable:'si'});
+      slot += 2;
+    } else if (tok === 'syncopa'){
+      // 8th (off-beat of beat A) + tie over the next on-beat + 8th... 
+      // We render as: hit at slot (off-beat of beat A) lasting 3 slots
+      // (off A, on B, off-of-on... ) -> spans through to just before off-beat B.
+      // slots: off-A(1) -> on-B(1) -> off-B is a NEW hit (the second 8th release)
+      // Classic syncopa rhythm: 8th - quarter - 8th, total 2 beats (4 slots):
+      //   slot+1 (off A): hit "syn", duration 2 slots (covers on-B, sustained)
+      //   slot+3 (off B): hit "pa", duration 1 slot
+      // with rest on slot (on A) and rest-ish continuation rather than new attack on-B
+      events.push({slot:slot+1, slots:2, syllable:'co', restBefore:true, restSyllable:'syn➝'});
+      events.push({slot:slot+3, slots:1, syllable:'pa'});
+      slot += 4;
+    }
+  }
+  return events;
+}
+
+// Pattern banks per level — each entry is a 2-bar phrase: [bar1 tokens, bar2 tokens].
+// ORDERED EASIEST (index 0) TO HARDEST (last index) within each level, so a
+// level can ease students in gently before reaching its densest patterns.
+const LEVEL_PATTERNS = {
+  1: [
+    [['ta','ta','ta','ta'], ['ta','ta','titi','ta']],
+    [['ta','ta','titi','ta'], ['ta','ta','ta','ta']],
+    [['ta','titi','ta','ta'], ['ta','ta','titi','ta']],
+    [['ta','ta','titi','ta'], ['titi','titi','ta','ta']],
+    [['titi','ta','ta','titi'], ['ta','titi','titi','ta']],
+    [['ta','titi','titi','ta'], ['titi','ta','titi','ta']],
+    [['titi','titi','titi','ta'], ['ta','ta','ta','titi']],
+    [['ta','ta','ta','titi'], ['titi','titi','ta','ta']],
+    [['titi','ta','titi','titi'], ['ta','titi','ta','ta']],
+  ],
+  2: [
+    [['ta','ta','ta','siti'], ['ta','ta','ta','ta']],
+    [['ta','siti','ta','ta'], ['ta','ta','titi','ta']],
+    [['ta','siti','titi','ta'], ['ta','ta','ta','ta']],
+    [['ta','siti','titi','ta'], ['titi','ta','siti','ta']],
+    [['siti','ta','titi','siti'], ['ta','titi','ta','ta']],
+    [['titi','siti','ta','titi'], ['siti','ta','titi','ta']],
+    [['ta','titi','siti','titi'], ['ta','siti','ta','titi']],
+    [['siti','titi','ta','ta'], ['titi','siti','titi','ta']],
+    [['ta','siti','ta','siti'], ['titi','ta','titi','ta']],
+  ],
+  3: [
+    // tokens fill 4 beats per bar; 'syncopa' eats 2 beats, so combine with 1-beat tokens carefully
+    [['ta','ta','syncopa'], ['ta','ta','ta','ta']],
+    [['ta','syncopa','ta'], ['ta','ta','titi','ta']],
+    [['syncopa','ta','ta'], ['ta','siti','ta','ta']],
+    [['syncopa','siti','ta'], ['titi','syncopa','ta']],
+    [['ta','syncopa','titi'], ['siti','syncopa','ta']],
+    [['syncopa','ta','titi'], ['syncopa','siti','ta']],
+    [['titi','siti','syncopa'], ['ta','syncopa','siti']],
+    [['syncopa','titi','ta'], ['ta','siti','syncopa']],
+    [['siti','syncopa','titi'], ['syncopa','ta','siti']],
+  ]
+};
+
+/* Picks a pattern index from a level's bank that eases in from easy to hard
+   across the level's rounds, rather than picking uniformly at random.
+   Round 0 always gets the bank's easiest pattern (index 0) so the very
+   first thing a student hears in a level is guaranteed gentle. Later
+   rounds draw from a window that slides toward the harder end of the
+   bank and narrows slightly, keeping some natural variety rather than a
+   mechanically increasing sequence. */
+function pickPatternIndex(bankSize, roundIdx, roundsPerLevel){
+  if (roundIdx === 0) return 0;
+  const progress = roundIdx / Math.max(1, roundsPerLevel - 1);
+  const center = 1 + progress * (bankSize - 2);
+  const width = bankSize*0.28 - progress*(bankSize*0.1);
+  const lo = Math.max(0, Math.round(center - width));
+  const hi = Math.min(bankSize-1, Math.round(center + width));
+  return lo + Math.floor(Math.random() * (hi - lo + 1));
+}
+
+function buildTwoBarPattern(tokenPair){
+  return [buildBar(tokenPair[0]), buildBar(tokenPair[1])];
+}
+
+/* ---------------- AUDIO: drumstick "call" hit + clap "response" hit ---------------- */
+/* Low claves synthesis: real claves are unpitched percussion — a sharp,
+   woody "knock" with a brief resonant ring, not a sustained musical pitch.
+   We build this from filtered noise (no oscillator/fundamental at all, so
+   it never reads as a "note") run through a narrow bandpass filter tuned
+   low for a deeper knock, with a very fast attack and short decay matching
+   how a real clave strike dies away almost immediately. */
+function playClaves(start, {gain=1.0, resonance=480}={}){
+  const dur = 0.1;
+  const bufferSize = Math.floor(audioCtx.sampleRate * dur);
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i=0;i<bufferSize;i++){
+    data[i] = (Math.random()*2-1) * Math.pow(1 - i/bufferSize, 1.6); // fast decay envelope baked into the noise burst
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buffer;
+
+  const filt = audioCtx.createBiquadFilter();
+  filt.type = 'bandpass';
+  filt.frequency.value = resonance; // low resonant band = the "pitch" of the knock, without it being a tuned note
+  filt.Q.value = 4; // wide enough to let real loudness through while still sounding like a tuned knock, not hiss
+
+  // Saturation adds perceived loudness through harmonic content rather than
+  // raw peak amplitude (same principle a compressor/limiter uses). Because
+  // tanh saturates toward its ceiling quickly, we apply a fixed trim AFTER
+  // the shaper so the claves body and the thump layer below have a known,
+  // verified combined peak rather than each being tuned in isolation.
+  const shaper = audioCtx.createWaveShaper();
+  const curve = new Float32Array(256);
+  for (let i=0;i<256;i++){
+    const x = (i/255)*2-1;
+    curve[i] = Math.tanh(x*2.5);
+  }
+  shaper.curve = curve;
+
+  const outputTrim = audioCtx.createGain();
+  outputTrim.gain.value = 0.73; // fixed trim — keeps claves body within its share of headroom
+
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0, start);
+  g.gain.linearRampToValueAtTime(gain, start + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+
+  src.connect(filt); filt.connect(shaper); shaper.connect(outputTrim); outputTrim.connect(g); g.connect(clickGain);
+  src.start(start);
+  src.stop(start + dur + 0.01);
+
+  // Low body "thump" layered underneath the knock for extra perceived
+  // weight/loudness. Sized conservatively (peak 0.2 before the bus) so that
+  // even when it lands at exactly the same instant as the claves body's own
+  // peak, the sum still stays safely under the mix's clipping ceiling.
+  const thump = audioCtx.createOscillator();
+  thump.type = 'sine';
+  thump.frequency.value = resonance * 0.55;
+  const gThump = audioCtx.createGain();
+  gThump.gain.setValueAtTime(0, start);
+  gThump.gain.linearRampToValueAtTime(gain * 0.2, start + 0.002);
+  gThump.gain.exponentialRampToValueAtTime(0.001, start + dur * 0.6);
+  thump.connect(gThump); gThump.connect(clickGain);
+  thump.start(start);
+  thump.stop(start + dur * 0.6 + 0.02);
+}
+
+function playStick(start, accent=false){
+  // CALL — low claves, slightly higher/louder resonance on accented hits
+  playClaves(start, { gain: accent?1.0:0.92, resonance: accent?520:460 });
+}
+function playClap(start){
+  // RESPONSE pad — same low-claves family, voiced a touch lower so call vs.
+  // response are still easy to tell apart by ear while both staying clearly
+  // in the same unpitched, woody timbre
+  playClaves(start, { gain: 0.95, resonance: 400 });
+}
+
+/* Convert bar-relative events (8 slots) + bar offset into absolute ctx times */
+function eventsToAbsoluteTimes(barEvents, barStartCtxTime){
+  return barEvents.map(ev=>{
+    const t = barStartCtxTime + slotOffsetInBar(ev.slot);
+    const endSlot = ev.slot + ev.slots;
+    // endSlot can be at most 8 (end of bar) given our pattern bank; slotOffsetInBar
+    // only covers 0..7, so handle the exact-bar-end case explicitly rather than
+    // letting it wrap incorrectly to slot 0's offset.
+    const endT = barStartCtxTime + (endSlot < 8 ? slotOffsetInBar(endSlot) : barDuration + slotOffsetInBar(endSlot-8));
+    return {...ev, time:t, endTime:endT};
+  });
+}
+
+/* =========================================================================
+   GAME STATE / FLOW
+   ========================================================================= */
+const state = {
+  level: 1,
+  round: 0,
+  roundsPerLevel: 8,
+  score: 0,
+  encore: 0,
+  phase: 'idle', // idle | call | response | feedback
+  currentPatternTokens: null,
+  currentEvents2Bar: null, // flattened with absolute bar 0/1 markers
+  responseTimes: [], // recorded tap times (ctx time) during response window
+  responseWindowStart: 0,
+  responseWindowEnd: 0,
+  awaitingResponseBarStart: null,
+};
+
+const els = {};
+function cacheEls(){
+  ['formStrip','roundLabel','levelLabel','scoreLabel','phaseBanner','notationRow',
+   'pad','padHint','encoreFill','encorePct','encoreNote','replayBtn','resetBtn',
+   'nextLevelBtn','actLevel1','actLevel2','actLevel3'].forEach(id=> els[id]=document.getElementById(id));
+}
+
+function buildFormStrip(){
+  els.formStrip.innerHTML = '';
+  FORM.forEach((chord, i)=>{
+    const d = document.createElement('div');
+    d.className = 'bar-light';
+    d.id = 'barlight-'+i;
+    d.textContent = (i+1);
+    els.formStrip.appendChild(d);
+  });
+}
+function setActiveBarLight(idx){
+  for (let i=0;i<12;i++){
+    document.getElementById('barlight-'+i).classList.toggle('active', i===idx);
+  }
+}
+
+function levelName(l){ return l===1?'Opening Act': l===2?'Headliner':'Encore'; }
+
+/* This game is aural dictation: students must copy back the rhythm purely
+   by ear, so we deliberately do NOT render the rhythm as notation. Instead
+   we show a simple, content-free "listening" pulse so the stage doesn't
+   feel dead during playback — it animates on every hit (call or response)
+   but reveals nothing about timing, duration, or rhythm pattern. */
+function showListeningIndicator(){
+  els.notationRow.innerHTML = `
+    <div class="listen-indicator" id="listenIndicator">
+      <div class="listen-dot"></div>
+      <div class="listen-dot"></div>
+      <div class="listen-dot"></div>
+    </div>
+  `;
+}
+function pulseListeningIndicator(){
+  const ind = document.getElementById('listenIndicator');
+  if (!ind) return;
+  ind.classList.remove('pulse');
+  // restart animation even if triggered in quick succession
+  void ind.offsetWidth;
+  ind.classList.add('pulse');
+}
+
+function updateHUD(){
+  els.roundLabel.textContent = (state.round+1) + ' / ' + state.roundsPerLevel;
+  els.levelLabel.textContent = levelName(state.level);
+  els.scoreLabel.textContent = state.score;
+  els.encorePct.textContent = Math.round(state.encore) + '%';
+  els.encoreFill.style.width = Math.min(100,state.encore) + '%';
+  [1,2,3].forEach(l=>{
+    document.getElementById('actLevel'+l).classList.toggle('active', l===state.level);
+  });
+}
+
+function setBanner(text, cls){
+  els.phaseBanner.className = 'phase-banner' + (cls? ' '+cls : '');
+  els.phaseBanner.textContent = text;
+}
+
+/* ---- Find an upcoming bar boundary (in the running 12-bar loop) so the
+   2-bar call/response always starts cleanly at the top of a bar ---- */
+function nextBarBoundaryCtxTime(leadBars=1){
+  const now = audioCtx.currentTime;
+  const barsElapsed = (now - bandStartCtxTime) / barDuration;
+  let nextBarN = Math.ceil(barsElapsed) + (leadBars-1);
+  nextBarN = Math.max(nextBarN, 0); // never resolve to a bar before the band's own start
+  let result = bandStartCtxTime + nextBarN * barDuration;
+  if (result < now) result += barDuration; // guard: never return a time already in the past
+  return result;
+}
+function barFormIndexAtCtxTime(t){
+  const barsElapsed = Math.round((t - bandStartCtxTime) / barDuration);
+  return ((barsElapsed % 12) + 12) % 12;
+}
+
+let roundActive = false;
+
+function startRound(forcedCallStart){
+  if (!bandPlaying) startBand();
+  roundActive = true;
+  state.responseTimes = [];
+  els.nextLevelBtn.style.display='none';
+  els.replayBtn.disabled = true;
+  els.pad.classList.add('disabled');
+
+  const bank = LEVEL_PATTERNS[state.level];
+  const patternIdx = pickPatternIndex(bank.length, state.round, state.roundsPerLevel);
+  const tokenPair = bank[patternIdx];
+  state.currentPatternTokens = tokenPair;
+  const events2Bar = buildTwoBarPattern(tokenPair);
+  state.currentEvents2Bar = events2Bar;
+  showListeningIndicator();
+
+  // Only show the "Call — listen up" banner for the very first round, where
+  // there's no previous result to display yet. On every later round, the
+  // previous round's result/feedback banner stays visible through this call
+  // phase instead of being instantly overwritten — the listening-indicator
+  // dots already give a visual cue that a new call is playing, so feedback
+  // genuinely stays readable rather than flashing for zero time.
+  if (state.round === 0){
+    setBanner('🎙 Call — listen up', 'call');
+    els.padHint.textContent = 'Listen to the call… (tap the pad or press SPACE when it\'s your turn)';
+  } else {
+    els.padHint.textContent = 'Listening… get ready';
+  }
+
+  const callBarStart = forcedCallStart !== undefined ? forcedCallStart : nextBarBoundaryCtxTime(1);
+  scheduleCallPlayback(events2Bar, callBarStart);
+
+  // Response window begins exactly 2 bars after the call begins
+  const responseBarStart = callBarStart + 2*barDuration;
+  state.responseWindowStart = responseBarStart;
+  state.responseWindowEnd = responseBarStart + 2*barDuration;
+
+  // schedule UI flip to "response" phase
+  const now = audioCtx.currentTime;
+  setTimeout(()=>{
+    if (!roundActive) return;
+    setBanner('🥁 Your turn — play it back!', 'response');
+    els.pad.classList.remove('disabled');
+    els.padHint.textContent = 'Tap the pad or press SPACE in time — swung eighths!';
+  }, Math.max(0,(responseBarStart-now)*1000));
+
+  setTimeout(()=>{
+    if (!roundActive) return;
+    finishResponseWindow();
+  }, Math.max(0,(state.responseWindowEnd-now)*1000) + 30);
+
+  els.replayBtn.disabled = false;
+}
+
+function scheduleCallPlayback(events2Bar, barStartCtxTime){
+  for (let bar=0; bar<2; bar++){
+    const barTime = barStartCtxTime + bar*barDuration;
+    const abs = eventsToAbsoluteTimes(events2Bar[bar], barTime);
+    abs.forEach(ev=>{
+      playStick(ev.time, ev.syllable==='pa'||ev.syllable==='ta');
+      const delayMs = Math.max(0,(ev.time - audioCtx.currentTime)*1000);
+      setTimeout(()=>pulseListeningIndicator(), delayMs);
+    });
+  }
+}
+
+function triggerPadHit(){
+  if (els.pad.classList.contains('disabled')) return;
+  ensureAudio();
+  const t = audioCtx.currentTime;
+  playClap(t);
+  els.pad.classList.add('hot');
+  setTimeout(()=>els.pad.classList.remove('hot'),90);
+  if (t >= state.responseWindowStart - 0.05 && t <= state.responseWindowEnd + 0.15){
+    state.responseTimes.push(t);
+  }
+}
+
+function attachPadListener(){
+  els.pad.addEventListener('pointerdown', (e)=>{
+    e.preventDefault();
+    triggerPadHit();
+  });
+
+  // Spacebar plays back the rhythm on the pad, same as tapping/clicking it.
+  // Guard against key-repeat while held down, and stop the page from
+  // scrolling (the browser's default action for spacebar).
+  document.addEventListener('keydown', (e)=>{
+    if (e.code === 'Space' || e.key === ' '){
+      e.preventDefault();
+      if (e.repeat) return;
+      triggerPadHit();
+    }
+  });
+}
+
+function finishResponseWindow(){
+  roundActive = false;
+  els.pad.classList.add('disabled');
+  const result = scoreResponse(state.currentEvents2Bar, state.responseWindowStart, state.responseTimes);
+  showResult(result);
+}
+
+/* Score by matching each expected hit-start to the nearest tap within tolerance */
+const TOLERANCE_SEC = 0.16;
+function scoreResponse(events2Bar, windowStartTime, taps){
+  const expected = [];
+  for (let bar=0; bar<2; bar++){
+    events2Bar[bar].forEach(ev=>{
+      expected.push(windowStartTime + bar*barDuration + slotOffsetInBar(ev.slot));
+    });
+  }
+  const usedTaps = new Set();
+  let hits = 0;
+  expected.forEach(expT=>{
+    let bestIdx=-1, bestDelta=Infinity;
+    taps.forEach((tapT, idx)=>{
+      if (usedTaps.has(idx)) return;
+      const d = Math.abs(tapT-expT);
+      if (d<bestDelta){ bestDelta=d; bestIdx=idx; }
+    });
+    if (bestIdx>=0 && bestDelta<=TOLERANCE_SEC){
+      hits++; usedTaps.add(bestIdx);
+    }
+  });
+  const extraTaps = Math.max(0, taps.length - expected.length);
+  const accuracy = expected.length? hits/expected.length : 0;
+  return { hits, total: expected.length, accuracy, extraTaps };
+}
+
+function showResult(result){
+  const pct = Math.round(result.accuracy*100);
+  let msg, cls;
+  if (pct>=85){ msg = `🎉 Encore! ${result.hits}/${result.total} hits — ${pct}%`; cls='result-good'; }
+  else if (pct>=50){ msg = `👏 Nice groove — ${result.hits}/${result.total} hits — ${pct}%`; cls='result-good'; }
+  else { msg = `🤔 Off the beat — ${result.hits}/${result.total} hits — ${pct}%`; cls='result-bad'; }
+  setBanner(msg, cls);
+
+  state.score += result.hits;
+  state.encore = Math.min(100, state.encore + (pct>=85? 14 : pct>=50? 7 : 2));
+  els.encoreNote.textContent = pct>=85 ? 'The room is roaring!' : pct>=50 ? 'Warming up the crowd…' : 'Keep swinging those eighths.';
+  state.round++;
+  updateHUD();
+
+  els.replayBtn.disabled = true;
+
+  if (state.round >= state.roundsPerLevel){
+    // Intentional stopping point: let the set-complete banner take over
+    // once this 2-bar window has actually finished, rather than continuing
+    // the cycle straight into another call.
+    els.padHint.textContent = state.level<3 ? 'Set complete!' : 'Encore complete!';
+    if (state.level<3){
+      setBanner('🌟 Set complete! Ready for the next act?', 'result-good');
+      els.nextLevelBtn.style.display='block';
+    } else {
+      setBanner('🏆 Encore complete — you closed the show!', 'result-good');
+    }
+  } else {
+    // Keep the call-response cycle perfectly continuous: the next call
+    // starts at the exact instant this response window ended (no searching
+    // for "the next bar" and no artificial pause), so the rhythm always
+    // plays every 2 bars without fail. The feedback banner above stays on
+    // screen and updates again at the end of the next round — it never
+    // gates or delays the timing.
+    els.padHint.textContent = 'Next call coming up…';
+    startRound(state.responseWindowEnd);
+  }
+}
+
+function goToLevel(l){
+  state.level = l;
+  state.round = 0;
+  els.nextLevelBtn.style.display='none';
+  updateHUD();
+  setTimeout(()=>{ startRound(); }, 400);
+}
+
+/* ---------------- WIRING ---------------- */
+function init(){
+  cacheEls();
+  attachPadListener();
+  buildFormStrip();
+  onBarChange = setActiveBarLight;
+  updateHUD();
+
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    try{
+      ensureAudio();
+      document.getElementById('startOverlay').style.display='none';
+      setBanner('Get ready… counting in', '');
+
+      const countInStart = audioCtx.currentTime + 0.1;
+      const musicStartTime = scheduleCountIn(countInStart, ()=>{
+        startBand(musicStartTime);
+        startRound(musicStartTime);
+      });
+    } catch(err){
+      console.error('Failed to start the club:', err);
+      const overlay = document.getElementById('startOverlay');
+      let errBox = document.getElementById('startErrorBox');
+      if (!errBox){
+        errBox = document.createElement('div');
+        errBox.id = 'startErrorBox';
+        errBox.style.cssText = 'color:#ff8a80; background:#2a1414; border:1px solid #ff8a80; border-radius:8px; padding:12px 16px; max-width:480px; font-family:Helvetica Neue,Arial,sans-serif; font-size:13px; margin-top:10px; text-align:left;';
+        overlay.appendChild(errBox);
+      }
+      errBox.textContent = 'Could not start audio: ' + (err && err.message ? err.message : err) +
+        '. This usually happens when the page is opened directly as a file (file://) — try opening it through a local server, or a different browser, instead.';
+    }
+  });
+
+  els.replayBtn.addEventListener('click', ()=>{
+    if (!state.currentEvents2Bar) return;
+    const callBarStart = nextBarBoundaryCtxTime(1);
+    setBanner('🎙 Call (replay) — listen up', 'call');
+    els.pad.classList.add('disabled');
+    scheduleCallPlayback(state.currentEvents2Bar, callBarStart);
+    const responseBarStart = callBarStart + 2*barDuration;
+    state.responseWindowStart = responseBarStart;
+    state.responseWindowEnd = responseBarStart + 2*barDuration;
+    state.responseTimes = [];
+    roundActive = true;
+    const now = audioCtx.currentTime;
+    setTimeout(()=>{
+      if (!roundActive) return;
+      setBanner('🥁 Your turn — play it back!', 'response');
+      els.pad.classList.remove('disabled');
+    }, Math.max(0,(responseBarStart-now)*1000));
+    setTimeout(()=>{
+      if (!roundActive) return;
+      finishResponseWindow();
+    }, Math.max(0,(state.responseWindowEnd-now)*1000)+30);
+  });
+
+  els.resetBtn.addEventListener('click', ()=>{
+    state.level=1; state.round=0; state.score=0; state.encore=0;
+    roundActive=false;
+    updateHUD();
+    setBanner('Reset — tap Replay or wait for next call', '');
+    setTimeout(()=>{ startRound(); }, 300);
+  });
+
+  els.nextLevelBtn.addEventListener('click', ()=>{
+    goToLevel(Math.min(3, state.level+1));
+  });
+
+  [1,2,3].forEach(l=>{
+    document.getElementById('actLevel'+l).addEventListener('click', ()=> goToLevel(l));
+  });
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  try{
+    init();
+  } catch(err){
+    console.error('Init failed:', err);
+    const overlay = document.getElementById('startOverlay');
+    if (overlay){
+      const errBox = document.createElement('div');
+      errBox.style.cssText = 'color:#ff8a80; background:#2a1414; border:1px solid #ff8a80; border-radius:8px; padding:12px 16px; max-width:480px; font-family:Helvetica Neue,Arial,sans-serif; font-size:13px; margin-top:10px; text-align:left;';
+      errBox.textContent = 'The page failed to set up properly: ' + (err && err.message ? err.message : err);
+      overlay.appendChild(errBox);
+    }
+  }
+});
+</script>
+</body>
+</html>
