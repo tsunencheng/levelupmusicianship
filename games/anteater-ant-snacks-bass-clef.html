@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anteater Note Snacks (Bass Clef)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Music&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#ffe2a8;
+    --sky-bottom:#fff3df;
+    --leaf-dark:#8a5a2b;
+    --leaf-mid:#c98a3f;
+    --leaf-light:#e8c28a;
+    --bark:#6b4a2f;
+    --ink:#3a2a18;
+    --card:#fffaf0ee;
+    --gold:#ffcf4d;
+    --coral:#ff6f59;
+    --sky-accent:#3aa9c9;
+    --wrong:#e85d5d;
+    --right:#3fae5a;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    height:100%;
+    font-family:'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+    background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bottom) 70%);
+    color:var(--ink);
+    overflow:hidden;
+  }
+  #app{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .cloud{
+    position:absolute;
+    background:#ffffff;
+    border-radius:50%;
+    opacity:.8;
+    filter:blur(.5px);
+  }
+
+  header{
+    width:100%;
+    max-width:1040px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    padding:14px 22px 6px;
+    z-index:5;
+  }
+  h1{
+    font-size:1.4rem;
+    margin:0;
+    color:var(--leaf-dark);
+    text-shadow:1px 1px 0 #fff;
+  }
+  @media (max-width: 480px){
+    h1{ font-size:1.1rem; }
+    .stat-pill{ font-size:.8rem; padding:6px 10px; gap:7px 10px; }
+    .hearts-row{ font-size:.9rem; }
+  }
+  .stat-pill{
+    background:var(--card);
+    border-radius:999px;
+    padding:8px 16px;
+    font-weight:bold;
+    box-shadow:0 3px 0 rgba(0,0,0,.08);
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 14px;
+    align-items:center;
+    font-size:.95rem;
+    max-width:100%;
+  }
+  .stat-pill span.label{font-weight:normal; color:#666; margin-right:4px;}
+  #score{color:var(--coral);}
+  .hearts-row{
+    display:flex;
+    gap:3px;
+    align-items:center;
+  }
+  .hearts-row.heart-shake{ animation: heartShake .4s; }
+  @keyframes heartShake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-4px);}
+    75%{transform:translateX(4px);}
+  }
+  .heart-slot{
+    width:1.15em;
+    height:1.15em;
+    flex-shrink:0;
+  }
+  .heart-slot rect{ transition: y .25s ease-out, height .25s ease-out; }
+  .final-stats{
+    display:flex;
+    gap:24px;
+    justify-content:center;
+    margin:14px 0;
+    font-weight:bold;
+    font-size:1.1rem;
+  }
+  .final-stats .label{ font-weight:normal; color:#666; display:block; font-size:.8rem; }
+  #streak{color:var(--sky-accent);}
+
+  #stage-wrap{
+    position:relative;
+    flex:1;
+    width:100%;
+    max-width:1080px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:3;
+  }
+
+  #stageSvg{
+    width:100%;
+    height:100%;
+    max-height:64vh;
+  }
+
+  .staff-line{
+    stroke:#3a3a3a;
+    stroke-width:2.2;
+  }
+
+  .feedback-flash{
+    position:absolute;
+    font-size:2.1rem;
+    font-weight:bold;
+    pointer-events:none;
+    animation:floatUp 0.9s ease-out forwards;
+    z-index:10;
+    text-shadow:0 2px 0 rgba(0,0,0,.15);
+  }
+  @keyframes floatUp{
+    0%{transform:translateY(0) scale(.6); opacity:0;}
+    15%{transform:translateY(-6px) scale(1.15); opacity:1;}
+    100%{transform:translateY(-70px) scale(1); opacity:0;}
+  }
+
+  #controls{
+    width:100%;
+    max-width:1040px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    padding:8px 18px 22px;
+    z-index:5;
+  }
+
+  #answerForm{
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  #letterInput{
+    width:88px;
+    font-size:2rem;
+    text-align:center;
+    text-transform:uppercase;
+    border:4px solid var(--leaf-mid);
+    border-radius:16px;
+    padding:6px 0;
+    background:#fffef8;
+    color:var(--ink);
+    outline:none;
+    font-weight:bold;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.08);
+    transition:border-color .15s, transform .15s;
+  }
+  #letterInput:focus{ border-color:var(--sky-accent); }
+  #letterInput.shake{ border-color:var(--wrong); animation:shake .35s; }
+  #letterInput.good{ border-color:var(--right); }
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-8px);}
+    40%{transform:translateX(8px);}
+    60%{transform:translateX(-6px);}
+    80%{transform:translateX(6px);}
+  }
+
+  .letter-btns{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .letter-btns button{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    border:none;
+    background:var(--card);
+    font-weight:bold;
+    font-size:1.05rem;
+    color:var(--leaf-dark);
+    box-shadow:0 3px 0 rgba(0,0,0,.1);
+    cursor:pointer;
+    transition:transform .08s;
+  }
+  .letter-btns button:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.1); }
+
+  #hint{
+    font-size:.85rem;
+    color:#3d5a3f;
+    opacity:.85;
+    min-height:1.1em;
+  }
+
+  #startOverlay, #pauseOverlay, #gameOverOverlay{
+    position:absolute;
+    inset:0;
+    background:rgba(20,40,20,.55);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    text-align:center;
+    color:#fff;
+    padding:20px;
+    overflow-y:auto;
+  }
+  #startOverlay .card, #pauseOverlay .card, #gameOverOverlay .card{
+    background:var(--card);
+    color:var(--ink);
+    border-radius:24px;
+    padding:28px 32px;
+    max-width:560px;
+    box-shadow:0 10px 0 rgba(0,0,0,.15);
+  }
+  #startOverlay h2, #pauseOverlay h2, #gameOverOverlay h2{ margin-top:0; color:var(--leaf-dark); }
+  #startOverlay button, #pauseOverlay button, #gameOverOverlay button{
+    margin-top:14px;
+    font-size:1.1rem;
+    font-weight:bold;
+    padding:12px 28px;
+    border:none;
+    border-radius:999px;
+    background:var(--coral);
+    color:#fff;
+    cursor:pointer;
+    box-shadow:0 4px 0 #c44b3c;
+  }
+  #startOverlay button:hover, #pauseOverlay button:hover, #gameOverOverlay button:hover{ filter:brightness(1.06); }
+
+  ol.how-to{
+    text-align:left;
+    margin:12px 0 10px 0;
+    padding-left:1.4em;
+    font-size:.95rem;
+    line-height:1.7;
+    color:var(--ink);
+  }
+  ol.how-to li{ margin-bottom:3px; }
+
+  .ant-note{
+    font-size:.82rem;
+    background:var(--sky-top);
+    border-radius:10px;
+    padding:7px 12px;
+    margin:8px 0 4px;
+    color:var(--bark);
+    text-align:center;
+  }
+
+  .bug-key{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:10px;
+  }
+  .bug-key div{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-size:.7rem;
+    width:54px;
+  }
+  .bug-key svg{ width:34px; height:34px; }
+
+  select, .difficulty-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  select{
+    font-size:1rem;
+    padding:6px 10px;
+    border-radius:10px;
+    border:2px solid var(--leaf-mid);
+    background:#fffef8;
+  }
+
+  footer{
+    font-size:.7rem;
+    color:#3d5a3f88;
+    text-align:center;
+    padding-bottom:6px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="bg-dressing"></div>
+
+  <header>
+    <h1>🐜 Anteater Note Snacks</h1>
+    <div class="stat-pill">
+      <div id="healthHearts" class="hearts-row"></div>
+      <div><span class="label">Score</span><span id="score">0</span></div>
+      <div><span class="label">Streak</span><span id="streak">0</span></div>
+      <div><span class="label">Best</span><span id="best">0</span></div>
+    </div>
+  </header>
+
+  <div id="stage-wrap">
+    <svg id="stageSvg" viewBox="0 0 1040 460" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div id="controls">
+    <form id="answerForm" autocomplete="off">
+      <input id="letterInput" maxlength="1" placeholder="?" autocapitalize="characters" />
+    </form>
+    <div class="letter-btns" id="letterButtons"></div>
+    <div id="hint">Type the natural note name (A–G) — it submits instantly, no Enter needed.</div>
+  </div>
+
+  <footer>Natural notes only · no sharps or flats · made for bass-clef practice</footer>
+
+  <div id="startOverlay">
+    <div class="card">
+      <h2>Feed the anteater the right note!</h2>
+      <ol class="how-to">
+        <li>An ant marches onto the <strong>bass clef staff</strong> and crawls toward the anteater.</li>
+        <li>Work out which <strong>line or space</strong> the ant is sitting on.</li>
+        <li><strong>Type the note name</strong> (A – G) — it submits the instant you press the key, no Enter needed.</li>
+        <li>Correct? The anteater's tongue <strong>snaps it up</strong> ✓ — Wrong? The ant scurries back.</li>
+        <li>If an ant reaches the anteater without being named, you <strong>lose a heart</strong> ♥.</li>
+        <li>The crawl <strong>speeds up</strong> as your streak grows — stay sharp!</li>
+      </ol>
+      <p class="ant-note">🐜 Ant colours are random — read the <strong>staff position</strong>, not the colour!</p>
+      <div class="bug-key" id="bugKey"></div>
+      <div class="difficulty-row">
+        <label for="rangeSelect">Note range:</label>
+        <select id="rangeSelect">
+          <option value="easy">Easy — lines &amp; spaces near the staff</option>
+          <option value="full" selected>Full — low G to middle C</option>
+        </select>
+      </div>
+      <button id="startBtn">Start feeding 🐜</button>
+    </div>
+  </div>
+
+  <div id="pauseOverlay" style="display:none;">
+    <div class="card">
+      <h2 id="pauseTitle">Paused</h2>
+      <p id="pauseMsg"></p>
+      <button id="resumeBtn">Keep playing</button>
+    </div>
+  </div>
+
+  <div id="gameOverOverlay" style="display:none;">
+    <div class="card">
+      <h2>Out of hearts!</h2>
+      <p>The anteater's let a few too many ants escape — but here's how you did:</p>
+      <div class="final-stats">
+        <div><span class="label">Final score</span><span id="finalScore">0</span></div>
+        <div><span class="label">Best streak</span><span id="finalBest">0</span></div>
+      </div>
+      <button id="restartBtn">Try again 🐜</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------
+     MUSIC DATA
+     Bass clef, natural notes only (no sharps/flats).
+  --------------------------------------------------------- */
+
+  const STAFF_TOP_Y = 165;      // y of top staff line (line 5, A3 in bass clef)
+  const STAFF_LINE_GAP = 18;    // gap between staff lines
+  const STAFF_LEFT_X = 130;
+  const STAFF_RIGHT_X = 760;
+  const STEP = STAFF_LINE_GAP / 2; // one diatonic step = half a line-gap
+
+  const LETTERS = ['C','D','E','F','G','A','B'];
+
+  // Absolute diatonic index: C4 (middle C) = 0, D4=1 ... B4=6, C5=7, etc.
+  function diatonicIndex(letter, octave){
+    return LETTERS.indexOf(letter) + (octave - 4) * 7;
+  }
+  // Bass clef: the top staff line (line 5) is A3 — "Good Boys Do Fine Always"
+  // for the lines (G2 B2 D3 F3 A3) reading bottom to top.
+  const TOP_LINE_INDEX = diatonicIndex('A',3);
+
+  // steps (svg-down-positive) from the top line for a given note
+  function stepsFromF5(letter, octave){
+    return TOP_LINE_INDEX - diatonicIndex(letter, octave);
+  }
+  function yForNote(letter, octave){
+    return STAFF_TOP_Y + stepsFromF5(letter, octave) * STEP;
+  }
+  // Ledger lines needed between the staff and a note above/below it
+  function ledgerStepsNeeded(letter, octave){
+    const s = stepsFromF5(letter, octave);
+    const lines = [];
+    if(s > 8){ for(let L=10; L<=s; L+=2) lines.push(L); }
+    else if (s < 0){ for(let L=-2; L>=s; L-=2) lines.push(L); }
+    return lines;
+  }
+
+  /* ---------------------------------------------------------
+     ANT DEFINITIONS
+     Every ant is drawn in SIDE PROFILE, facing right (the
+     direction of travel toward the anteater), so it's obvious
+     at a glance whether it's standing ON a line or sitting IN a
+     space: the legs' feet sit right at the note's y-position,
+     with the body riding just above it, the same way a real bug
+     would stand on a wire. The whole silhouette is still kept
+     within a tight ~13px vertical radius and centred on (0,0)
+     so ledger-line/space alignment stays exact — there is no
+     vertical bob animation.
+     Each "species" keeps the classic three-segment ant body
+     (head / thorax / abdomen, left to right) but varies abdomen
+     shape, colour, and markings so every note is instantly
+     recognisable.
+  --------------------------------------------------------- */
+
+  // ANT_SPECIES is an array — species are picked randomly at spawn, so
+  // the same ant colour never always means the same note. The player has
+  // to read the staff position, not the ant's colour.
+  const ANT_SPECIES = [
+    { name:'Red Ant',    color:'#d8432f', spots:'#7a1f12', draw: drawAntRound },
+    { name:'Honey Ant',  color:'#e8a23d', spots:'#a85f1a', draw: drawAntStriped },
+    { name:'Leaf Ant',   color:'#5a9c3f', spots:'#2c5a1f', draw: drawAntLeaf },
+    { name:'Violet Ant', color:'#8a5cd6', spots:'#4f2f99', draw: drawAntSpiky },
+    { name:'Teal Ant',   color:'#2fa3a8', spots:'#1c6468', draw: drawAntLong },
+    { name:'Sand Ant',   color:'#c9a55f', spots:'#7d6230', draw: drawAntFuzzy },
+    { name:'Black Ant',  color:'#3a3a3a', spots:'#111111', draw: drawAntBig },
+  ];
+  // Keep a backwards-compat alias so nothing else in the code breaks
+  const BUGS = Object.fromEntries('CDEFGAB'.split('').map((l,i) => [l, ANT_SPECIES[i]]));
+
+  let lastSpeciesIndex = -1;
+  function randomSpecies(){
+    let i;
+    do { i = Math.floor(Math.random() * ANT_SPECIES.length); }
+    while(i === lastSpeciesIndex && ANT_SPECIES.length > 1);
+    lastSpeciesIndex = i;
+    return ANT_SPECIES[i];
+  }
+
+  // All shapes below are bounded to roughly x:[-14,14] y:[-7,7], centred on
+  // 0,0 — the body itself straddles the note's line/space centre (just like
+  // a real ant standing with its belly right at wire height), with short
+  // legs stepping a few px below the belly and antennae sweeping up from
+  // the head, so nothing droops far above or below that radius and there
+  // is no vertical bob animation.
+  // Shared leg/antenna helper so every species reads clearly as "an ant"
+  // despite differing abdomen shapes — six short legs in profile (three
+  // down each side, stepping just below the belly line), plus two
+  // antennae sweeping forward from the head.
+  function antLegsAndAntennae(c, legColor){
+    const lc = legColor || c.spots;
+    return `
+      <g stroke="${lc}" stroke-width="1.3" fill="none" stroke-linecap="round">
+        <path d="M -9 3 L -10.3 5.6"/>
+        <path d="M -5.5 3.6 L -6 6.2"/>
+        <path d="M -2 3.6 L -1.6 6.2"/>
+        <path d="M 1.3 3.2 L 2.2 5.7"/>
+        <path d="M 3.8 2.4 L 5.1 4.6"/>
+        <path d="M 6 0.8 L 7.7 2.5"/>
+      </g>
+      <line x1="8" y1="-3.4" x2="11.8" y2="-6" stroke="${lc}" stroke-width="1.1" stroke-linecap="round"/>
+      <line x1="8" y1="-2.2" x2="12.2" y2="-2.6" stroke="${lc}" stroke-width="1.1" stroke-linecap="round"/>
+    `;
+  }
+
+  function drawAntRound(c){
+    // Classic rounded three-bead ant in profile: round abdomen (rear,
+    // left), small thorax (middle), round head with antennae (front, right).
+    return `<g>
+      ${antLegsAndAntennae(c)}
+      <circle cx="-7" cy="0" r="5.6" fill="${c.color}" stroke="${c.spots}" stroke-width="1.3"/>
+      <circle cx="-0.5" cy="0.5" r="3.2" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="6" cy="-1.5" r="3.6" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="7.4" cy="-2.6" r="0.8" fill="#fff"/>
+      <ellipse cx="-7" cy="-1.5" rx="2" ry="2.6" fill="${c.spots}" opacity=".3"/>
+    </g>`;
+  }
+
+  function drawAntStriped(c){
+    // Same silhouette as the round ant, but with vertical honey-bee-ish
+    // stripe bands across the abdomen.
+    return `<g>
+      ${antLegsAndAntennae(c)}
+      <ellipse cx="-7" cy="0" rx="5.9" ry="5.9" fill="${c.color}" stroke="${c.spots}" stroke-width="1.3"/>
+      <path d="M -9.2 -4.8 V 4.8 M -7 -5.8 V 5.8 M -4.8 -4.8 V 4.8" stroke="${c.spots}" stroke-width="1.3"/>
+      <circle cx="-0.5" cy="0.5" r="3.2" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="6" cy="-1.5" r="3.6" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="7.4" cy="-2.6" r="0.8" fill="#fff"/>
+    </g>`;
+  }
+
+  function drawAntLeaf(c){
+    // Abdomen is a pointed leaf-like teardrop instead of a round bead,
+    // tapering backward (to the left).
+    return `<g>
+      ${antLegsAndAntennae(c)}
+      <path d="M -2.5 -0.3 C -3.3 -5 -7.5 -6.8 -11 -5 C -13.5 -3.5 -13.5 3.5 -11 5 C -7.5 7 -3.3 4 -2.5 -0.3 Z"
+            fill="${c.color}" stroke="${c.spots}" stroke-width="1.3"/>
+      <line x1="-3" y1="0" x2="-12" y2="0" stroke="${c.spots}" stroke-width="0.9" opacity=".6"/>
+      <circle cx="-0.5" cy="0.5" r="3.1" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="6" cy="-1.5" r="3.5" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="7.4" cy="-2.6" r="0.8" fill="#fff"/>
+    </g>`;
+  }
+
+  function drawAntSpiky(c){
+    // Small triangular spines along the top of the abdomen for a
+    // slightly fiercer-looking species.
+    return `<g>
+      ${antLegsAndAntennae(c)}
+      <circle cx="-7" cy="0" r="5.4" fill="${c.color}" stroke="${c.spots}" stroke-width="1.3"/>
+      <path d="M -9.6 -3.4 L -9.9 -6.6 L -7.6 -4.3 Z" fill="${c.spots}"/>
+      <path d="M -7 -4.6 L -7.2 -7.7 L -5.3 -5.2 Z" fill="${c.spots}"/>
+      <path d="M -4.2 -4.9 L -3.9 -7.7 L -2.3 -5.3 Z" fill="${c.spots}"/>
+      <circle cx="-0.5" cy="0.5" r="3.2" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="6" cy="-1.5" r="3.6" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="7.4" cy="-2.6" r="0.8" fill="#fff"/>
+    </g>`;
+  }
+
+  function drawAntLong(c){
+    // Elongated, narrower abdomen (more "weaver ant" shaped) instead of
+    // round, stretched out behind the thorax.
+    return `<g>
+      ${antLegsAndAntennae(c)}
+      <ellipse cx="-7.5" cy="0" rx="7" ry="4.6" fill="${c.color}" stroke="${c.spots}" stroke-width="1.3"/>
+      <ellipse cx="-7.5" cy="0" rx="5.2" ry="1.8" fill="${c.spots}" opacity=".25"/>
+      <circle cx="-0.6" cy="0.6" r="3" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="5.8" cy="-1.4" r="3.4" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="7.1" cy="-2.4" r="0.75" fill="#fff"/>
+    </g>`;
+  }
+
+  function drawAntFuzzy(c){
+    // Small fuzzy tufts around the abdomen rim — a softer-looking,
+    // sand-coloured species.
+    return `<g>
+      ${antLegsAndAntennae(c)}
+      <circle cx="-7" cy="0" r="5.5" fill="${c.color}" stroke="${c.spots}" stroke-width="1.3"/>
+      <g stroke="${c.spots}" stroke-width="0.9" stroke-linecap="round" opacity=".7">
+        <line x1="-10.6" y1="-3" x2="-12.4" y2="-4.6"/>
+        <line x1="-12.4" y1="0" x2="-14.4" y2="0"/>
+        <line x1="-10.6" y1="3" x2="-12.4" y2="4.6"/>
+        <line x1="-3.6" y1="-3.4" x2="-1.8" y2="-5.2"/>
+        <line x1="-3.6" y1="3.4" x2="-1.8" y2="5.2"/>
+      </g>
+      <circle cx="-0.5" cy="0.5" r="3.2" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="6" cy="-1.5" r="3.6" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="7.4" cy="-2.6" r="0.8" fill="#fff"/>
+    </g>`;
+  }
+
+  function drawAntBig(c){
+    // The largest, darkest species — a chunky "bull ant" silhouette
+    // with a noticeably bigger head and visible mandibles, up front.
+    return `<g>
+      ${antLegsAndAntennae(c)}
+      <circle cx="-7.3" cy="0" r="6.1" fill="${c.color}" stroke="${c.spots}" stroke-width="1.3"/>
+      <circle cx="-0.2" cy="0.4" r="3.5" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="7" cy="-1.8" r="4.2" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <path d="M 8.5 0.4 Q 11.5 0.6 12.8 2.8" stroke="${c.spots}" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+      <circle cx="8.5" cy="-3.2" r="0.85" fill="#fff"/>
+    </g>`;
+  }
+
+  function bugSvgString(){
+    const b = randomSpecies();
+    return b.draw(b);
+  }
+
+  /* ---------------------------------------------------------
+     NOTE POOLS — bass clef range, low G (below the staff) up to
+     middle C (just above the staff).
+  --------------------------------------------------------- */
+  const EASY_NOTES = [
+    {letter:'G', octave:2}, {letter:'B', octave:2}, {letter:'D', octave:3},
+    {letter:'F', octave:3}, {letter:'A', octave:3}, {letter:'C', octave:3},
+    {letter:'E', octave:3}, {letter:'G', octave:3},
+  ];
+  const FULL_NOTES = [
+    {letter:'G', octave:2}, {letter:'A', octave:2}, {letter:'B', octave:2},
+    {letter:'C', octave:3}, {letter:'D', octave:3}, {letter:'E', octave:3},
+    {letter:'F', octave:3}, {letter:'G', octave:3}, {letter:'A', octave:3},
+    {letter:'B', octave:3}, {letter:'C', octave:4},
+  ];
+
+  /* ---------------------------------------------------------
+     STATE
+  --------------------------------------------------------- */
+  let score = 0, streak = 0, best = 0;
+  let pool = FULL_NOTES;
+  let current = null;
+  let awaitingAnswer = false;
+  let gameRunning = false;
+  const bugSpawnX = 300; // fixed spawn x position on the staff (left side)
+
+  // --- Health / difficulty state ---
+  const MAX_HEALTH = 5;
+  const PIPS_PER_HEART = 4; // health is tracked in quarter-heart "pips" so
+                             // small wrong-answer nibbles can show as partial
+                             // hearts, distinct from a full heart lost on a miss
+  const MAX_PIPS = MAX_HEALTH * PIPS_PER_HEART;
+  let healthPips = MAX_PIPS;
+  let wrongStreak = 0; // consecutive wrong guesses on the CURRENT bug only
+  let correctCount = 0; // drives the difficulty ramp
+  const CRAWL_START_MS = 6500;  // how long a bug takes to cross at the very start
+  const CRAWL_FLOOR_MS = 2200;  // fastest the crawl will ever get
+  const CRAWL_RAMP_STEPS = 18;  // number of correct answers to reach the floor speed
+  let crawlRAF = null;
+  let crawlStartTime = 0;
+  let crawlDuration = CRAWL_START_MS;
+  let crawlFromX = bugSpawnX, crawlToX = bugSpawnX;
+  let crawlActive = false;
+
+  const svg = document.getElementById('stageSvg');
+  const scoreEl = document.getElementById('score');
+  const streakEl = document.getElementById('streak');
+  const bestEl = document.getElementById('best');
+  const input = document.getElementById('letterInput');
+
+  function currentCrawlDuration(){
+    // Linearly ramps from CRAWL_START_MS down to CRAWL_FLOOR_MS over
+    // CRAWL_RAMP_STEPS correct answers, then stays at the floor.
+    const t = Math.min(correctCount / CRAWL_RAMP_STEPS, 1);
+    return CRAWL_START_MS + (CRAWL_FLOOR_MS - CRAWL_START_MS) * t;
+  }
+
+  /* ---------------------------------------------------------
+     AUDIO
+  --------------------------------------------------------- */
+  let actx = null;
+  function getCtx(){
+    if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    return actx;
+  }
+  function blip(freqStart, freqEnd, dur, type, gainPeak){
+    try{
+      const ctx = getCtx();
+      const t0 = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freqStart, t0);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd,20), t0+dur);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(gainPeak||0.18, t0+0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0+dur+0.02);
+    }catch(e){ /* audio unavailable */ }
+  }
+  function gulpSound(){
+    blip(200, 70, 0.16, 'square', 0.22);
+    setTimeout(()=>blip(100,45,0.12,'sine',0.18), 70);
+  }
+  function spitSound(){
+    blip(140, 320, 0.16, 'sawtooth', 0.12);
+  }
+  function correctDing(){ blip(660, 880, 0.18, 'triangle', 0.12); }
+
+  /* ---------------------------------------------------------
+     STAFF + BASS CLEF
+     The clef uses the real Unicode music glyph (U+1D122) so the
+     shape is an authentic bass (F) clef rather than a hand-drawn
+     approximation. By convention the two dots of the F-clef
+     straddle the F3 line (second line from the top).
+  --------------------------------------------------------- */
+  function drawStaffStatic(){
+    let s = '';
+    for(let i=0;i<5;i++){
+      const y = STAFF_TOP_Y + i*STAFF_LINE_GAP;
+      s += `<line class="staff-line" x1="${STAFF_LEFT_X}" y1="${y}" x2="${STAFF_RIGHT_X}" y2="${y}"/>`;
+    }
+    s += bassClefGlyph(STAFF_LEFT_X + 30, STAFF_TOP_Y);
+    return s;
+  }
+
+  function bassClefGlyph(originX, topLineY){
+    // Uses the real Unicode F-clef glyph (U+1D122) rendered through the
+    // Noto Music web font. It needs internet access to fetch the font;
+    // if that's unavailable the glyph falls back to a generic serif
+    // rendering, which looks wrong, but in a normal browser with
+    // internet access (i.e. however this file is actually opened) the
+    // real font loads fine.
+    //
+    // Positioned using the standard convention (matching how every
+    // reference diagram draws it): the top of the clef's hook sits AT
+    // the top staff line — never above it — the two dots straddle the
+    // F3 line (second line from the top), and the tail finishes within
+    // the staff. Calibrated by direct visual comparison against the
+    // staff lines at this font size.
+    const fontSize = 100;
+    const baselineOffset = 84; // baseline sits this far below the top staff line
+    return `<text x="${originX}" y="${topLineY + baselineOffset}"
+        font-family="'Noto Music', 'Bravura Text', serif"
+        font-size="${fontSize}" fill="#27331f" text-anchor="start">&#x1D122;</text>`;
+  }
+
+  /* ---------------------------------------------------------
+     SAVANNA SCENE: rolling hills and termite mounds across the
+     top, with a fallen log reaching in from the right for the
+     anteater to stand beside.
+  --------------------------------------------------------- */
+  function drawTree(){
+    let s = `<g id="tree">`;
+
+    // Distant hills: layered rounded blobs arcing across the very top of
+    // the scene. Kept entirely above y=95 (with margin) so it never
+    // crowds the highest playable note, which sits around y=147 (one
+    // ledger line above the staff).
+    const blobs = [
+      [40,30,42,'var(--leaf-mid)'], [120,14,52,'var(--leaf-dark)'], [220,32,46,'var(--leaf-light)'],
+      [330,8,56,'var(--leaf-mid)'], [450,28,48,'var(--leaf-dark)'], [570,4,54,'var(--leaf-light)'],
+      [690,26,46,'var(--leaf-mid)'], [800,8,54,'var(--leaf-dark)'], [910,30,44,'var(--leaf-light)'],
+      [1000,12,42,'var(--leaf-mid)']
+    ];
+    blobs.forEach(([cx,cy,r,col])=>{
+      s += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" opacity="0.9"/>`;
+    });
+    // a soft shadow strip under the hills so they read as "behind" the scene
+    s += `<rect x="0" y="40" width="1040" height="14" fill="var(--leaf-dark)" opacity="0.15"/>`;
+
+    // A couple of small termite mounds poking up from the horizon line,
+    // tying the background to the ant theme without crowding the staff.
+    function termiteMound(cx, baseY){
+      return `<g>
+        <path d="M ${cx-22} ${baseY}
+                 C ${cx-20} ${baseY-34} ${cx-9} ${baseY-58} ${cx} ${baseY-60}
+                 C ${cx+9} ${baseY-58} ${cx+20} ${baseY-34} ${cx+22} ${baseY}
+                 Z" fill="var(--bark)" opacity="0.55"/>
+        <ellipse cx="${cx-6}" cy="${baseY-22}" rx="3.5" ry="2.5" fill="#000" opacity="0.18"/>
+        <ellipse cx="${cx+8}" cy="${baseY-38}" rx="3" ry="2" fill="#000" opacity="0.18"/>
+      </g>`;
+    }
+    s += termiteMound(150, 50);
+    s += termiteMound(640, 46);
+
+    // Fallen log: a clear horizontal log shape entering from the right
+    // edge. Top surface sits at a consistent y so the anteater's feet can
+    // reliably land on it. Extends further left to leave room below/behind
+    // for the anteater's body and tail to read clearly against the sky.
+    const branchTopY = 318, branchBottomY = 346;
+    s += `<path d="M 1040 ${branchTopY}
+                  L 760 ${branchTopY}
+                  Q 740 ${(branchTopY+branchBottomY)/2} 760 ${branchBottomY}
+                  L 1040 ${branchBottomY} Z"
+            fill="var(--bark)" stroke="#4a3219" stroke-width="2.5"/>`;
+    // subtle bark texture lines
+    s += `<path d="M 800 ${branchTopY+6} L 1020 ${branchTopY+6}" stroke="#4a3219" stroke-width="1.5" opacity=".35"/>`;
+    s += `<path d="M 820 ${branchBottomY-6} L 1010 ${branchBottomY-6}" stroke="#4a3219" stroke-width="1.5" opacity=".35"/>`;
+    // a couple of small grass tufts for cohesion with the savanna hills
+    s += `<path d="M 970 ${branchTopY-2} L 966 ${branchTopY-16} L 972 ${branchTopY-3} L 976 ${branchTopY-18} L 980 ${branchTopY-2} Z" fill="var(--leaf-mid)"/>`;
+    s += `<path d="M 900 ${branchTopY+2} L 896 ${branchTopY-12} L 902 ${branchTopY+1} L 906 ${branchTopY-13} L 910 ${branchTopY+2} Z" fill="var(--leaf-dark)"/>`;
+
+    s += `</g>`;
+    return s;
+  }
+
+  /* ---------------------------------------------------------
+     ANTEATER
+     Large, standing beside the log on the right, body and long
+     snout facing LEFT (toward the staff). Tongue fires left to
+     snap up ants; on a correct answer it gulps the ant down, on
+     a wrong answer it spits the ant back out toward its staff
+     position.
+  --------------------------------------------------------- */
+  const CHAM_X = 900, CHAM_Y = 280, CHAM_SCALE = 1.15;
+  const MOUTH_LOCAL_X = -118, MOUTH_LOCAL_Y = -4;
+  const MOUTH_X = CHAM_X + MOUTH_LOCAL_X * CHAM_SCALE;
+  const MOUTH_Y = CHAM_Y + MOUTH_LOCAL_Y * CHAM_SCALE;
+
+  function drawAnteater(x,y){
+    // Local coordinate space: faces LEFT toward the staff. Giant-anteater
+    // silhouette — very long tapering snout, small ears and eye, a big
+    // bushy banner tail, grey body with the classic dark diagonal
+    // shoulder stripe, and stocky clawed feet.
+    return `<g id="anteater" transform="translate(${x},${y}) scale(${CHAM_SCALE})">
+
+      <!-- bushy tail: wide at the body, tapering and fanning out behind,
+           drawn as a filled silhouette with a few coarse "hair" strokes -->
+      <path id="tailOutline" d="M 38 6
+               C 70 -6 108 -2 128 18
+               C 142 32 140 52 122 60
+               C 100 70 70 64 52 48
+               C 42 39 36 22 38 6 Z"
+            fill="none" stroke="#5c5650" stroke-width="2" stroke-linejoin="round"/>
+      <path id="tailFill" d="M 38 6
+               C 70 -6 108 -2 128 18
+               C 142 32 140 52 122 60
+               C 100 70 70 64 52 48
+               C 42 39 36 22 38 6 Z"
+            fill="#8a8378" stroke="#5c5650" stroke-width="2" stroke-linejoin="round"/>
+      <!-- coarse hair texture lines across the tail -->
+      <g stroke="#4a443e" stroke-width="2" stroke-linecap="round" opacity=".55">
+        <path d="M 58 10 L 72 -2"/>
+        <path d="M 74 8 L 92 -4"/>
+        <path d="M 92 14 L 112 4"/>
+        <path d="M 106 24 L 128 18"/>
+        <path d="M 112 38 L 136 36"/>
+        <path d="M 104 52 L 126 54"/>
+        <path d="M 84 60 L 102 66"/>
+        <path d="M 64 58 L 78 66"/>
+      </g>
+
+      <!-- back legs (stocky, clawed) -->
+      <path d="M 22 30 Q 18 42 10 48" stroke="#6b655c" stroke-width="13" fill="none" stroke-linecap="round"/>
+      <ellipse cx="7" cy="51" rx="9" ry="6" fill="#6b655c" stroke="#3f3a33" stroke-width="2"/>
+      <path d="M 1 53 L -4 58 M 7 54 L 6 60 M 13 53 L 16 58" stroke="#3f3a33" stroke-width="2" stroke-linecap="round"/>
+
+      <!-- body: stocky, slightly humped, grey-brown coat -->
+      <ellipse cx="2" cy="2" rx="46" ry="27" fill="#8a8378" stroke="#3f3a33" stroke-width="3"/>
+      <!-- pale belly -->
+      <ellipse cx="-2" cy="14" rx="30" ry="11" fill="#c9c2b3" opacity=".8"/>
+      <!-- classic dark diagonal shoulder stripe, bordered in pale cream -->
+      <path d="M -34 -18 L 24 18 L 32 12 L -26 -24 Z" fill="#2c2924"/>
+      <path d="M -34 -18 L 24 18" stroke="#d9d2bf" stroke-width="3" fill="none"/>
+      <path d="M -26 -24 L 32 12" stroke="#d9d2bf" stroke-width="3" fill="none"/>
+
+      <!-- front legs (stocky, clawed, in front of body) -->
+      <path d="M -20 24 Q -26 38 -36 45" stroke="#797266" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <ellipse cx="-40" cy="48" rx="9.5" ry="6.5" fill="#797266" stroke="#3f3a33" stroke-width="2.2"/>
+      <path d="M -47 50 L -52 55 M -40 51 L -41 58 M -33 50 L -30 55" stroke="#3f3a33" stroke-width="2" stroke-linecap="round"/>
+
+      <!-- small rounded ears, set back on the head -->
+      <ellipse cx="-44" cy="-26" rx="6.5" ry="8" fill="#8a8378" stroke="#3f3a33" stroke-width="2.2"/>
+      <ellipse cx="-44" cy="-26" rx="3.4" ry="4.6" fill="#5c5650"/>
+
+      <!-- head + the long, gently tapering snout, built as one
+           continuous silhouette so the taper reads smoothly -->
+      <path d="M -28 -12
+               C -34 -26 -48 -32 -62 -30
+               C -90 -27 -118 -16 -134 -5
+               C -138 -2 -138 1 -134 3
+               C -118 10 -90 16 -62 18
+               C -48 19 -34 13 -28 -2
+               Z"
+            fill="#9c9486" stroke="#3f3a33" stroke-width="3"/>
+      <!-- soft underside shading along the jaw -->
+      <path d="M -60 14 C -86 12 -112 7 -130 1" stroke="#7d766a" stroke-width="4" fill="none" opacity=".6" stroke-linecap="round"/>
+
+      <!-- small eye, set well back near the head -->
+      <circle cx="-40" cy="-12" r="4.4" fill="#2a261f"/>
+      <circle cx="-41.5" cy="-13.5" r="1.3" fill="#fff" opacity=".85"/>
+
+      <!-- nostril right at the snout tip -->
+      <ellipse cx="-132" cy="-1" rx="2.6" ry="1.8" fill="#2a261f"/>
+
+      <!-- mouth gap at snout tip, opens left (kept for tongue mechanic) -->
+      <path id="chamMouthTop" d="M -120 -3 Q -128 -3.5 -134 -2.5" stroke="#3f3a33" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path id="chamMouthBottom" d="M -120 1 Q -128 2 -134 1.5" stroke="#3f3a33" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+      <!-- subtle coat texture flecks -->
+      <circle cx="0" cy="-8" r="2.2" fill="#6b655c" opacity=".4"/>
+      <circle cx="16" cy="-4" r="2" fill="#6b655c" opacity=".4"/>
+      <circle cx="28" cy="4" r="1.8" fill="#6b655c" opacity=".4"/>
+    </g>`;
+  }
+
+  // The tongue is drawn as its own top-level group in ABSOLUTE scene
+  // coordinates (not nested inside #anteater's local transform), since
+  // fireTongueTo() computes its endpoints in scene space already.
+  function drawTongueLayer(){
+    return `<g id="tongueGroup" opacity="0">
+        <line id="tongueLine" x1="0" y1="0" x2="0" y2="0" stroke="#e85d6b" stroke-width="3.6" stroke-linecap="round"/>
+        <circle id="tongueTip" cx="0" cy="0" r="6.5" fill="#e85d6b" stroke="#c44b5a" stroke-width="1.2"/>
+      </g>`;
+  }
+
+  /* ---------------------------------------------------------
+     RENDER LOOP
+  --------------------------------------------------------- */
+  function renderStaticScene(){
+    svg.innerHTML =
+      drawStaffStatic() +
+      `<g id="bug-layer"></g>` +
+      drawTree() +
+      drawAnteater(CHAM_X, CHAM_Y) +
+      drawTongueLayer() +
+      `<g id="fx-layer"></g>`;
+  }
+
+  function pickNewNote(){
+    let next;
+    do{
+      next = pool[Math.floor(Math.random()*pool.length)];
+    } while(current && next.letter===current.letter && next.octave===current.octave && pool.length>1);
+    current = next;
+    spawnBug(current);
+  }
+
+  function spawnBug(note){
+    wrongStreak = 0; // fresh bug, fresh slate for the wrong-guess tally
+    const layer = document.getElementById('bug-layer');
+    const y = yForNote(note.letter, note.octave);
+    const ledgerSteps = ledgerStepsNeeded(note.letter, note.octave);
+    const ly_list = ledgerSteps.map(Lstep => STAFF_TOP_Y + Lstep*STEP);
+
+    const bugMarkup = bugSvgString();
+
+    let ledgerSvg = '';
+    ly_list.forEach(ly=>{
+      ledgerSvg += `<line class="staff-line ledger-line" data-ly="${ly}" x1="${bugSpawnX-20}" y1="${ly}" x2="${bugSpawnX+20}" y2="${ly}"/>`;
+    });
+
+    layer.innerHTML = `
+      <g id="currentBug">
+        ${ledgerSvg}
+        <g id="bugWrap" data-cur-x="${bugSpawnX}" data-cur-y="${y}" transform="translate(${bugSpawnX},${y})">
+          <g id="bugWiggle">${bugMarkup}</g>
+        </g>
+      </g>`;
+
+    animateWiggle();
+    awaitingAnswer = true;
+
+    // Set up and start the horizontal crawl toward the anteater's mouth.
+    crawlDuration = currentCrawlDuration();
+    crawlFromX = bugSpawnX;
+    crawlToX = MOUTH_X;
+    crawlStartTime = performance.now();
+    crawlActive = true;
+    if(crawlRAF) cancelAnimationFrame(crawlRAF);
+    crawlRAF = requestAnimationFrame(animateCrawlFrame);
+  }
+
+  function animateCrawlFrame(now){
+    if(!crawlActive) return;
+    const bugWrap = document.getElementById('bugWrap');
+    if(!bugWrap){ crawlActive = false; return; }
+
+    const elapsed = now - crawlStartTime;
+    const p = Math.min(elapsed / crawlDuration, 1);
+    const x = crawlFromX + (crawlToX - crawlFromX) * p;
+    const y = parseFloat(bugWrap.getAttribute('data-cur-y'));
+
+    bugWrap.setAttribute('data-cur-x', x);
+    bugWrap.setAttribute('transform', `translate(${x},${y})`);
+
+    // ledger lines (if any) follow the bug's live x position
+    document.querySelectorAll('.ledger-line').forEach(line=>{
+      line.setAttribute('x1', x-20);
+      line.setAttribute('x2', x+20);
+    });
+
+    if(p >= 1){
+      crawlActive = false;
+      bugEscaped();
+      return;
+    }
+    crawlRAF = requestAnimationFrame(animateCrawlFrame);
+  }
+
+  // Subtle rotation-only wiggle — NO vertical translation, so the bug's
+  // centre stays locked exactly on its line/space at all times.
+  let wiggleRAF = null;
+  function animateWiggle(){
+    if(wiggleRAF) cancelAnimationFrame(wiggleRAF);
+    const node = document.getElementById('bugWiggle');
+    if(!node) return;
+    const start = performance.now();
+    function frame(t){
+      if(!document.getElementById('bugWiggle')) return;
+      const elapsed = (t-start)/1000;
+      const rot = Math.sin(elapsed*1.8)*4;
+      node.setAttribute('transform', `rotate(${rot})`);
+      wiggleRAF = requestAnimationFrame(frame);
+    }
+    wiggleRAF = requestAnimationFrame(frame);
+  }
+
+  /* ---------------------------------------------------------
+     TONGUE ANIMATION (shared path-out, used for both gulp & spit)
+  --------------------------------------------------------- */
+  function fireTongueTo(targetX, targetY, onReachTarget, onReturnDone){
+    const tongueGroup = document.getElementById('tongueGroup');
+    const tongueLine = document.getElementById('tongueLine');
+    const tongueTip = document.getElementById('tongueTip');
+
+    const mouthX = MOUTH_X, mouthY = MOUTH_Y;
+
+    const dx = targetX - mouthX, dy = targetY - mouthY;
+    tongueGroup.setAttribute('opacity','1');
+
+    let t0 = performance.now();
+    const outDur = 170, holdDur = 70, backDur = 190;
+
+    function step(now){
+      const elapsed = now - t0;
+      let x2, y2;
+      if(elapsed < outDur){
+        const p = elapsed/outDur;
+        x2 = mouthX + dx*p; y2 = mouthY + dy*p;
+      } else if(elapsed < outDur+holdDur){
+        x2 = targetX; y2 = targetY;
+        if(elapsed - outDur < 4) onReachTarget && onReachTarget();
+      } else if(elapsed < outDur+holdDur+backDur){
+        const p = (elapsed-outDur-holdDur)/backDur;
+        x2 = targetX + (mouthX-targetX)*p; y2 = targetY + (mouthY-targetY)*p;
+      } else {
+        tongueGroup.setAttribute('opacity','0');
+        onReturnDone && onReturnDone();
+        return;
+      }
+      tongueLine.setAttribute('x1', mouthX); tongueLine.setAttribute('y1', mouthY);
+      tongueLine.setAttribute('x2', x2); tongueLine.setAttribute('y2', y2);
+      tongueTip.setAttribute('cx', x2); tongueTip.setAttribute('cy', y2);
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function eatBugCorrect(callback){
+    const bugWrap = document.getElementById('bugWrap');
+    if(!bugWrap){ callback && callback(); return; }
+    crawlActive = false; // stop the crawl — it's been caught
+    if(crawlRAF) cancelAnimationFrame(crawlRAF);
+    const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+    const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+
+    fireTongueTo(curX, curY,
+      ()=>{ // reached the bug — shrink it away (gulped)
+        gulpSound();
+        bugWrap.style.transition = 'opacity .12s, transform .12s';
+        bugWrap.setAttribute('opacity','0');
+      },
+      ()=>{ bugWrap.remove(); callback && callback(); }
+    );
+  }
+
+  function spitBugBack(callback){
+    const bugWrap = document.getElementById('bugWrap');
+    if(!bugWrap){ callback && callback(); return; }
+    const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+    const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+
+    // bug visually rides the tongue tip out and is dropped back at its
+    // current crawl position — a wrong guess doesn't reset progress,
+    // the crawl just keeps going once this brief animation finishes
+    bugWrap.setAttribute('opacity','0'); // hidden while "in" the tongue grab
+
+    fireTongueTo(curX, curY,
+      ()=>{ spitSound(); },
+      ()=>{
+        bugWrap.setAttribute('opacity','1');
+        callback && callback();
+      }
+    );
+  }
+
+  /* ---------------------------------------------------------
+     FEEDBACK TEXT POP
+  --------------------------------------------------------- */
+  function showFlash(text, color, x, y){
+    const wrap = document.getElementById('stage-wrap');
+    const el = document.createElement('div');
+    el.className = 'feedback-flash';
+    el.textContent = text;
+    el.style.color = color;
+    el.style.left = x+'px';
+    el.style.top = y+'px';
+    wrap.appendChild(el);
+    setTimeout(()=>el.remove(), 950);
+  }
+  function svgPointToScreen(x,y){
+    const rect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    const scaleX = rect.width/vb.width, scaleY = rect.height/vb.height;
+    const wrapRect = document.getElementById('stage-wrap').getBoundingClientRect();
+    return { x: rect.left - wrapRect.left + x*scaleX, y: rect.top - wrapRect.top + y*scaleY };
+  }
+
+  /* ---------------------------------------------------------
+     ANSWER HANDLING
+  --------------------------------------------------------- */
+  function submitAnswer(letter){
+    if(!awaitingAnswer || !gameRunning) return;
+    letter = (letter||'').toUpperCase().trim();
+    if(!letter) return;
+
+    const correct = letter === current.letter;
+    awaitingAnswer = false;
+
+    const bugWrap = document.getElementById('bugWrap');
+    let sx=500, sy=200;
+    if(bugWrap){
+      const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+      const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+      const pt = svgPointToScreen(curX, curY);
+      sx = pt.x; sy = pt.y;
+    }
+
+    if(correct){
+      score += 10 + Math.min(streak,10);
+      streak += 1;
+      correctCount += 1; // ramps difficulty — see currentCrawlDuration()
+      wrongStreak = 0; // recovering from a wobble resets the wrong-tally
+      if(streak>best){ best=streak; bestEl.textContent=best; }
+      scoreEl.textContent = score;
+      streakEl.textContent = streak;
+      input.classList.remove('shake');
+      input.classList.add('good');
+      correctDing();
+      showFlash(`${current.letter}! ✓`, 'var(--right)', sx, sy-20);
+      eatBugCorrect(()=>{
+        input.value='';
+        input.classList.remove('good');
+        setTimeout(()=>{ if(gameRunning) { pickNewNote(); input.focus(); } }, 160);
+      });
+    } else {
+      streak = 0;
+      streakEl.textContent = streak;
+      input.classList.remove('good');
+      input.classList.add('shake');
+
+      wrongStreak += 1;
+      // The first wrong guess on a bug is a free pass — typos happen.
+      // From the second consecutive wrong guess onward, each one nibbles
+      // a small bit of health, so genuinely sustained wrong-answering
+      // costs you, without punishing a single slip.
+      const WRONG_FORGIVENESS = 1; // this many free wrong guesses per bug
+      const PIPS_PER_WRONG = 1;    // health pips nibbled per costly wrong guess
+      if(wrongStreak > WRONG_FORGIVENESS && gameRunning){
+        nibbleHealth(PIPS_PER_WRONG);
+      }
+
+      showFlash(`Spat out!`, 'var(--wrong)', sx, sy-20);
+      // pause the crawl clock during the brief spit-back animation so the
+      // bug doesn't silently lose travel time while it's "in" the tongue
+      const pausedElapsed = crawlActive ? performance.now() - crawlStartTime : 0;
+      crawlActive = false;
+      if(crawlRAF) cancelAnimationFrame(crawlRAF);
+      spitBugBack(()=>{
+        input.classList.remove('shake');
+        input.value='';
+        if(gameRunning){
+          awaitingAnswer = true; // same bug, have another go
+          input.focus();
+          // resume the crawl from where it left off
+          crawlStartTime = performance.now() - pausedElapsed;
+          crawlActive = true;
+          crawlRAF = requestAnimationFrame(animateCrawlFrame);
+        }
+      });
+    }
+  }
+
+  /* ---------------------------------------------------------
+     MISS HANDLING — a bug that reaches the anteater's mouth without
+     being correctly named "falls off": health drops, no score penalty
+     beyond that, and a fresh bug spawns so the game keeps moving.
+  --------------------------------------------------------- */
+  function bugEscaped(){
+    if(!gameRunning) return;
+    awaitingAnswer = false;
+    const bugWrap = document.getElementById('bugWrap');
+
+    streak = 0;
+    streakEl.textContent = streak;
+    loseHealth();
+
+    if(bugWrap){
+      // little "falling off" flourish: drop and fade rather than just vanish
+      bugWrap.style.transition = 'transform .35s ease-in, opacity .35s ease-in';
+      const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+      const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+      bugWrap.setAttribute('transform', `translate(${curX},${curY+40}) rotate(50)`);
+      bugWrap.setAttribute('opacity','0');
+    }
+    showFlash(`Missed!`, 'var(--wrong)', ...(()=>{
+      const pt = svgPointToScreen(MOUTH_X, MOUTH_Y);
+      return [pt.x, pt.y-10];
+    })());
+
+    setTimeout(()=>{
+      const layer = document.getElementById('bug-layer');
+      if(layer) layer.innerHTML = '';
+      if(gameRunning && healthPips>0){ pickNewNote(); input.focus(); }
+    }, 380);
+  }
+
+  /* ---------------------------------------------------------
+     HEALTH SYSTEM
+     Health is tracked internally in quarter-heart "pips" so a wrong
+     guess can nibble away a small sliver of a heart, while a missed
+     bug (escaped uncaught) still costs one whole heart outright. Each
+     heart renders as a grey outline with a red fill clipped to the
+     fraction of that heart's pips remaining.
+  --------------------------------------------------------- */
+  // A small reusable heart path for the custom SVG health icons below —
+  // simple, symmetric, easy to read at tiny sizes.
+  const HEART_PATH = "M12 21 C 12 21 3 14.5 3 8.5 C 3 5 5.5 3 8.5 3 C 10.5 3 12 4.5 12 4.5 C 12 4.5 13.5 3 15.5 3 C 18.5 3 21 5 21 8.5 C 21 14.5 12 21 12 21 Z";
+
+  function renderHealthUI(){
+    const wrap = document.getElementById('healthHearts');
+    if(!wrap) return;
+    let html = '';
+    for(let i=0;i<MAX_HEALTH;i++){
+      const pipsInThisHeart = Math.max(0, Math.min(PIPS_PER_HEART, healthPips - i*PIPS_PER_HEART));
+      const fraction = pipsInThisHeart / PIPS_PER_HEART; // 0, .25, .5, .75, 1
+      // Liquid-fill effect: the red fill rises from the BOTTOM of the
+      // heart as health increases, so a half-lost heart visibly reads
+      // as "half full" rather than just "a chunk is missing".
+      const fillTopY = 21 - fraction*18; // heart spans roughly y=3 to y=21
+      html += `<svg class="heart-slot" viewBox="0 0 24 24" width="1em" height="1em">
+          <path d="${HEART_PATH}" fill="#e0e0e0" stroke="#b0b0b0" stroke-width="0.6"/>
+          <clipPath id="heartClip${i}"><rect x="0" y="${fillTopY}" width="24" height="${24-fillTopY}"/></clipPath>
+          <path d="${HEART_PATH}" fill="#ff5a5f" clip-path="url(#heartClip${i})"/>
+        </svg>`;
+    }
+    wrap.innerHTML = html;
+  }
+
+  function shakeHearts(){
+    const wrap = document.getElementById('healthHearts');
+    if(wrap){
+      wrap.classList.remove('heart-shake');
+      void wrap.offsetWidth; // restart animation
+      wrap.classList.add('heart-shake');
+    }
+  }
+
+  // Full heart lost — used when a bug escapes uncaught.
+  function loseHealth(){
+    healthPips = Math.max(0, healthPips - PIPS_PER_HEART);
+    renderHealthUI();
+    shakeHearts();
+    if(healthPips<=0) endGame();
+  }
+
+  // Small nibble of health lost — used for sustained wrong guessing on
+  // the same bug. Much smaller than a full miss so occasional typos
+  // are forgiven; only repeated wrong answers add up to real damage.
+  function nibbleHealth(pips){
+    healthPips = Math.max(0, healthPips - pips);
+    renderHealthUI();
+    shakeHearts();
+    if(healthPips<=0) endGame();
+  }
+
+  function endGame(){
+    gameRunning = false;
+    crawlActive = false;
+    if(crawlRAF) cancelAnimationFrame(crawlRAF);
+    if(wiggleRAF) cancelAnimationFrame(wiggleRAF);
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalBest').textContent = best;
+    document.getElementById('gameOverOverlay').style.display = 'flex';
+  }
+
+  function resetGameState(){
+    score = 0; streak = 0; best = 0; correctCount = 0; healthPips = MAX_PIPS; wrongStreak = 0;
+    scoreEl.textContent = 0; streakEl.textContent = 0; bestEl.textContent = 0;
+    renderHealthUI();
+  }
+
+  /* ---------------------------------------------------------
+     INPUT WIRING — auto-submits the instant a valid letter (A-G) is
+     typed, no Enter needed. The hidden text input still exists (for
+     mobile on-screen keyboards and the letter buttons) but typing
+     directly into the page also works via a keydown listener.
+  --------------------------------------------------------- */
+  const form = document.getElementById('answerForm');
+  form.addEventListener('submit', (e)=>{ e.preventDefault(); }); // Enter no longer needed, but don't let a stray submit reload the page
+
+  let submitLock = false; // guards against double-fires from key repeat / multiple listeners
+  function trySubmitLetter(letter){
+    if(submitLock) return;
+    submitLock = true;
+    submitAnswer(letter);
+    // release the lock shortly after — submitAnswer itself ignores input
+    // while awaitingAnswer is false, so this just prevents a single
+    // keystroke from double-triggering within the same tick
+    setTimeout(()=>{ submitLock = false; }, 50);
+  }
+
+  input.addEventListener('input', ()=>{
+    const v = input.value.toUpperCase().replace(/[^A-G]/g,'').slice(0,1);
+    input.value = v;
+    if(v) {
+      trySubmitLetter(v);
+      // clear right away so the box is ready for the next letter
+      setTimeout(()=>{ input.value=''; }, 0);
+    }
+  });
+
+  // Also listen at the document level so the person can type without
+  // needing to click into the small input box first.
+  document.addEventListener('keydown', (e)=>{
+    if(!gameRunning) return;
+    if(e.ctrlKey || e.metaKey || e.altKey) return; // ignore shortcuts
+    const key = e.key.toUpperCase();
+    if(key.length===1 && key>='A' && key<='G'){
+      e.preventDefault();
+      trySubmitLetter(key);
+    }
+  });
+
+  const letterButtonsWrap = document.getElementById('letterButtons');
+  ['A','B','C','D','E','F','G'].forEach(L=>{
+    const btn = document.createElement('button');
+    btn.textContent = L;
+    btn.addEventListener('click', ()=>{ trySubmitLetter(L); });
+    letterButtonsWrap.appendChild(btn);
+  });
+
+  /* ---------------------------------------------------------
+     BUG KEY (legend) on start screen
+  --------------------------------------------------------- */
+  function renderBugKey(){
+    const wrap = document.getElementById('bugKey');
+    wrap.innerHTML = '';
+    ANT_SPECIES.forEach(b => {
+      const cell = document.createElement('div');
+      cell.innerHTML = `<svg viewBox="-16 -16 32 32">${b.draw(b)}</svg><span>${b.name}</span>`;
+      wrap.appendChild(cell);
+    });
+  }
+
+  /* ---------------------------------------------------------
+     BACKGROUND DRESSING (sky clouds only — tree/branch are in-SVG now)
+  --------------------------------------------------------- */
+  function renderBgDressing(){
+    const wrap = document.getElementById('bg-dressing');
+    let html = '';
+    const cloudSpots = [[6,8,90],[18,14,60],[78,6,110],[88,16,70]];
+    cloudSpots.forEach(([leftPct,topPct,size])=>{
+      html += `<div class="cloud" style="left:${leftPct}%; top:${topPct}%; width:${size}px; height:${size*0.55}px;"></div>`;
+    });
+    wrap.innerHTML = html;
+  }
+
+  /* ---------------------------------------------------------
+     START / PAUSE / GAME OVER / RESTART
+  --------------------------------------------------------- */
+  function startGame(){
+    pool = document.getElementById('rangeSelect').value === 'easy' ? EASY_NOTES : FULL_NOTES;
+    resetGameState();
+    gameRunning = true;
+    renderStaticScene();
+    pickNewNote();
+    input.focus();
+  }
+
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    document.getElementById('startOverlay').style.display = 'none';
+    startGame();
+  });
+
+  document.getElementById('resumeBtn').addEventListener('click', ()=>{
+    document.getElementById('pauseOverlay').style.display='none';
+    gameRunning = true;
+    input.focus();
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    document.getElementById('gameOverOverlay').style.display = 'none';
+    startGame();
+  });
+
+  renderBugKey();
+  renderBgDressing();
+  renderHealthUI();
+
+  document.getElementById('stage-wrap').addEventListener('click', ()=>{ if(gameRunning) input.focus(); });
+
+})();
+</script>
+</body>
+</html>
