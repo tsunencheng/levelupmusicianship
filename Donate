@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support — Level Up Musicianship</title>
+<meta name="description" content="Help keep Level Up Musicianship's ear-training games free for classrooms everywhere.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1B2A4A;
+    --ink-soft: #33456B;
+    --paper: #F7F3E8;
+    --paper-line: #E4DCC7;
+    --amber: #C8842A;
+    --amber-deep: #9C6519;
+    --text: #2A2A28;
+    --text-soft: #5B5A52;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-padding-top: 90px; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--text);
+    font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+  }
+
+  h1, h2 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  a { color: var(--amber-deep); }
+  a:hover { color: var(--ink); }
+
+  /* Nav, matching the site's existing structure */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 28px 24px 16px;
+    font-size: 0.95rem;
+  }
+
+  nav .brand {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 1.05rem;
+  }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 26px;
+    margin: 0;
+    padding: 0;
+  }
+
+  nav a {
+    text-decoration: none;
+    color: var(--text-soft);
+  }
+
+  nav a.current {
+    color: var(--amber-deep);
+    border-bottom: 2px solid var(--amber);
+    padding-bottom: 2px;
+  }
+
+  /* Staff-line motif: a nod to sheet music, used once as a divider, not decoration everywhere */
+  .staff {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .staff-lines {
+    height: 42px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 9px,
+      var(--paper-line) 9px,
+      var(--paper-line) 10px
+    );
+    margin: 8px 0 44px;
+  }
+
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 8px 24px 80px;
+  }
+
+  .eyebrow-free {
+    /* intentionally no tracked-out label above the heading */
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4vw, 2.6rem);
+    line-height: 1.15;
+    max-width: 15ch;
+  }
+
+  .lede {
+    margin-top: 22px;
+    font-size: 1.1rem;
+    color: var(--text-soft);
+    max-width: 58ch;
+  }
+
+  .support-list {
+    margin: 40px 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .support-list li {
+    display: flex;
+    gap: 14px;
+    padding: 16px 0;
+    border-top: 1px solid var(--paper-line);
+  }
+
+  .support-list li:last-child {
+    border-bottom: 1px solid var(--paper-line);
+  }
+
+  .support-list .mark {
+    color: var(--amber-deep);
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.3rem;
+    line-height: 1.4;
+  }
+
+  .support-list p {
+    margin: 0;
+  }
+
+  .support-list strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .kofi-panel {
+    margin-top: 56px;
+  }
+
+  .kofi-panel h2 {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+  }
+
+  .kofi-panel .sub {
+    color: var(--text-soft);
+    font-size: 0.98rem;
+    margin-bottom: 18px;
+  }
+
+  .kofi-embed {
+    border: 1px solid var(--paper-line);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .kofi-embed iframe {
+    display: block;
+    width: 100%;
+    border: none;
+  }
+
+  .thanks {
+    margin-top: 56px;
+    padding-top: 32px;
+    border-top: 1px solid var(--paper-line);
+    color: var(--text-soft);
+    font-size: 1rem;
+  }
+
+  .thanks strong {
+    color: var(--ink);
+  }
+
+  footer {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 24px 24px 40px;
+    color: var(--text-soft);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 560px) {
+    nav { flex-direction: column; gap: 14px; align-items: flex-start; }
+    nav ul { gap: 18px; flex-wrap: wrap; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .support-list li { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="brand" href="/">Level Up Musicianship</a>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/games">Games</a></li>
+    <li><a href="/activities">Activities</a></li>
+    <li><a href="/contact">Contact</a></li>
+    <li><a class="current" href="/support">Support</a></li>
+  </ul>
+</nav>
+
+<div class="staff">
+  <div class="staff-lines" aria-hidden="true"></div>
+</div>
+
+<main>
+  <h1>Help keep the games free.</h1>
+
+  <p class="lede">
+    Level Up Musicianship started as a way to give students a fun way to explore
+    ear training without having to download or login. Every game on this site is free to
+    play — donations just help cover hosting and the time that goes
+    into building the next one.
+  </p>
+
+  <ul class="support-list">
+    <li>
+      <span class="mark">&#9834;</span>
+      <p><strong>Hosting &amp; upkeep.</strong> Keeps the site fast, ad-free, and online for classrooms.</p>
+    </li>
+    <li>
+      <span class="mark">&#9834;</span>
+      <p><strong>New games.</strong> Every ear training game takes design, testing, and classroom trial time.</p>
+    </li>
+    <li>
+      <span class="mark">&#9834;</span>
+      <p><strong>Kept free.</strong> No subscriptions, no logins, no ads — donations are what make that possible long-term.</p>
+    </li>
+  </ul>
+
+  <div class="kofi-panel">
+    <h2>Buy me a coffee</h2>
+    <p class="sub">One-off or monthly — whatever suits. Thank you for your support.</p>
+    <div class="kofi-embed">
+      <iframe
+        id="kofiframe"
+        src="https://ko-fi.com/levelupmusicianship/?hidefeed=true&widget=true&embed=true"
+        height="712"
+        title="Support Level Up Musicianship on Ko-fi">
+      </iframe>
+    </div>
+  </div>
+
+  <p class="thanks">
+    <strong>Thank you</strong> for teaching with these games and sharing them with colleagues.
+    That's the whole reason this exists.
+  </p>
+</main>
+
+<footer>
+  © 2026 Tsun-En Cheng — Built for music classrooms everywhere
+</footer>
+
+</body>
+</html>
