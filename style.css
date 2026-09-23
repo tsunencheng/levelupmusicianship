@@ -419,14 +419,21 @@ img { max-width: 100%; display: block; }
 }
 @media (max-width: 700px) {
   .site-nav .shell {
+    flex-direction: column;
+    align-items: flex-start;
     flex-wrap: nowrap;
-    overflow: hidden;
+    gap: 10px;
+  }
+  .brand {
+    white-space: nowrap;
   }
   .nav-links {
+    width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     flex-wrap: nowrap;
     white-space: nowrap;
+    gap: 20px;
     padding-bottom: 4px;
     scrollbar-width: none; /* Firefox */
   }
