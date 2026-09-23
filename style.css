@@ -417,3 +417,20 @@ img { max-width: 100%; display: block; }
 @media (max-width: 860px) {
   .hero-notes { opacity: 0.25; width: 200px; }
 }
+@media (max-width: 700px) {
+  .site-nav .shell {
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  .nav-links {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    padding-bottom: 4px;
+    scrollbar-width: none; /* Firefox */
+  }
+  .nav-links::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+}
