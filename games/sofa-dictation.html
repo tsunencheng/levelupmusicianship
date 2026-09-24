@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Solfa Dictation — Level Up Musicianship</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #A855D9; --purple-deep: #8635BE; --ink: #3A2A4A; --paper: #FFF6EE;
+    --card: #FFFFFF; --card-border: #F3E1EF; --gold: #E0A02C; --gold-soft: #FDF0D6;
+    --brick: #E0665A; --brick-soft: #FCE4E1; --muted: #8B7A9C; --pink: #F7A8C4; --mint: #8FD9C4;
+    color-scheme: light dark;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --purple: #C98CE8; --purple-deep: #AE68D8; --ink: #F3ECFA;
+      --paper: #211A2C; --card: #2C2338; --card-border: #423454;
+      --gold: #EAC066; --gold-soft: #3A2F16; --brick: #E88F82; --brick-soft: #3A211D;
+      --muted: #B7A9CC; --pink: #C97C9B; --mint: #5FA893;
+    }
+  }
+  :root[data-theme="dark"] {
+    --purple: #C98CE8; --purple-deep: #AE68D8; --ink: #F3ECFA;
+    --paper: #211A2C; --card: #2C2338; --card-border: #423454;
+    --gold: #EAC066; --gold-soft: #3A2F16; --brick: #E88F82; --brick-soft: #3A211D;
+    --muted: #B7A9CC; --pink: #C97C9B; --mint: #5FA893;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { background: var(--paper); color: var(--ink); }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0; font-family: "Nunito", system-ui, -apple-system, sans-serif; line-height: 1.5;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    background: radial-gradient(circle at 8px 8px, rgba(168,85,217,0.08) 3px, transparent 3.5px),
+      linear-gradient(180deg, #FDEFF6, #FFF6EE 40%, #FFF9F0);
+    background-size: 32px 32px, 100% 100%;
+  }
+  .awning {
+    position: fixed; top: 0; left: 0; right: 0; height: 22px; z-index: 5;
+    background-image: repeating-linear-gradient(-55deg, var(--pink) 0 22px, var(--mint) 22px 44px);
+    clip-path: polygon(0 0,100% 0,100% 60%,97% 100%,94% 60%,91% 100%,88% 60%,85% 100%,82% 60%,79% 100%,76% 60%,73% 100%,70% 60%,67% 100%,64% 60%,61% 100%,58% 60%,55% 100%,52% 60%,49% 100%,46% 60%,43% 100%,40% 60%,37% 100%,34% 60%,31% 100%,28% 60%,25% 100%,22% 60%,19% 100%,16% 60%,13% 100%,10% 60%,7% 100%,4% 60%,1% 100%,0 60%);
+  }
+  .particles { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .note-particle { position: absolute; bottom: -40px; font-size: 20px; opacity: 0.65; animation-name: floatUp; animation-timing-function: linear; }
+  @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.55; } 100% { transform: translateY(-108vh) rotate(20deg); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .note-particle { animation: none; display: none; } }
+
+  .wrap { position: relative; max-width: 640px; margin: 0 auto; padding: 40px 18px 64px; }
+  header.top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .brand { font-family: "Nunito", sans-serif; font-weight: 800; font-size: 13px; color: var(--purple-deep); text-decoration: none; background: #fff; padding: 6px 12px; border-radius: 999px; border: 2px solid var(--card-border); }
+  .brand:hover { background: var(--gold-soft); }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .change-level-btn { font-family: "Nunito", sans-serif; font-weight: 800; font-size: 12.5px; color: var(--purple-deep); background: #fff; border: 2px solid var(--card-border); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+  .change-level-btn:hover { background: var(--gold-soft); }
+  .score-pill { display: inline-flex; align-items: center; gap: 6px; background: #fff; color: var(--ink); font-weight: 800; font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 2px solid var(--card-border); }
+  .score-pill .coin { display: inline-block; transition: transform 0.25s ease; }
+  .score-pill.bump .coin { transform: scale(1.4) rotate(15deg); }
+
+  .title-row { display: flex; align-items: center; gap: 14px; margin: 4px 0 4px; }
+  h1.title { font-family: "Baloo 2", cursive, sans-serif; font-weight: 800; font-size: clamp(28px, 6.5vw, 40px); line-height: 1.05; margin: 0; color: var(--purple-deep); }
+  .mascot-wrap { flex-shrink: 0; animation: idleBob 1.8s ease-in-out infinite; }
+  .mascot-wrap.hop { animation: hopJump 0.55s ease; }
+  .mascot-wrap.oops { animation: wobbleOops 0.5s ease; }
+  @keyframes idleBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  @keyframes hopJump { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-16px) scale(1.08); } 100% { transform: translateY(0) scale(1); } }
+  @keyframes wobbleOops { 0%,100% { transform: rotate(0deg); } 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+  @media (prefers-reduced-motion: reduce) { .mascot-wrap, .mascot-wrap.hop, .mascot-wrap.oops { animation: none; } }
+
+  p.subtitle { font-size: 15px; color: var(--muted); margin: 0 0 20px; max-width: 48ch; font-weight: 600; }
+
+  /* ---------- level select ---------- */
+  .select-wrap { background: #fff; border: 2px solid var(--card-border); border-radius: 20px; padding: 22px 20px; margin-bottom: 20px; box-shadow: 0 10px 26px rgba(168,85,217,0.1); }
+  .select-title { font-family: "Baloo 2", sans-serif; font-weight: 700; font-size: 19px; margin: 0 0 4px; color: var(--purple-deep); }
+  .select-sub { font-size: 13px; color: var(--muted); font-weight: 600; margin: 0 0 14px; }
+  .level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(122px, 1fr)); gap: 10px; margin-bottom: 22px; }
+  .level-card { position: relative; border: 2px solid var(--card-border); background: var(--paper); border-radius: 14px; padding: 12px 8px 10px; text-align: center; cursor: pointer; transition: border-color .15s, transform .1s, background .15s; }
+  .level-card:hover { border-color: var(--purple); }
+  .level-card.active { border-color: var(--purple); background: #F6ECFB; box-shadow: 0 0 0 3px rgba(168,85,217,0.15); }
+  .level-card .lvl-icon { font-size: 22px; }
+  .level-card .lvl-num { font-family: "Baloo 2", sans-serif; font-weight: 700; font-size: 13.5px; margin-top: 3px; color: var(--ink); }
+  .level-card .lvl-tag { font-size: 10.5px; color: var(--muted); font-weight: 700; margin-top: 3px; line-height: 1.3; }
+  .level-card .lvl-rec { font-size: 9.5px; color: var(--gold); font-weight: 800; margin-top: 3px; }
+  .count-picker { margin-bottom: 22px; }
+  .count-label { font-weight: 800; font-size: 13.5px; color: var(--ink); margin-bottom: 8px; }
+  .count-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .count-chip { border: 2px solid var(--card-border); background: var(--paper); border-radius: 999px; padding: 8px 16px; font-family: "Nunito", sans-serif; font-weight: 800; font-size: 13.5px; cursor: pointer; color: var(--ink); }
+  .count-chip.active { border-color: var(--gold); background: var(--gold-soft); color: var(--gold); }
+  .rule-preview { background: var(--gold-soft); border: 2px dashed var(--gold); border-radius: 12px; padding: 8px 14px; font-size: 12.5px; font-weight: 700; color: #8a611a; margin-bottom: 18px; }
+
+  .rule-banner { background: #fff; border: 2px dashed var(--purple); border-radius: 14px; padding: 10px 16px; font-size: 13.5px; font-weight: 700; color: var(--purple-deep); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .rule-banner .ico { font-size: 16px; }
+
+  .tray-wrap { background: #fff; border: 2px solid var(--card-border); border-radius: 18px; padding: 14px 16px; margin-bottom: 18px; box-shadow: 0 6px 18px rgba(168,85,217,0.08); }
+  .tray-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .tray-top .level-label { font-family: "Baloo 2", sans-serif; font-weight: 700; font-size: 17px; color: var(--ink); }
+  .tray-top .level-tag { font-size: 12.5px; color: var(--muted); font-weight: 700; }
+  .tray { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .tray-slot { width: 40px; height: 40px; border-radius: 50%; background: var(--paper); border: 2px dashed var(--card-border); display: flex; align-items: center; justify-content: center; font-size: 18px; transition: transform 0.3s cubic-bezier(.4,1.4,.6,1), background 0.2s ease, border-style 0.2s ease; }
+  .tray-slot.good { background: #fff; border: 2px solid var(--gold); transform: scale(1.08); }
+  .tray-slot.bad { background: #fff; border: 2px solid var(--brick); transform: scale(1.08); }
+  .tray-slot.pop { animation: trayPop 0.4s ease; }
+  @keyframes trayPop { 0% { transform: scale(1); } 45% { transform: scale(1.3) rotate(-8deg); } 100% { transform: scale(1.08); } }
+
+  .card { background: var(--card); border: 2px solid var(--card-border); border-radius: 22px; padding: 30px 24px; box-shadow: 0 14px 34px rgba(168,85,217,0.14); position: relative; }
+  .listen-row { display: flex; align-items: center; gap: 16px; margin-bottom: 26px; flex-wrap: wrap; }
+  button.play-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--purple); color: white; border: none; border-radius: 999px; padding: 13px 22px; font-family: "Nunito", sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; transition: background 0.15s ease, transform 0.1s ease; box-shadow: 0 4px 14px rgba(168,85,217,0.35); }
+  button.play-btn:hover:not(:disabled) { background: var(--purple-deep); }
+  button.play-btn:active:not(:disabled) { transform: scale(0.96); }
+  button.play-btn:disabled { opacity: 0.5; cursor: default; }
+  button.play-btn .ico { width: 16px; height: 16px; }
+  button.play-btn.pulse { animation: pulseRing 1.1s ease-out infinite; }
+  @keyframes pulseRing { 0% { box-shadow: 0 4px 14px rgba(168,85,217,0.35), 0 0 0 0 rgba(168,85,217,0.5); } 100% { box-shadow: 0 4px 14px rgba(168,85,217,0.35), 0 0 0 14px rgba(168,85,217,0); } }
+  .replay-link { background: none; border: none; color: var(--muted); font-family: "Nunito", sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 6px 0; }
+  .replay-link:hover:not(:disabled) { color: var(--ink); }
+  .replay-link:disabled { opacity: 0.4; cursor: default; text-decoration: none; }
+
+  .slots { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 28px; padding: 22px 10px; border-top: 2px dashed var(--card-border); border-bottom: 2px dashed var(--card-border); }
+  .slot { width: 50px; height: 50px; border-radius: 50%; border: 2px dashed var(--card-border); display: flex; align-items: center; justify-content: center; font-family: "Baloo 2", sans-serif; font-weight: 700; font-size: 16px; color: var(--muted); transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.15s ease; background: transparent; position: relative; }
+  .slot.filled { border-style: solid; border-color: var(--purple); color: var(--purple-deep); background: #F6ECFB; }
+  .slot.ghost { border-style: dashed; border-color: var(--gold); color: var(--gold); opacity: 0.55; }
+  .slot.given { border-style: solid; border-color: var(--gold); color: var(--gold); background: var(--gold-soft); animation: correctPop 0.4s ease; }
+  .slot .tag { position: absolute; bottom: -18px; font-size: 9px; color: var(--gold); font-family: "Nunito", sans-serif; font-weight: 800; white-space: nowrap; }
+  .slot.correct { border-color: var(--gold); background: var(--gold-soft); color: var(--gold); animation: correctPop 0.4s ease; }
+  .slot.wrong { border-color: var(--brick); background: var(--brick-soft); color: var(--brick); }
+  .slot.pop { transform: scale(1.14); }
+  @keyframes correctPop { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+  .slot .was { position: absolute; bottom: -18px; font-size: 9.5px; color: var(--muted); font-family: "Nunito", sans-serif; white-space: nowrap; text-decoration: line-through; }
+
+  .pad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  button.solfa-btn { font-family: "Baloo 2", sans-serif; font-weight: 700; font-size: 16px; padding: 16px 4px; border-radius: 16px; border: 2px solid var(--card-border); background: var(--paper); color: var(--ink); cursor: pointer; transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease, box-shadow .15s ease; }
+  button.solfa-btn small { display: block; font-family: "Nunito", sans-serif; font-weight: 700; font-size: 11px; color: var(--muted); margin-top: 3px; }
+  button.solfa-btn:hover:not(:disabled) { border-color: var(--purple); box-shadow: 0 3px 10px rgba(168,85,217,0.18); }
+  button.solfa-btn:active:not(:disabled) { transform: scale(0.93); }
+  button.solfa-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  .feedback { margin-top: 20px; min-height: 26px; text-align: center; font-size: 14.5px; font-weight: 800; }
+  .feedback.good { color: var(--gold); }
+  .feedback.bad { color: var(--brick); }
+  .next-row { display: flex; justify-content: center; margin-top: 6px; }
+  button.next-btn { background: var(--purple-deep); color: #fff; border: none; border-radius: 999px; padding: 11px 22px; font-family: "Nunito", sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; }
+  button.next-btn:hover { opacity: 0.9; }
+  .hint { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 22px; font-weight: 600; }
+  .hint kbd { font-family: "Nunito", sans-serif; border: 1px solid var(--card-border); border-radius: 4px; padding: 1px 5px; font-size: 11px; margin: 0 1px; }
+
+  .overlay { position: fixed; inset: 0; background: rgba(58,42,74,0.55); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 20; }
+  .overlay[hidden] { display: none; }
+  .overlay-card { background: var(--card); border-radius: 24px; padding: 36px 32px; max-width: 400px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); border: 3px solid var(--card-border); }
+  .overlay-card .icon-slot { min-height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+  .overlay-card .icon-slot .emoji { font-size: 40px; }
+  .overlay-card h2 { font-family: "Baloo 2", sans-serif; font-weight: 700; font-size: 24px; margin: 8px 0 8px; color: var(--purple-deep); }
+  .overlay-card p { color: var(--muted); font-size: 14px; margin: 0 0 22px; font-weight: 600; }
+
+  .oven-anim { position: relative; width: 110px; height: 90px; margin: 0 auto; }
+  .oven-body { position: absolute; inset: 0; background: #F1C88A; border-radius: 16px; border: 4px solid #C08A4B; }
+  .oven-window { position: absolute; left: 20px; right: 20px; top: 16px; bottom: 22px; background: #3B2A22; border-radius: 8px; overflow: hidden; }
+  .oven-glow { position: absolute; inset: 0; background: radial-gradient(circle at 50% 60%, #FFD27A, #E8763A 70%); animation: ovenGlow 1s ease-in-out infinite alternate; }
+  @keyframes ovenGlow { 0% { opacity: 0.65; } 100% { opacity: 1; } }
+  .oven-dots span { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--purple); margin: 0 2px; animation: ovenDots 1.2s infinite ease-in-out; }
+  .oven-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .oven-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes ovenDots { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-5px); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .oven-glow { animation: none; } .oven-dots span { animation: none; } }
+
+  footer.foot { text-align: center; margin-top: 40px; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+  .confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 30; overflow: hidden; }
+  .confetto { position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; border-radius: 2px; animation: confettiBurst 0.9s ease-out forwards; }
+  @keyframes confettiBurst { 0% { transform: translate(-50%, -50%) translate(0,0) rotate(0deg); opacity: 1; } 100% { transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
+
+  @media (max-width: 400px) {
+    .card { padding: 24px 16px; }
+    .slot { width: 42px; height: 42px; font-size: 14px; }
+    button.solfa-btn { font-size: 14px; padding: 13px 2px; }
+  }
+</style>
+</head>
+<body>
+<div class="awning"></div>
+<div class="particles" id="particles"></div>
+
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="https://levelupmusicianship.com/games">← All games</a>
+    <div class="header-right">
+      <button type="button" class="change-level-btn" id="changeLevelBtn">🔄 Change level</button>
+      <span class="score-pill" id="scorePill"><span class="coin">🧁</span> <span id="scoreVal">0</span></span>
+    </div>
+  </header>
+
+  <div class="title-row">
+    <div class="mascot-wrap" id="mascotWrap">
+      <svg width="48" height="48" viewBox="0 0 60 60">
+        <ellipse cx="30" cy="46" rx="19" ry="12" fill="#FFFFFF" stroke="#F3E1EF" stroke-width="2"/>
+        <circle cx="30" cy="26" r="17" fill="#FFF6EE" stroke="#F3E1EF" stroke-width="2"/>
+        <path d="M15 20 Q30 2 45 20 Q30 12 15 20 Z" fill="#FFFFFF" stroke="#F3E1EF" stroke-width="2"/>
+        <circle cx="24" cy="26" r="2.6" fill="#3A2A4A"/>
+        <circle cx="36" cy="26" r="2.6" fill="#3A2A4A"/>
+        <circle cx="20" cy="32" r="2.6" fill="#F7A8C4" opacity="0.7"/>
+        <circle cx="40" cy="32" r="2.6" fill="#F7A8C4" opacity="0.7"/>
+        <path d="M23 34 Q30 39 37 34" stroke="#3A2A4A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h1 class="title">Solfa Dictation</h1>
+  </div>
+  <p class="subtitle">Hear a short pentatonic phrase and write down the solfa. Get it right and the ingredient goes in the bowl — pass the level and something sweet comes out of the oven.</p>
+
+  <div class="select-wrap" id="selectArea">
+    <h2 class="select-title">Choose a level</h2>
+    <p class="select-sub">Pick a level, then choose how many phrases to complete this round.</p>
+    <div class="level-grid" id="levelGrid"></div>
+    <div class="rule-preview" id="rulePreview"></div>
+    <div class="count-picker">
+      <div class="count-label">How many phrases this round?</div>
+      <div class="count-chips" id="countChips"></div>
+    </div>
+    <button class="play-btn" id="startBtn" style="width:100%;justify-content:center;">
+      <svg class="ico" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      Start baking
+    </button>
+  </div>
+
+  <div class="game-area" id="gameArea" hidden>
+    <div class="rule-banner"><span class="ico">📋</span> <span id="ruleText">Every phrase starts on Do.</span></div>
+
+    <div class="tray-wrap">
+      <div class="tray-top">
+        <span class="level-label">Level <span id="levelNum">1</span> of 8</span>
+        <span class="level-tag" id="levelTag">do re mi so</span>
+      </div>
+      <div class="tray" id="tray"></div>
+    </div>
+
+    <div class="card">
+      <div class="listen-row">
+        <button class="play-btn pulse" id="playBtn">
+          <svg class="ico" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <span id="playLabel">Play phrase</span>
+        </button>
+        <button class="replay-link" id="replayBtn" disabled>Hear it again</button>
+      </div>
+
+      <div class="slots" id="slots"></div>
+      <div class="pad" id="pad"></div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="next-row" id="nextRow" hidden>
+        <button class="next-btn" id="nextBtn">Next phrase</button>
+      </div>
+
+      <div class="hint">Tap a syllable, or use keys <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>5</kbd><kbd>6</kbd> · <kbd>R</kbd> to replay</div>
+    </div>
+  </div>
+
+  <footer class="foot">Part of the Level Up Musicianship library · free for classroom use</footer>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="overlay-card">
+    <div class="icon-slot" id="overlayIcon"><span class="emoji">⭐</span></div>
+    <h2 id="overlayTitle">Level complete!</h2>
+    <p id="overlayBody">Nice ears. On to the next set of syllables.</p>
+    <button class="next-btn" id="overlayBtn">Continue</button>
+  </div>
+</div>
+
+<div class="confetti-layer" id="confettiLayer"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  // Do=1, Re=2, Mi=3, So=5, La=6 — 4 is intentionally skipped
+  var SCALE = [
+    { sol: "Do", freq: 261.63, key: "1" },
+    { sol: "Re", freq: 293.66, key: "2" },
+    { sol: "Mi", freq: 329.63, key: "3" },
+    { sol: "So", freq: 392.00, key: "5" },
+    { sol: "La", freq: 440.00, key: "6" }
+  ];
+  var DO = 0, RE = 1, MI = 2, SO = 3, LA = 4;
+
+  var LEVELS = [
+    { allowed: [DO,RE,MI,SO],       start: DO,   length: 4, count: 3, tag: "do re mi so",
+      rule: "Every phrase starts on Do — tap the note that's already lit, then guess the rest.",
+      stage: { type: "cupcake", sprinkles: false } },
+    { allowed: [DO,RE,MI,SO],       start: null, length: 4, count: 3, tag: "do re mi so · starts anywhere",
+      rule: "Same four notes, but now the phrase can start on any of them.",
+      stage: { type: "cupcake", sprinkles: true } },
+    { allowed: [DO,RE,MI,SO,LA],    start: DO,   length: 5, count: 4, tag: "+ la · starts on Do",
+      rule: "La joins the set. Every phrase starts on Do again.",
+      stage: { type: "cake", tiers: 1, sprinkles: false, berries: false, candles: 0, topper: false } },
+    { allowed: [DO,RE,MI,SO,LA],    start: SO,   length: 5, count: 4, tag: "full pentatonic · starts on So",
+      rule: "Same five notes — every phrase starts on So this time.",
+      stage: { type: "cake", tiers: 1, sprinkles: true, berries: false, candles: 0, topper: false } },
+    { allowed: [DO,RE,MI,SO,LA],    start: LA,   length: 5, count: 4, tag: "full pentatonic · starts on La",
+      rule: "Every phrase starts on La.",
+      stage: { type: "cake", tiers: 2, sprinkles: true, berries: false, candles: 0, topper: false } },
+    { allowed: [DO,RE,MI,SO,LA],    start: MI,   length: 5, count: 5, tag: "full pentatonic · starts on Mi",
+      rule: "Every phrase starts on Mi.",
+      stage: { type: "cake", tiers: 2, sprinkles: true, berries: true, candles: 0, topper: false } },
+    { allowed: [DO,RE,MI,SO,LA],    start: RE,   length: 5, count: 5, tag: "full pentatonic · starts on Re",
+      rule: "Every phrase starts on Re.",
+      stage: { type: "cake", tiers: 3, sprinkles: true, berries: true, candles: 2, topper: false } },
+    { allowed: [DO,RE,MI,SO,LA],    start: null, length: 6, count: 6, tag: "full pentatonic · starts anywhere",
+      rule: "Full pentatonic, starting anywhere — good luck!",
+      stage: { type: "cake", tiers: 3, sprinkles: true, berries: true, candles: 3, topper: true } }
+  ];
+
+  var NOTE_MS = [720, 700, 680, 660, 640, 620, 600, 580];
+  var INPUT_LOCK_MS = 160;
+  var COUNT_PRESETS = [3, 4, 5, 6, 8, 10];
+
+  var GOOD_ICONS = ["🥚", "🍓", "🍯", "🧈", "🍫", "🌾", "🥛", "🍌", "🥜", "🍋"];
+  var BAD_ICONS = ["🧂", "🐛", "🌶️", "🥥", "🧊", "🍋", "🦴", "🧅", "🪱", "🧦"];
+
+  var KEY_TO_IDX = {};
+  var CODE_TO_IDX = {};
+  SCALE.forEach(function (note, idx) {
+    KEY_TO_IDX[note.key] = idx;
+    CODE_TO_IDX["Digit" + note.key] = idx;
+    CODE_TO_IDX["Numpad" + note.key] = idx;
+  });
+
+  var state = {
+    level: 0, count: 3, pass: 2,
+    phraseInLevel: 0, correctInLevel: 0,
+    trayResults: [], usedPhrases: [],
+    phrase: [], answer: [],
+    locked: false, inputLocked: false,
+    overlayAction: null, recommendLevel: 0,
+    selectedLevel: 0, selectedCount: null,
+    score: 0, audioCtx: null
+  };
+
+  var el = {};
+  ["levelNum","levelTag","ruleText","tray","mascotWrap","particles","scorePill","scoreVal",
+   "playBtn","playLabel","replayBtn","slots","pad","feedback","nextRow","nextBtn",
+   "overlay","overlayIcon","overlayTitle","overlayBody","overlayBtn","confettiLayer",
+   "selectArea","gameArea","levelGrid","countChips","rulePreview","startBtn","changeLevelBtn"
+  ].forEach(function (id) { el[id] = document.getElementById(id); });
+
+  // ================= Audio: marimba-style synth =================
+  function ctx() {
+    if (!state.audioCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      state.audioCtx = new AC();
+    }
+    if (state.audioCtx.state === "suspended") state.audioCtx.resume();
+    return state.audioCtx;
+  }
+
+  function playNote(freq, spacingMs, when) {
+    var c = ctx();
+    var t0 = c.currentTime + (when || 0);
+    var ringMs = Math.min(650, Math.max(320, spacingMs * 0.95));
+    var ring = ringMs / 1000;
+
+    var body = c.createOscillator();
+    var bodyGain = c.createGain();
+    body.type = "sine";
+    body.frequency.value = freq;
+    bodyGain.gain.setValueAtTime(0, t0);
+    bodyGain.gain.linearRampToValueAtTime(0.5, t0 + 0.008);
+    bodyGain.gain.exponentialRampToValueAtTime(0.001, t0 + ring);
+    body.connect(bodyGain);
+
+    var strike = c.createOscillator();
+    var strikeGain = c.createGain();
+    strike.type = "sine";
+    strike.frequency.value = freq * 3.98;
+    strikeGain.gain.setValueAtTime(0, t0);
+    strikeGain.gain.linearRampToValueAtTime(0.22, t0 + 0.004);
+    strikeGain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.09);
+    strike.connect(strikeGain);
+
+    var master = c.createGain();
+    master.gain.value = 1;
+    bodyGain.connect(master);
+    strikeGain.connect(master);
+    master.connect(c.destination);
+
+    body.start(t0); body.stop(t0 + ring + 0.02);
+    strike.start(t0); strike.stop(t0 + 0.12);
+  }
+
+  function playChime(good) {
+    var freqs = good ? [523.25, 659.25, 783.99] : [329.63, 277.18];
+    freqs.forEach(function (f, i) { playNote(f, 260, i * 0.09); });
+  }
+
+  function playPhrase() {
+    var ms = NOTE_MS[state.level];
+    state.phrase.forEach(function (idx, i) {
+      playNote(SCALE[idx].freq, ms, i * (ms / 1000));
+    });
+  }
+
+  // ================= Ambient floating bits =================
+  var GLYPHS = ["♪", "♫", "♩", "✨", "🍓", "🧁", "🍰"];
+  function spawnParticle() {
+    var s = document.createElement("span");
+    s.className = "note-particle";
+    s.textContent = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+    s.style.left = (Math.random() * 100) + "%";
+    var dur = 9 + Math.random() * 8;
+    s.style.fontSize = (14 + Math.random() * 16) + "px";
+    s.style.animationDuration = dur + "s";
+    el.particles.appendChild(s);
+    setTimeout(function () { s.remove(); }, dur * 1000 + 200);
+  }
+  setInterval(spawnParticle, 1400);
+  for (var pi = 0; pi < 4; pi++) setTimeout(spawnParticle, pi * 350);
+
+  // ================= Confetti =================
+  function burstConfetti() {
+    var colors = ["#E0A02C", "#A855D9", "#F7A8C4", "#8FD9C4", "#FFFFFF"];
+    var layer = el.confettiLayer;
+    var rect = el.playBtn.getBoundingClientRect();
+    var originX = window.innerWidth / 2;
+    var originY = Math.max(120, rect.top);
+    for (var i = 0; i < 20; i++) {
+      var c = document.createElement("span");
+      c.className = "confetto";
+      var angle = Math.random() * Math.PI * 2;
+      var dist = 60 + Math.random() * 110;
+      c.style.setProperty("--dx", (Math.cos(angle) * dist) + "px");
+      c.style.setProperty("--dy", (Math.sin(angle) * dist - 40) + "px");
+      c.style.setProperty("--rot", (Math.random() * 360 - 180) + "deg");
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.top = originY + "px";
+      c.style.left = originX + "px";
+      layer.appendChild(c);
+      (function (node) { setTimeout(function () { node.remove(); }, 950); })(c);
+    }
+  }
+
+  // ================= Bakery artwork =================
+  function drawCupcake(cfg) {
+    var parts = [];
+    parts.push('<path d="M55 150 L45 100 L135 100 L125 150 Z" fill="#F6C6D6"/>');
+    for (var i = 0; i < 6; i++) {
+      var x = 50 + i * 14;
+      parts.push('<line x1="' + x + '" y1="100" x2="' + (x - 3) + '" y2="150" stroke="#FFFFFF" stroke-width="4" opacity="0.6"/>');
+    }
+    parts.push('<path d="M45 100 Q90 55 135 100 Q120 78 108 66 Q90 46 72 66 Q60 78 45 100 Z" fill="#FADADD" stroke="#FFFFFF" stroke-width="2"/>');
+    parts.push('<ellipse cx="90" cy="52" rx="17" ry="15" fill="#FCE9EE"/>');
+    if (cfg.sprinkles) {
+      var cols = ["#E0A02C", "#A855D9", "#8FD9C4", "#4AA3D9", "#F7A8C4"];
+      for (var s = 0; s < 10; s++) {
+        var sx = (70 + Math.random() * 40).toFixed(1);
+        var sy = (52 + Math.random() * 32).toFixed(1);
+        var rot = Math.floor(Math.random() * 180);
+        parts.push('<rect x="' + sx + '" y="' + sy + '" width="3" height="7" rx="1.5" fill="' + cols[s % cols.length] + '" transform="rotate(' + rot + ' ' + sx + ' ' + sy + ')"/>');
+      }
+    }
+    parts.push('<circle cx="90" cy="43" r="6" fill="#C1483B"/>');
+    return '<svg viewBox="0 0 180 175" width="150" height="146">' + parts.join("") + "</svg>";
+  }
+
+  function drawCake(cfg) {
+    var layerColors = ["#F3C77A", "#F6C6D6", "#EADCF8"];
+    var layerWidths = [120, 96, 74];
+    var layerHeight = 32;
+    var baseY = 150;
+    var parts = [];
+    parts.push('<ellipse cx="90" cy="' + (baseY + 10) + '" rx="80" ry="12" fill="#00000022"/>');
+    parts.push('<ellipse cx="90" cy="' + (baseY + 6) + '" rx="78" ry="10" fill="#FFFFFF" stroke="#F3E1EF" stroke-width="2"/>');
+    var y = baseY - 4;
+    var topW = layerWidths[0], topX = 90 - topW / 2;
+    for (var i = 0; i < cfg.tiers; i++) {
+      var w = layerWidths[i];
+      var x = 90 - w / 2;
+      y -= layerHeight;
+      parts.push('<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + layerHeight + '" rx="10" fill="' + layerColors[i] + '" stroke="#FFFFFF66"/>');
+      topW = w; topX = x;
+    }
+    parts.push('<path d="M' + topX + ' ' + y + ' q9 -13 18 0 q9 -13 18 0 q9 -13 18 0 q9 -13 18 0 L' + (topX + topW) + ' ' + (y + 5) + ' L' + topX + ' ' + (y + 5) + ' Z" fill="#FFFFFF" opacity="0.95"/>');
+    if (cfg.sprinkles) {
+      var sprinkleColors = ["#E0A02C", "#A855D9", "#8FD9C4", "#4AA3D9", "#F7A8C4"];
+      for (var s = 0; s < 14; s++) {
+        var sx = (topX + 6 + Math.random() * (topW - 12)).toFixed(1);
+        var sy = (y - Math.random() * 8).toFixed(1);
+        var rot = Math.floor(Math.random() * 180);
+        parts.push('<rect x="' + sx + '" y="' + sy + '" width="3" height="7" rx="1.5" fill="' + sprinkleColors[s % sprinkleColors.length] + '" transform="rotate(' + rot + ' ' + sx + ' ' + sy + ')"/>');
+      }
+    }
+    if (cfg.berries) {
+      for (var b = 0; b < 5; b++) {
+        var bx = topX + 8 + b * ((topW - 16) / 4);
+        parts.push('<circle cx="' + bx + '" cy="' + (y - 6) + '" r="5" fill="#C1483B"/>');
+        parts.push('<circle cx="' + (bx - 1.5) + '" cy="' + (y - 8) + '" r="1.3" fill="#8FCB86"/>');
+      }
+    }
+    if (cfg.candles) {
+      for (var c = 0; c < cfg.candles; c++) {
+        var cx = 90 - ((cfg.candles - 1) * 14) / 2 + c * 14;
+        var cyTop = y - 26;
+        parts.push('<rect x="' + (cx - 2) + '" y="' + cyTop + '" width="4" height="20" fill="#F7A8C4"/>');
+        parts.push('<ellipse cx="' + cx + '" cy="' + (cyTop - 6) + '" rx="3.4" ry="6" fill="#F5A623"/>');
+        parts.push('<ellipse cx="' + cx + '" cy="' + (cyTop - 7) + '" rx="1.6" ry="3" fill="#FFF3C0"/>');
+      }
+    }
+    if (cfg.topper) parts.push('<text x="90" y="' + (y - 34) + '" font-size="22" text-anchor="middle">⭐</text>');
+    return '<svg viewBox="0 0 180 175" width="150" height="146">' + parts.join("") + "</svg>";
+  }
+
+  function drawBaked(stageCfg) { return stageCfg.type === "cupcake" ? drawCupcake(stageCfg) : drawCake(stageCfg); }
+
+  function burntSVG() {
+    return '<svg viewBox="0 0 180 175" width="150" height="146">' +
+      '<ellipse cx="90" cy="160" rx="80" ry="12" fill="#00000022"/>' +
+      '<ellipse cx="90" cy="156" rx="78" ry="10" fill="#FFFFFF" stroke="#F3E1EF" stroke-width="2"/>' +
+      '<rect x="30" y="100" width="120" height="50" rx="10" fill="#3B2A22"/>' +
+      '<path d="M30 108 q20 -10 40 0 q20 -10 40 0 q20 -10 40 0" fill="none" stroke="#1F1712" stroke-width="4"/>' +
+      '<ellipse cx="60" cy="86" rx="9" ry="15" fill="#9C9C9C" opacity="0.5">' +
+        '<animate attributeName="cy" values="86;58;86" dur="2.6s" repeatCount="indefinite"/>' +
+        '<animate attributeName="opacity" values="0.5;0;0.5" dur="2.6s" repeatCount="indefinite"/></ellipse>' +
+      '<ellipse cx="108" cy="90" rx="7" ry="12" fill="#9C9C9C" opacity="0.4">' +
+        '<animate attributeName="cy" values="90;64;90" dur="2.2s" repeatCount="indefinite"/>' +
+        '<animate attributeName="opacity" values="0.4;0;0.4" dur="2.2s" repeatCount="indefinite"/></ellipse>' +
+      '</svg>';
+  }
+
+  function ovenAnimHTML() {
+    return '<div class="oven-anim"><div class="oven-body"></div><div class="oven-window"><div class="oven-glow"></div></div></div>' +
+      '<div class="oven-dots" style="margin-top:14px;"><span></span><span></span><span></span></div>';
+  }
+
+  // ================= Level-select screen =================
+  function renderLevelGrid() {
+    el.levelGrid.innerHTML = "";
+    LEVELS.forEach(function (cfg, idx) {
+      var card = document.createElement("button");
+      card.type = "button";
+      card.className = "level-card" + (idx === state.selectedLevel ? " active" : "");
+      var icon = cfg.stage.type === "cupcake" ? "🧁" : "🎂";
+      var recFlag = idx === state.recommendLevel ? '<div class="lvl-rec">★ Recommended</div>' : "";
+      card.innerHTML = '<div class="lvl-icon">' + icon + '</div><div class="lvl-num">Level ' + (idx + 1) + '</div><div class="lvl-tag">' + cfg.tag + '</div>' + recFlag;
+      card.addEventListener("click", function () {
+        state.selectedLevel = idx;
+        state.selectedCount = cfg.count;
+        renderLevelGrid();
+        renderCountChips();
+        renderRulePreview();
+      });
+      el.levelGrid.appendChild(card);
+    });
+  }
+
+  function renderCountChips() {
+    el.countChips.innerHTML = "";
+    var cfg = LEVELS[state.selectedLevel];
+    var presets = COUNT_PRESETS.slice();
+    if (presets.indexOf(cfg.count) === -1) presets.push(cfg.count);
+    presets.sort(function (a, b) { return a - b; });
+    presets.forEach(function (n) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "count-chip" + (state.selectedCount === n ? " active" : "");
+      chip.textContent = n + " phrases";
+      chip.addEventListener("click", function () {
+        state.selectedCount = n;
+        renderCountChips();
+      });
+      el.countChips.appendChild(chip);
+    });
+  }
+
+  function renderRulePreview() {
+    el.rulePreview.textContent = "📋 " + LEVELS[state.selectedLevel].rule;
+  }
+
+  function goToSelect() {
+    el.gameArea.hidden = true;
+    el.selectArea.hidden = false;
+    if (state.selectedLevel == null) state.selectedLevel = state.recommendLevel || 0;
+    if (!state.selectedCount) state.selectedCount = LEVELS[state.selectedLevel].count;
+    renderLevelGrid();
+    renderCountChips();
+    renderRulePreview();
+  }
+
+  el.startBtn.addEventListener("click", function () {
+    state.level = state.selectedLevel;
+    state.count = state.selectedCount;
+    state.pass = Math.max(1, Math.ceil(state.count * 0.66));
+    state.phraseInLevel = 0;
+    state.correctInLevel = 0;
+    state.trayResults = [];
+    state.usedPhrases = [];
+    el.selectArea.hidden = true;
+    el.gameArea.hidden = false;
+    renderLevelHeader();
+    newPhrase();
+  });
+
+  el.changeLevelBtn.addEventListener("click", function () { goToSelect(); });
+
+  // ================= Game flow =================
+  function generateRawPhrase(cfg) {
+    var phrase = [];
+    var prev = -1;
+    for (var i = 0; i < cfg.length; i++) {
+      if (i === 0 && cfg.start !== null) { phrase.push(cfg.start); prev = cfg.start; continue; }
+      var pick, tries = 0;
+      do {
+        pick = cfg.allowed[Math.floor(Math.random() * cfg.allowed.length)];
+        tries++;
+      } while (pick === prev && cfg.allowed.length > 1 && Math.random() < 0.7 && tries < 8);
+      phrase.push(pick);
+      prev = pick;
+    }
+    return phrase;
+  }
+
+  function newPhrase() {
+    var cfg = LEVELS[state.level];
+    var phrase, key, attempts = 0;
+    do {
+      phrase = generateRawPhrase(cfg);
+      key = phrase.join(",");
+      attempts++;
+    } while (state.usedPhrases.indexOf(key) !== -1 && attempts < 40);
+    state.usedPhrases.push(key);
+
+    state.phrase = phrase;
+    state.answer = [];
+    state.locked = false;
+    state.inputLocked = false;
+    renderSlots();
+    renderPad();
+    el.feedback.textContent = "";
+    el.feedback.className = "feedback";
+    el.nextRow.hidden = true;
+    el.replayBtn.disabled = true;
+    el.playLabel.textContent = "Play phrase";
+    el.playBtn.disabled = false;
+    el.playBtn.classList.add("pulse");
+  }
+
+  function renderLevelHeader() {
+    var cfg = LEVELS[state.level];
+    el.levelNum.textContent = (state.level + 1);
+    el.levelTag.textContent = cfg.tag;
+    el.ruleText.textContent = cfg.rule;
+    renderTray();
+  }
+
+  function renderTray(justFilledIndex) {
+    el.tray.innerHTML = "";
+    for (var i = 0; i < state.count; i++) {
+      var slot = document.createElement("div");
+      slot.className = "tray-slot";
+      var res = state.trayResults[i];
+      if (res === "good") { slot.classList.add("good"); slot.textContent = GOOD_ICONS[i % GOOD_ICONS.length]; }
+      else if (res === "bad") { slot.classList.add("bad"); slot.textContent = BAD_ICONS[i % BAD_ICONS.length]; }
+      else { slot.textContent = "?"; }
+      if (i === justFilledIndex) slot.classList.add("pop");
+      el.tray.appendChild(slot);
+    }
+  }
+
+  function renderSlots() {
+    el.slots.innerHTML = "";
+    var cfg = LEVELS[state.level];
+    var hintIdx = cfg.start !== null ? 0 : -1;
+    for (var i = 0; i < cfg.length; i++) {
+      var s = document.createElement("div");
+      s.className = "slot";
+      var answered = state.answer[i] !== undefined;
+      if (i === hintIdx && !answered) {
+        s.classList.add("ghost");
+        s.textContent = SCALE[cfg.start].sol;
+        var tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = "tap first";
+        s.appendChild(tag);
+      } else if (answered) {
+        s.classList.add(i === hintIdx ? "given" : "filled");
+        s.textContent = SCALE[state.answer[i]].sol;
+      }
+      el.slots.appendChild(s);
+    }
+  }
+
+  function renderPad() {
+    el.pad.innerHTML = "";
+    var cfg = LEVELS[state.level];
+    SCALE.forEach(function (note, idx) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "solfa-btn";
+      b.innerHTML = note.sol + "<small>" + note.key + "</small>";
+      b.disabled = cfg.allowed.indexOf(idx) === -1;
+      b.addEventListener("click", (function (idxCaptured) { return function () { handleInput(idxCaptured); }; })(idx));
+      el.pad.appendChild(b);
+    });
+  }
+
+  function handleInput(idx) {
+    if (state.locked || state.inputLocked) return;
+    var cfg = LEVELS[state.level];
+    if (state.answer.length >= cfg.length) return;
+
+    state.inputLocked = true;
+    setTimeout(function () { state.inputLocked = false; }, INPUT_LOCK_MS);
+
+    state.answer.push(idx);
+    renderSlots();
+    var last = el.slots.children[state.answer.length - 1];
+    last.classList.add("pop");
+    setTimeout(function () { last.classList.remove("pop"); }, 150);
+
+    if (state.answer.length === cfg.length) {
+      state.locked = true;
+      setTimeout(checkAnswer, 220);
+    }
+  }
+
+  function checkAnswer() {
+    var correctCount = 0;
+    for (var i = 0; i < state.phrase.length; i++) {
+      var slot = el.slots.children[i];
+      slot.className = "slot";
+      if (state.answer[i] === state.phrase[i]) {
+        slot.classList.add("correct");
+        slot.textContent = SCALE[state.phrase[i]].sol;
+        correctCount++;
+      } else {
+        slot.classList.add("wrong");
+        var was = document.createElement("span");
+        was.className = "was";
+        was.textContent = SCALE[state.answer[i]].sol;
+        slot.textContent = SCALE[state.phrase[i]].sol;
+        slot.appendChild(was);
+      }
+    }
+    var allCorrect = correctCount === state.phrase.length;
+    playChime(allCorrect);
+    el.playBtn.classList.remove("pulse");
+
+    var trayIndex = state.phraseInLevel;
+    state.trayResults[trayIndex] = allCorrect ? "good" : "bad";
+    renderTray(trayIndex);
+    reactMascot(allCorrect);
+
+    if (allCorrect) {
+      el.feedback.textContent = "Correct — into the bowl it goes!";
+      el.feedback.className = "feedback good";
+      state.correctInLevel++;
+      state.score++;
+      el.scoreVal.textContent = state.score;
+      el.scorePill.classList.add("bump");
+      setTimeout(function () { el.scorePill.classList.remove("bump"); }, 300);
+      burstConfetti();
+    } else {
+      el.feedback.textContent = "Not quite — a bad ingredient snuck into the bowl. Correct answer shown above.";
+      el.feedback.className = "feedback bad";
+    }
+
+    state.phraseInLevel++;
+
+    if (allCorrect) {
+      el.replayBtn.disabled = true;
+      setTimeout(goNext, 1050);
+    } else {
+      el.nextRow.hidden = false;
+      el.replayBtn.disabled = false;
+    }
+  }
+
+  function reactMascot(success) {
+    el.mascotWrap.classList.remove("hop", "oops");
+    void el.mascotWrap.offsetWidth;
+    el.mascotWrap.classList.add(success ? "hop" : "oops");
+  }
+
+  function goNext() {
+    if (state.phraseInLevel >= state.count) {
+      bakeThenReveal(state.correctInLevel >= state.pass);
+      return;
+    }
+    newPhrase();
+  }
+
+  function bakeThenReveal(pass) {
+    var passedLevel = state.level;
+    var isLast = state.level === LEVELS.length - 1;
+    showOvenOverlay();
+    setTimeout(function () {
+      if (pass) {
+        state.recommendLevel = isLast ? passedLevel : passedLevel + 1;
+        saveProgress(state.recommendLevel);
+        showBakedOverlay(passedLevel, isLast);
+      } else {
+        showBurntOverlay();
+      }
+    }, 1650);
+  }
+
+  function showOvenOverlay() {
+    el.overlayIcon.innerHTML = ovenAnimHTML();
+    el.overlayTitle.textContent = "Baking…";
+    el.overlayBody.textContent = "Give it a moment in the oven.";
+    el.overlayBtn.style.display = "none";
+    el.overlay.hidden = false;
+  }
+
+  function showBakedOverlay(passedLevel, isLast) {
+    var stageCfg = LEVELS[passedLevel].stage;
+    var thing = stageCfg.type === "cupcake" ? "cupcake" : "cake";
+    el.overlayIcon.innerHTML = drawBaked(stageCfg);
+    el.overlayTitle.textContent = isLast ? "Showstopper!" : "Fresh " + thing + "!";
+    el.overlayBody.textContent = isLast
+      ? "You've baked every layer — the full pentatonic showstopper cake is done."
+      : "Beautiful bake. Pick your next level when you're ready.";
+    el.overlayBtn.style.display = "";
+    el.overlayBtn.textContent = "Choose next level";
+    el.overlay.hidden = false;
+    state.overlayAction = "toSelect";
+    state.phraseInLevel = 0;
+    state.correctInLevel = 0;
+    state.trayResults = [];
+  }
+
+  function showBurntOverlay() {
+    el.overlayIcon.innerHTML = burntSVG();
+    el.overlayTitle.textContent = "Uh oh — it burned!";
+    el.overlayBody.textContent = "A couple of mixed-up ingredients got in there. Let's remix the batter and try this level again.";
+    el.overlayBtn.style.display = "";
+    el.overlayBtn.textContent = "Try again";
+    el.overlay.hidden = false;
+    state.overlayAction = "retry";
+    state.phraseInLevel = 0;
+    state.correctInLevel = 0;
+    state.trayResults = [];
+    state.usedPhrases = [];
+  }
+
+  function handleOverlayContinue() {
+    el.overlay.hidden = true;
+    if (state.overlayAction === "toSelect") {
+      goToSelect();
+    } else {
+      renderTray();
+      newPhrase();
+    }
+  }
+
+  function saveProgress(lvl) {
+    try { localStorage.setItem("solfa-dictation-level", String(lvl)); }
+    catch (e) { /* storage unavailable — game still works, just won't remember progress */ }
+  }
+  function loadProgress() {
+    try {
+      var v = parseInt(localStorage.getItem("solfa-dictation-level"), 10);
+      state.recommendLevel = (!isNaN(v) && v >= 0 && v < LEVELS.length) ? v : 0;
+    } catch (e) { state.recommendLevel = 0; }
+  }
+
+  // ================= Events =================
+  el.playBtn.addEventListener("click", function () {
+    el.playBtn.disabled = true;
+    el.playBtn.classList.remove("pulse");
+    el.playLabel.textContent = "Listening…";
+    playPhrase();
+    var cfg = LEVELS[state.level];
+    var ms = NOTE_MS[state.level];
+    setTimeout(function () {
+      el.playLabel.textContent = "Play again";
+      el.playBtn.disabled = false;
+      el.replayBtn.disabled = false;
+    }, cfg.length * ms + 150);
+  });
+
+  el.replayBtn.addEventListener("click", function () {
+    if (el.replayBtn.disabled) return;
+    playPhrase();
+  });
+
+  el.nextBtn.addEventListener("click", goNext);
+  el.overlayBtn.addEventListener("click", handleOverlayContinue);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.repeat) return;
+    if (!el.overlay.hidden) {
+      var btnVisible = el.overlayBtn.style.display !== "none";
+      if (btnVisible && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); handleOverlayContinue(); }
+      return;
+    }
+    if (!el.gameArea.hidden) {
+      var idx;
+      if (CODE_TO_IDX.hasOwnProperty(e.code)) idx = CODE_TO_IDX[e.code];
+      else if (KEY_TO_IDX.hasOwnProperty(e.key)) idx = KEY_TO_IDX[e.key];
+      if (idx !== undefined) {
+        var cfg = LEVELS[state.level];
+        if (cfg.allowed.indexOf(idx) !== -1) handleInput(idx);
+        return;
+      }
+      if (e.key.toLowerCase() === "r") {
+        if (!el.replayBtn.disabled) playPhrase();
+        else if (!el.playBtn.disabled) el.playBtn.click();
+      } else if ((e.key === "Enter" || e.key === " ") && !el.nextRow.hidden) {
+        e.preventDefault();
+        goNext();
+      }
+    }
+  });
+
+  // ================= Init =================
+  loadProgress();
+  goToSelect();
+})();
+</script>
+</body>
+</html>
