@@ -87,6 +87,7 @@
   .level-card .lvl-num { font-family: "Baloo 2", sans-serif; font-weight: 700; font-size: 13.5px; margin-top: 3px; color: var(--ink); }
   .level-card .lvl-tag { font-size: 10.5px; color: var(--muted); font-weight: 700; margin-top: 3px; line-height: 1.3; }
   .level-card .lvl-rec { font-size: 9.5px; color: var(--gold); font-weight: 800; margin-top: 3px; }
+  .warmup-wrap { margin-bottom: 22px; }
   .count-picker { margin-bottom: 22px; }
   .count-label { font-weight: 800; font-size: 13.5px; color: var(--ink); margin-bottom: 8px; }
   .count-chips { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -132,6 +133,12 @@
   .slot.pop { transform: scale(1.14); }
   @keyframes correctPop { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
   .slot .was { position: absolute; bottom: -18px; font-size: 9.5px; color: var(--muted); font-family: "Nunito", sans-serif; white-space: nowrap; text-decoration: line-through; }
+
+  .entry-row { display: flex; justify-content: center; gap: 10px; margin: -14px 0 28px; min-height: 20px; }
+  button.ghost-btn { background: #fff; color: var(--muted); border: 2px solid var(--card-border); border-radius: 999px; padding: 9px 18px; font-family: "Nunito", sans-serif; font-weight: 800; font-size: 13.5px; cursor: pointer; }
+  button.ghost-btn:hover { border-color: var(--brick); color: var(--brick); }
+  .slot.editable { cursor: pointer; }
+  .slot.editable:hover { border-color: var(--brick); background: var(--brick-soft); }
 
   .pad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
   button.solfa-btn { font-family: "Baloo 2", sans-serif; font-weight: 700; font-size: 16px; padding: 16px 4px; border-radius: 16px; border: 2px solid var(--card-border); background: var(--paper); color: var(--ink); cursor: pointer; transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease, box-shadow .15s ease; }
@@ -195,15 +202,18 @@
 
   <div class="title-row">
     <div class="mascot-wrap" id="mascotWrap">
-      <svg width="48" height="48" viewBox="0 0 60 60">
-        <ellipse cx="30" cy="46" rx="19" ry="12" fill="#FFFFFF" stroke="#F3E1EF" stroke-width="2"/>
-        <circle cx="30" cy="26" r="17" fill="#FFF6EE" stroke="#F3E1EF" stroke-width="2"/>
-        <path d="M15 20 Q30 2 45 20 Q30 12 15 20 Z" fill="#FFFFFF" stroke="#F3E1EF" stroke-width="2"/>
-        <circle cx="24" cy="26" r="2.6" fill="#3A2A4A"/>
-        <circle cx="36" cy="26" r="2.6" fill="#3A2A4A"/>
-        <circle cx="20" cy="32" r="2.6" fill="#F7A8C4" opacity="0.7"/>
-        <circle cx="40" cy="32" r="2.6" fill="#F7A8C4" opacity="0.7"/>
-        <path d="M23 34 Q30 39 37 34" stroke="#3A2A4A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <svg width="48" height="48" viewBox="0 0 60 62">
+        <ellipse cx="30" cy="48" rx="19" ry="12" fill="#FFFFFF" stroke="#F3E1EF" stroke-width="2"/>
+        <circle cx="30" cy="30" r="16" fill="#FFF6EE" stroke="#F3E1EF" stroke-width="2"/>
+        <circle cx="19" cy="14" r="7.5" fill="#FFFFFF" stroke="#E7DBEF" stroke-width="2"/>
+        <circle cx="30" cy="9" r="9" fill="#FFFFFF" stroke="#E7DBEF" stroke-width="2"/>
+        <circle cx="41" cy="14" r="7.5" fill="#FFFFFF" stroke="#E7DBEF" stroke-width="2"/>
+        <rect x="15" y="18" width="30" height="10" rx="4" fill="#FFFFFF" stroke="#E7DBEF" stroke-width="2"/>
+        <circle cx="24" cy="32" r="2.6" fill="#3A2A4A"/>
+        <circle cx="36" cy="32" r="2.6" fill="#3A2A4A"/>
+        <circle cx="20" cy="37" r="2.6" fill="#F7A8C4" opacity="0.7"/>
+        <circle cx="40" cy="37" r="2.6" fill="#F7A8C4" opacity="0.7"/>
+        <path d="M23 39 Q30 44 37 39" stroke="#3A2A4A" stroke-width="2" fill="none" stroke-linecap="round"/>
       </svg>
     </div>
     <h1 class="title">Solfa Dictation</h1>
@@ -211,6 +221,11 @@
   <p class="subtitle">Hear a short pentatonic phrase and write down the solfa. Get it right and the ingredient goes in the bowl — pass the level and something sweet comes out of the oven.</p>
 
   <div class="select-wrap" id="selectArea">
+    <div class="warmup-wrap">
+      <div class="count-label">🔊 Warm up: hear each note first</div>
+      <div class="pad" id="warmupPad"></div>
+    </div>
+
     <h2 class="select-title">Choose a level</h2>
     <p class="select-sub">Pick a level, then choose how many phrases to complete this round.</p>
     <div class="level-grid" id="levelGrid"></div>
@@ -246,6 +261,10 @@
       </div>
 
       <div class="slots" id="slots"></div>
+      <div class="entry-row" id="entryRow">
+        <button class="ghost-btn" id="clearBtn" hidden>Clear</button>
+        <button class="next-btn" id="submitBtn" hidden>Submit answer</button>
+      </div>
       <div class="pad" id="pad"></div>
 
       <div class="feedback" id="feedback"></div>
@@ -341,8 +360,9 @@
   var el = {};
   ["levelNum","levelTag","ruleText","tray","mascotWrap","particles","scorePill","scoreVal",
    "playBtn","playLabel","replayBtn","slots","pad","feedback","nextRow","nextBtn",
+   "clearBtn","submitBtn",
    "overlay","overlayIcon","overlayTitle","overlayBody","overlayBtn","confettiLayer",
-   "selectArea","gameArea","levelGrid","countChips","rulePreview","startBtn","changeLevelBtn"
+   "selectArea","gameArea","levelGrid","countChips","rulePreview","startBtn","changeLevelBtn","warmupPad"
   ].forEach(function (id) { el[id] = document.getElementById(id); });
 
   // ================= Audio: marimba-style synth =================
@@ -512,6 +532,24 @@
 
   function drawBaked(stageCfg) { return stageCfg.type === "cupcake" ? drawCupcake(stageCfg) : drawCake(stageCfg); }
 
+  function drawWonkyCupcake() {
+    var parts = [];
+    parts.push('<g transform="rotate(-9 90 105) skewX(-3)">');
+    parts.push('<path d="M58 150 L42 100 L138 100 L122 150 Z" fill="#D9C48A"/>');
+    for (var i = 0; i < 6; i++) {
+      var x = 48 + i * 15;
+      parts.push('<line x1="' + x + '" y1="100" x2="' + (x - 4) + '" y2="150" stroke="#FFFFFF" stroke-width="4" opacity="0.4"/>');
+    }
+    parts.push('<path d="M42 100 Q70 60 100 78 Q125 55 138 100 Q115 85 100 92 Q75 78 42 100 Z" fill="#C9B27A" stroke="#FFFFFF" stroke-width="2"/>');
+    parts.push('<path d="M108 78 q10 20 4 34 q-3 8 -10 4" fill="none" stroke="#C9B27A" stroke-width="6" stroke-linecap="round"/>');
+    parts.push('<circle cx="80" cy="70" r="2.6" fill="#3A2A4A"/>');
+    parts.push('<circle cx="98" cy="66" r="2.2" fill="#3A2A4A"/>');
+    parts.push('<path d="M78 80 Q90 74 100 82" stroke="#3A2A4A" stroke-width="2" fill="none" stroke-linecap="round"/>');
+    parts.push('<rect x="86" y="40" width="4" height="18" fill="#F7A8C4" transform="rotate(18 88 49)"/>');
+    parts.push('</g>');
+    return '<svg viewBox="0 0 180 175" width="150" height="146">' + parts.join("") + "</svg>";
+  }
+
   function burntSVG() {
     return '<svg viewBox="0 0 180 175" width="150" height="146">' +
       '<ellipse cx="90" cy="160" rx="80" ry="12" fill="#00000022"/>' +
@@ -533,6 +571,18 @@
   }
 
   // ================= Level-select screen =================
+  function renderWarmupPad() {
+    el.warmupPad.innerHTML = "";
+    SCALE.forEach(function (note) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "solfa-btn";
+      b.innerHTML = note.sol + "<small>" + note.key + "</small>";
+      b.addEventListener("click", function () { playNote(note.freq, 700, 0); });
+      el.warmupPad.appendChild(b);
+    });
+  }
+
   function renderLevelGrid() {
     el.levelGrid.innerHTML = "";
     LEVELS.forEach(function (cfg, idx) {
@@ -639,9 +689,12 @@
     el.feedback.className = "feedback";
     el.nextRow.hidden = true;
     el.replayBtn.disabled = true;
+    el.clearBtn.hidden = true;
+    el.submitBtn.hidden = true;
     el.playLabel.textContent = "Play phrase";
     el.playBtn.disabled = false;
     el.playBtn.classList.add("pulse");
+    setTimeout(triggerPlay, 450);
   }
 
   function renderLevelHeader() {
@@ -684,6 +737,11 @@
       } else if (answered) {
         s.classList.add(i === hintIdx ? "given" : "filled");
         s.textContent = SCALE[state.answer[i]].sol;
+        if (!state.locked) {
+          s.classList.add("editable");
+          s.title = "Tap to clear from here";
+          s.addEventListener("click", (function (iCaptured) { return function () { truncateAt(iCaptured); }; })(i));
+        }
       }
       el.slots.appendChild(s);
     }
@@ -717,10 +775,37 @@
     last.classList.add("pop");
     setTimeout(function () { last.classList.remove("pop"); }, 150);
 
-    if (state.answer.length === cfg.length) {
-      state.locked = true;
-      setTimeout(checkAnswer, 220);
-    }
+    updateEntryButtons();
+  }
+
+  function updateEntryButtons() {
+    var cfg = LEVELS[state.level];
+    var full = state.answer.length === cfg.length;
+    el.clearBtn.hidden = state.locked || state.answer.length === 0;
+    el.submitBtn.hidden = state.locked || !full;
+  }
+
+  function clearAnswer() {
+    if (state.locked) return;
+    state.answer = [];
+    renderSlots();
+    updateEntryButtons();
+  }
+
+  function truncateAt(i) {
+    if (state.locked) return;
+    state.answer = state.answer.slice(0, i);
+    renderSlots();
+    updateEntryButtons();
+  }
+
+  function submitAnswer() {
+    var cfg = LEVELS[state.level];
+    if (state.locked || state.answer.length !== cfg.length) return;
+    state.locked = true;
+    el.clearBtn.hidden = true;
+    el.submitBtn.hidden = true;
+    checkAnswer();
   }
 
   function checkAnswer() {
@@ -792,12 +877,13 @@
   function bakeThenReveal(pass) {
     var passedLevel = state.level;
     var isLast = state.level === LEVELS.length - 1;
+    var hadBad = state.trayResults.indexOf("bad") !== -1;
     showOvenOverlay();
     setTimeout(function () {
       if (pass) {
         state.recommendLevel = isLast ? passedLevel : passedLevel + 1;
         saveProgress(state.recommendLevel);
-        showBakedOverlay(passedLevel, isLast);
+        showBakedOverlay(passedLevel, isLast, hadBad);
       } else {
         showBurntOverlay();
       }
@@ -812,14 +898,20 @@
     el.overlay.hidden = false;
   }
 
-  function showBakedOverlay(passedLevel, isLast) {
-    var stageCfg = LEVELS[passedLevel].stage;
-    var thing = stageCfg.type === "cupcake" ? "cupcake" : "cake";
-    el.overlayIcon.innerHTML = drawBaked(stageCfg);
-    el.overlayTitle.textContent = isLast ? "Showstopper!" : "Fresh " + thing + "!";
-    el.overlayBody.textContent = isLast
-      ? "You've baked every layer — the full pentatonic showstopper cake is done."
-      : "Beautiful bake. Pick your next level when you're ready.";
+  function showBakedOverlay(passedLevel, isLast, hadBad) {
+    if (hadBad) {
+      el.overlayIcon.innerHTML = drawWonkyCupcake();
+      el.overlayTitle.textContent = "A bit wonky!";
+      el.overlayBody.textContent = "One or two ingredients went in wrong along the way, so this batch came out a little odd. It still counts as a pass — see if you can bake a perfect one next time.";
+    } else {
+      var stageCfg = LEVELS[passedLevel].stage;
+      var thing = stageCfg.type === "cupcake" ? "cupcake" : "cake";
+      el.overlayIcon.innerHTML = drawBaked(stageCfg);
+      el.overlayTitle.textContent = isLast ? "Showstopper!" : "Fresh " + thing + "!";
+      el.overlayBody.textContent = isLast
+        ? "You've baked every layer — the full pentatonic showstopper cake is done."
+        : "Beautiful bake. Pick your next level when you're ready.";
+    }
     el.overlayBtn.style.display = "";
     el.overlayBtn.textContent = "Choose next level";
     el.overlay.hidden = false;
@@ -865,7 +957,8 @@
   }
 
   // ================= Events =================
-  el.playBtn.addEventListener("click", function () {
+  function triggerPlay() {
+    if (el.playBtn.disabled) return;
     el.playBtn.disabled = true;
     el.playBtn.classList.remove("pulse");
     el.playLabel.textContent = "Listening…";
@@ -877,13 +970,16 @@
       el.playBtn.disabled = false;
       el.replayBtn.disabled = false;
     }, cfg.length * ms + 150);
-  });
+  }
+  el.playBtn.addEventListener("click", triggerPlay);
 
   el.replayBtn.addEventListener("click", function () {
     if (el.replayBtn.disabled) return;
     playPhrase();
   });
 
+  el.clearBtn.addEventListener("click", clearAnswer);
+  el.submitBtn.addEventListener("click", submitAnswer);
   el.nextBtn.addEventListener("click", goNext);
   el.overlayBtn.addEventListener("click", handleOverlayContinue);
 
@@ -895,6 +991,11 @@
       return;
     }
     if (!el.gameArea.hidden) {
+      if (e.key === "Backspace" && !state.locked) {
+        e.preventDefault();
+        truncateAt(Math.max(0, state.answer.length - 1));
+        return;
+      }
       var idx;
       if (CODE_TO_IDX.hasOwnProperty(e.code)) idx = CODE_TO_IDX[e.code];
       else if (KEY_TO_IDX.hasOwnProperty(e.key)) idx = KEY_TO_IDX[e.key];
@@ -906,6 +1007,9 @@
       if (e.key.toLowerCase() === "r") {
         if (!el.replayBtn.disabled) playPhrase();
         else if (!el.playBtn.disabled) el.playBtn.click();
+      } else if (e.key === "Enter" && !el.submitBtn.hidden) {
+        e.preventDefault();
+        submitAnswer();
       } else if ((e.key === "Enter" || e.key === " ") && !el.nextRow.hidden) {
         e.preventDefault();
         goNext();
@@ -915,6 +1019,7 @@
 
   // ================= Init =================
   loadProgress();
+  renderWarmupPad();
   goToSelect();
 })();
 </script>
