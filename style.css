@@ -587,3 +587,7 @@ img { max-width: 100%; display: block; }
   .origin-grid { grid-template-columns: 1fr 1fr; }
   .origin-grid .origin-main { grid-column: 1 / -1; }
 }
+
+/* donate: classroom photo in place of the "Where it goes" box */
+.donate-photo { margin: 0; }
+.donate-photo img { width: 100%; height: auto; display: block; }
