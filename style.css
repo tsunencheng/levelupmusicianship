@@ -563,3 +563,27 @@ img { max-width: 100%; display: block; }
 .hero.hero-compact.hero-home h1 { font-size: clamp(36px, 5vw, 56px); }
 .about-photo { box-shadow: none !important; border: 1px solid #DCE1E8; }
 .hero.hero-compact.hero-home { padding-bottom: 64px; }
+
+/* games page: slim skill tiles that jump to each section */
+.skill-tiles-slim { padding: 0 0 40px; }
+.skill-tiles-slim .tile { min-height: 0; padding: 14px 18px; }
+.skill-tiles-slim .tile-name { font-size: clamp(22px, 2.4vw, 30px); margin-bottom: 4px; }
+.skill-tiles-slim .tile-note { font-size: 14px; }
+.section-head h2[id] { scroll-margin-top: 24px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.skill-tiles-slim { margin-top: -28px; }
+.skill-tiles-slim .tile { justify-content: flex-start; }
+
+/* activities: smaller "how these started" photos */
+.origin-grid { max-width: 720px; grid-template-columns: 1.5fr 1fr 1fr; gap: 10px; }
+.origin-grid img,
+.origin-grid .origin-main img { height: 160px; aspect-ratio: auto; }
+.origin-note { font-size: 15px; margin-top: 10px; }
+@media (max-width: 760px) {
+  .origin-grid img, .origin-grid .origin-main img { height: 140px; }
+}
+.origin { margin-top: -28px; }
+@media (max-width: 760px) {
+  .origin-grid { grid-template-columns: 1fr 1fr; }
+  .origin-grid .origin-main { grid-column: 1 / -1; }
+}
