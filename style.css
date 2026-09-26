@@ -457,6 +457,7 @@ img { max-width: 100%; display: block; }
 .dot.rhythm { background: var(--ember); }
 .dot.harmony { background: #C8CC00; }
 .dot.notes { background: var(--winery); }
+.dot.theory {  background: #F29E5C;; }
 .card-art img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
 .card-art { height: 165px; }
 
@@ -591,3 +592,11 @@ img { max-width: 100%; display: block; }
 /* donate: classroom photo in place of the "Where it goes" box */
 .donate-photo { margin: 0; }
 .donate-photo img { width: 100%; height: auto; display: block; }
+
+.btn.ghost:hover{background:#FFFFFF !important;color:#0B1320 !important}
+
+/* Theory tag */
+.card-stamp.theory {
+  background: #F29E5C;
+  color: #0B1320;
+}
