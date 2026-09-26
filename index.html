@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Level Up Musicianship &mdash; Free browser games for music classrooms</title>
+<title>Level Up Musicianship | Free browser games for music classrooms</title>
 <meta name="description" content="Free musicianship games for lower secondary music students. Made by a practising music teacher, and they run in the browser without an account.">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -13,6 +13,13 @@
   <div class="shell">
     <div class="brand">
       <svg class="brand-mark" viewBox="-5 -22 50 57" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <linearGradient id="logoGrad" gradientUnits="userSpaceOnUse" x1="2" y1="35" x2="36" y2="4">
+            <stop offset="0" stop-color="#E0640F"/>
+            <stop offset="0.55" stop-color="#F29E5C"/>
+            <stop offset="1" stop-color="#FFD2A6"/>
+          </linearGradient>
+        </defs>
         <rect x="2" y="24" width="10" height="11" rx="2.4" fill="var(--winery)" opacity="0.5"/>
         <rect x="14" y="14" width="10" height="21" rx="2.4" fill="var(--winery)" opacity="0.75"/>
         <rect x="26" y="4" width="10" height="31" rx="2.4" fill="var(--winery)" opacity="0.92"/>
@@ -35,25 +42,32 @@
   </div>
 </nav>
 
-<header class="hero">
+<header class="hero hero-home">
   <div class="staff-lines">
     <span></span><span></span><span></span><span></span><span></span>
   </div>
-  <svg class="hero-notes" viewBox="0 0 280 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <g fill="none" stroke="var(--winery)" stroke-width="2.5" stroke-linecap="round" opacity="0.55">
-      <path d="M60 60 v60 a14 10 -10 1 1 -4 -2" />
-      <ellipse cx="48" cy="118" rx="13" ry="9" transform="rotate(-10 48 118)" />
-      <path d="M150 30 v70 a15 11 -8 1 1 -4 -2" />
-      <ellipse cx="137" cy="98" rx="14" ry="10" transform="rotate(-8 137 98)" />
-      <path d="M210 140 v60 a13 9 -10 1 1 -4 -2" />
-      <ellipse cx="199" cy="198" rx="12" ry="8" transform="rotate(-10 199 198)" />
-      <path d="M90 220 q40 -20 70 10" stroke="var(--forest-dark)" />
+  <svg class="staff-notes" viewBox="0 -40 330 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g fill="#0B1320">
+      <!-- ta on G (2nd line) -->
+      <ellipse cx="30" cy="90" rx="15" ry="11" transform="rotate(-22 30 90)"/>
+      <rect x="39.8" y="-10" width="4.5" height="100"/>
+      <!-- ta on B (middle line) -->
+      <ellipse cx="100" cy="60" rx="15" ry="11" transform="rotate(-22 100 60)"/>
+      <rect x="85.7" y="60" width="4.5" height="98"/>
+      <!-- ti-ti on D and B, beamed -->
+      <ellipse cx="170" cy="30" rx="15" ry="11" transform="rotate(-22 170 30)"/>
+      <rect x="155.7" y="30" width="4.5" height="114"/>
+      <ellipse cx="230" cy="60" rx="15" ry="11" transform="rotate(-22 230 60)"/>
+      <rect x="215.7" y="60" width="4.5" height="84"/>
+      <rect x="155.7" y="132" width="64.5" height="12"/>
+      <!-- ta on G -->
+      <ellipse cx="295" cy="90" rx="15" ry="11" transform="rotate(-22 295 90)"/>
+      <rect x="304.8" y="-10" width="4.5" height="100"/>
     </g>
   </svg>
   <div class="shell">
-    <p class="hero-eyebrow">Free &middot; browser-based &middot; no installs</p>
-    <h1>Aural and theory games for the <em>real</em> music classroom.</h1>
-    <p class="lede">Built by a classroom music teacher for Year 7 to 9 music. Each game runs straight in the browser with no logins for a quick setup.</p>
+    <h1>Aural and theory games for the music classroom.</h1>
+    <p class="lede">Made by a teacher for Years 7 to 9. Everything opens straight in the browser, with no logins or setup.</p>
     <div class="hero-ctas">
       <a href="games.html" class="btn">Browse the games</a>
       <a href="activities.html" class="btn ghost">Unplugged activities</a>
@@ -61,107 +75,84 @@
   </div>
 </header>
 
+<section class="skill-tiles" aria-label="Find a game by skill">
+  <div class="shell">
+    <div class="tile-grid">
+      <a class="tile tile-yellow" href="games.html#rhythm"><span class="tile-name">Rhythm</span><span class="tile-note">Tap back, read and dictate rhythms</span></a>
+      <a class="tile tile-teal" href="games.html#pitch"><span class="tile-name">Pitch</span><span class="tile-note">Solfa, contour and melodic dictation</span></a>
+      <a class="tile tile-green" href="games.html#harmony"><span class="tile-name">Ear training</span><span class="tile-note">Chords and intervals</span></a>
+      <a class="tile tile-navy" href="games.html#notes"><span class="tile-name">Note reading</span><span class="tile-note">Treble and bass clef</span></a>
+    </div>
+  </div>
+</section>
+
+
 <section class="section">
   <div class="shell">
     <div class="section-head">
       <h2>Start here</h2>
-      <span class="section-note">Many games across rhythm, pitch and harmony</span>
     </div>
     <div class="card-grid">
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #2E8B6B, #155A48);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="222" cy="32" r="22" fill="#FBFF12"/>
-            <path d="M0 98 Q40 80 90 95 Q140 75 190 93 Q230 80 280 90 V130 H0 Z" fill="#0E3D31"/>
-            <g fill="#0A2E25">
-              <path d="M30 100 C10 90 -5 95 -10 108 C8 100 22 100 30 105 Z"/>
-              <path d="M30 100 C45 85 62 86 70 96 C52 94 40 98 32 106 Z"/>
-              <path d="M30 98 C28 78 35 62 48 52 C36 68 32 84 33 100 Z"/>
-              <path d="M30 100 C15 88 14 72 24 58 C20 76 22 90 32 102 Z"/>
-            </g>
-          </svg>
-        </div>
+        <a class="card-art" href="games/jungle-rhythm-safari.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/jungle-rhythm-safari.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp rhythm">Rhythm</span>
           <h3>Jungle Rhythm Safari</h3>
-          <p>Tap back rhythm patterns by ear across seven jungle levels, from <em>ta</em> and <em>ti-ti</em> through to fast syncopated patterns.</p>
+          <p>Tap back rhythms by ear, from <em>ta</em> and <em>ti-ti</em> up to fast syncopation.</p>
           <div class="card-meta">
-            <span>7 levels</span>
-            <span>5&ndash;15 min</span>
+            <span class="yr">Year 7</span><span>7 levels</span><span>5&ndash;15 min</span>
           </div>
           <a href="games/jungle-rhythm-safari.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B4FA0, #0D2654);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="125" cy="55" r="32" fill="none" stroke="#FBFF12" stroke-width="6"/>
-            <rect x="146" y="76" width="10" height="42" rx="5" fill="#FBFF12" transform="rotate(45 151 97)"/>
-            <circle cx="110" cy="45" r="3" fill="#E8D7F1"/>
-            <circle cx="135" cy="62" r="3" fill="#E8D7F1"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/lily-pad-leap.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/lily-pad-leap.jpg" alt=""></a>
         <div class="card-body">
-          <span class="card-stamp harmony">Harmony</span>
-          <h3>Chord Detectives</h3>
-          <p>Identify I, IV and V by ear, levelling up through chord sequences to a race-the-clock final case.</p>
+          <span class="card-stamp rhythm">Rhythm</span>
+          <h3>Lily Pad Leap</h3>
+          <p>Read the rhythm and hop the frog across the pond, holding each jump for exactly as long as the note.</p>
           <div class="card-meta">
-            <span>4 levels</span>
-            <span>5&ndash;15 min</span>
+            <span class="yr">Years 7&ndash;8</span><span>8 worlds</span><span>5&ndash;15 min</span>
           </div>
-          <a href="games/chord-detectives.html" class="btn">Play now</a>
+          <a href="games/lily-pad-leap.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B3A5C, #0E2438);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 95 Q40 78 90 94 Q140 76 190 92 Q230 78 280 90 V130 H0 Z" fill="#0E2438"/>
-            <path d="M0 105 Q40 90 90 103 Q140 86 190 100 Q230 90 280 100 V130 H0 Z" fill="#16344F" opacity="0.85"/>
-            <path d="M125 75 L20 95 L70 100 Z" fill="#E8D7F1"/>
-            <rect x="68" y="35" width="2.5" height="60" fill="#7F2CCB"/>
-            <path d="M70.5 38 L92 48 L70.5 58 Z" fill="#FBFF12"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/spot-the-fake.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/spot-the-fake.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp pitch">Pitch</span>
-          <h3>Charting the Melody</h3>
-          <p>Hear a short phrase, then pick the squiggle that matches its shape from pentatonic up to the full diatonic scale.</p>
+          <h3>Spot the Fake</h3>
+          <p>Hear the original solfa phrase, then find the forged note in the suspect painting.</p>
           <div class="card-meta">
-            <span>4 levels</span>
-            <span>5&ndash;15 min</span>
+            <span class="yr">Years 7&ndash;9</span><span>5 levels</span><span>5&ndash;15 min</span>
           </div>
-          <a href="games/charting-the-melody.html" class="btn">Play now</a>
+          <a href="games/spot-the-fake.html" class="btn">Play now</a>
         </div>
       </div>
 
     </div>
-    <p style="margin-top:28px;"><a href="games.html" class="btn ghost">Browse all games &rarr;</a></p>
+    <p style="margin-top:28px;"><a href="games.html" class="btn ghost">See the full list &rarr;</a></p>
   </div>
 </section>
 
 <section class="section">
   <div class="shell">
     <div class="section-head">
-      <h2>Made for real lessons: warm-ups, brain-breaks and early finishers.</h2>
+      <h2>For warm-ups, brain-breaks and early finishers.</h2>
     </div>
     <div class="about-grid">
       <div>
-        <p>Every game here started as a classroom activity, built around the same constraints any music teachers face: limited time,mixed ability levels in one room, and the need for visible feedback that feels like play, not a worksheet.</p>
-        <p class="pull-quote">Games are levelled, not flat, so a class of mixed ability can all be playing the same game at the difficulty that fits them.</p>
-        <p>Looking for something screen-free? The <a href="activities.html">Activities page</a> has unplugged classroom games with the same kind of game-based thinking, no devices required.</p>
+        <p>Every game on this site started on paper in my classroom. My students would tap and point their way through circles and hand shapes on an A4 sheet, and once an activity worked, I turned it into a game so they could keep practising on their own.</p>
+        <p class="pull-quote">Every title has several levels, so a whole class can play together, each student at the difficulty that suits them.</p>
+        <p>The <a href="activities.html">Activities page</a> has a variety of games that can be played as a class or in groups.</p>
       </div>
-      <div class="about-card">
-        <h3>Good to know</h3>
-        <ul>
-          <li>All games are free to use in any classroom.</li>
-          <li>No login required to play.</li>
-          <li>Works offline once a page has loaded once.</li>
-          <li>New games added as they're trialled and refined.</li>
-        </ul>
-      </div>
+      <figure class="maker">
+        <img src="images/nami-face.jpg" alt="Nami Cheng">
+        <figcaption><strong>Nami Cheng</strong><br>Music teacher, Perth<br><a href="about.html">About me</a></figcaption>
+      </figure>
     </div>
   </div>
 </section>
@@ -169,7 +160,6 @@
 <footer class="site-footer">
   <div class="shell">
     <span>&copy; 2026 Tsun-En Cheng</span>
-    <span>Built for music classrooms everywhere</span>
   </div>
 </footer>
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
@@ -177,7 +167,7 @@
   kofiWidgetOverlay.draw('levelupmusicianship', {
     'type': 'floating-chat',
     'floating-chat.donateButton.text': 'Donate',
-    'floating-chat.donateButton.background-color': '#794bc4',
+    'floating-chat.donateButton.background-color': '#1C2541',
     'floating-chat.donateButton.text-color': '#fff'
   });
 </script>

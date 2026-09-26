@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact &mdash; Level Up Musicianship</title>
+<title>Contact | Level Up Musicianship</title>
 <meta name="description" content="Report a bug, ask a question, or pitch a new game idea for Level Up Musicianship.">
 <link rel="stylesheet" href="style.css">
 <style>
@@ -106,21 +106,31 @@
   </div>
 </nav>
 
-<header class="hero hero-compact">
+<header class="hero hero-compact hero-home">
   <div class="staff-lines">
     <span></span><span></span><span></span><span></span><span></span>
   </div>
-  <svg class="hero-notes" viewBox="0 0 280 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <g fill="none" stroke="var(--winery)" stroke-width="2.5" stroke-linecap="round" opacity="0.55">
-      <path d="M60 60 v60 a14 10 -10 1 1 -4 -2" />
-      <ellipse cx="48" cy="118" rx="13" ry="9" transform="rotate(-10 48 118)" />
-      <path d="M150 30 v70 a15 11 -8 1 1 -4 -2" />
-      <ellipse cx="137" cy="98" rx="14" ry="10" transform="rotate(-8 137 98)" />
+  <svg class="staff-notes" viewBox="0 -40 330 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g fill="#0B1320">
+      <!-- ta on G (2nd line) -->
+      <ellipse cx="30" cy="90" rx="15" ry="11" transform="rotate(-22 30 90)"/>
+      <rect x="39.8" y="-10" width="4.5" height="100"/>
+      <!-- ta on B (middle line) -->
+      <ellipse cx="100" cy="60" rx="15" ry="11" transform="rotate(-22 100 60)"/>
+      <rect x="85.7" y="60" width="4.5" height="98"/>
+      <!-- ti-ti on D and B, beamed -->
+      <ellipse cx="170" cy="30" rx="15" ry="11" transform="rotate(-22 170 30)"/>
+      <rect x="155.7" y="30" width="4.5" height="114"/>
+      <ellipse cx="230" cy="60" rx="15" ry="11" transform="rotate(-22 230 60)"/>
+      <rect x="215.7" y="60" width="4.5" height="84"/>
+      <rect x="155.7" y="132" width="64.5" height="12"/>
+      <!-- ta on G -->
+      <ellipse cx="295" cy="90" rx="15" ry="11" transform="rotate(-22 295 90)"/>
+      <rect x="304.8" y="-10" width="4.5" height="100"/>
     </g>
   </svg>
   <div class="shell">
-    <p class="hero-eyebrow">Get in touch</p>
-    <h1 style="font-size: 40px;">Bugs, questions, and game ideas welcome.</h1>
+    <h1>Bugs, questions, and game ideas welcome.</h1>
     <p class="lede">Found something broken? Got a concept you'd love turned into a game? Let me know below.</p>
   </div>
 </header>
@@ -130,7 +140,7 @@
     <div class="contact-grid">
 
       <div>
-        <div id="formSuccess" class="form-success">Thanks &mdash; your message is on its way. I'll get back to you as soon as I can.</div>
+        <div id="formSuccess" class="form-success">Thanks, your message is on its way. I'll get back to you as soon as I can.</div>
 
         <form class="contact-form" id="contactForm" action="https://formsubmit.co/tsunencheng@gmail.com" method="POST">
           <input type="hidden" name="_subject" value="New message from Level Up Musicianship">
@@ -169,7 +179,7 @@
       <div>
         <div class="contact-card">
           <h3>Bug reports</h3>
-          <p>Let me know which game and level it happened in, and what you saw &mdash; the more specific, the faster I can fix it.</p>
+          <p>Let me know which game and level it happened in, and what you saw. The more specific, the faster I can fix it.</p>
         </div>
         <div class="contact-card">
           <h3>Game ideas</h3>
@@ -188,7 +198,6 @@
 <footer class="site-footer">
   <div class="shell">
     <span>&copy; 2026 Tsun-En Cheng</span>
-    <span>Built for music classrooms everywhere</span>
   </div>
 </footer>
 
@@ -212,7 +221,7 @@
         throw new Error('Submission failed');
       }
     }).catch(() => {
-      alert('Something went wrong sending that — feel free to email tsunencheng@gmail.com directly instead.');
+      alert('Something went wrong sending that. Please email tsunencheng@gmail.com directly instead.');
     });
   });
 </script>
@@ -221,7 +230,7 @@
   kofiWidgetOverlay.draw('levelupmusicianship', {
     'type': 'floating-chat',
     'floating-chat.donateButton.text': 'Donate',
-    'floating-chat.donateButton.background-color': '#794bc4',
+    'floating-chat.donateButton.background-color': '#1C2541',
     'floating-chat.donateButton.text-color': '#fff'
   });
 </script>

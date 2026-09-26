@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Games &mdash; Level Up Musicianship</title>
+<title>Games | Level Up Musicianship</title>
 <meta name="description" content="Browse all free browser-based music games for the classroom from rhythm dictation, melodic dictation, to note naming.">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -35,166 +35,93 @@
   </div>
 </nav>
 
-<header class="hero hero-compact">
+<header class="hero hero-compact hero-home">
   <div class="staff-lines">
     <span></span><span></span><span></span><span></span><span></span>
   </div>
-  <svg class="hero-notes" viewBox="0 0 280 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <g fill="none" stroke="var(--winery)" stroke-width="2.5" stroke-linecap="round" opacity="0.55">
-      <path d="M60 60 v60 a14 10 -10 1 1 -4 -2" />
-      <ellipse cx="48" cy="118" rx="13" ry="9" transform="rotate(-10 48 118)" />
-      <path d="M150 30 v70 a15 11 -8 1 1 -4 -2" />
-      <ellipse cx="137" cy="98" rx="14" ry="10" transform="rotate(-8 137 98)" />
+  <svg class="staff-notes" viewBox="0 -40 330 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g fill="#0B1320">
+      <!-- ta on G (2nd line) -->
+      <ellipse cx="30" cy="90" rx="15" ry="11" transform="rotate(-22 30 90)"/>
+      <rect x="39.8" y="-10" width="4.5" height="100"/>
+      <!-- ta on B (middle line) -->
+      <ellipse cx="100" cy="60" rx="15" ry="11" transform="rotate(-22 100 60)"/>
+      <rect x="85.7" y="60" width="4.5" height="98"/>
+      <!-- ti-ti on D and B, beamed -->
+      <ellipse cx="170" cy="30" rx="15" ry="11" transform="rotate(-22 170 30)"/>
+      <rect x="155.7" y="30" width="4.5" height="114"/>
+      <ellipse cx="230" cy="60" rx="15" ry="11" transform="rotate(-22 230 60)"/>
+      <rect x="215.7" y="60" width="4.5" height="84"/>
+      <rect x="155.7" y="132" width="64.5" height="12"/>
+      <!-- ta on G -->
+      <ellipse cx="295" cy="90" rx="15" ry="11" transform="rotate(-22 295 90)"/>
+      <rect x="304.8" y="-10" width="4.5" height="100"/>
     </g>
   </svg>
   <div class="shell">
-    <p class="hero-eyebrow">The full library</p>
-    <h1 style="font-size: 40px;">Every game sorted by rhythm or pitch.</h1>
-    <p class="lede">Click straight in to start playing.</p>
+    <h1>All games, grouped by skill.</h1>
+    <p class="lede">Each card shows the year level it suits best.</p>
   </div>
 </header>
 
 <section class="section" style="border-top: none;">
   <div class="shell">
     <div class="section-head">
-      <h2>Rhythm dictation</h2>
+      <h2 id="rhythm">Rhythm dictation</h2>
       <span class="section-note">Rhythm syllables</span>
     </div>
     <div class="card-grid">
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #2E8B6B, #155A48);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="222" cy="32" r="22" fill="#FBFF12"/>
-            <path d="M0 98 Q40 80 90 95 Q140 75 190 93 Q230 80 280 90 V130 H0 Z" fill="#0E3D31"/>
-            <g fill="#0A2E25">
-              <path d="M30 100 C10 90 -5 95 -10 108 C8 100 22 100 30 105 Z"/>
-              <path d="M30 100 C45 85 62 86 70 96 C52 94 40 98 32 106 Z"/>
-              <path d="M30 98 C28 78 35 62 48 52 C36 68 32 84 33 100 Z"/>
-              <path d="M30 100 C15 88 14 72 24 58 C20 76 22 90 32 102 Z"/>
-            </g>
-          </svg>
-        </div>
+        <a class="card-art" href="games/jungle-rhythm-safari.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/jungle-rhythm-safari.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp rhythm">Rhythm</span>
           <h3>Jungle Rhythm Safari</h3>
           <p>Tap back rhythm patterns by ear across seven jungle levels, building from <em>ta</em> and <em>ti-ti</em> up through to sixteenth-note combinations at increasing tempo. Notation appears as you go, so students can connect what they hear to what it looks like.</p>
-          <div class="card-meta">
-            <span>7 levels</span>
-            <span>Year 7</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 7</span><span>7 levels</span></div>
           <a href="games/jungle-rhythm-safari.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B2A4A, #0D1730);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="220" cy="35" r="26" fill="#F3E9D2"/>
-            <circle cx="232" cy="28" r="26" fill="#0D1730"/>
-            <circle cx="40" cy="20" r="2" fill="white"/><circle cx="70" cy="40" r="1.6" fill="white"/>
-            <circle cx="110" cy="15" r="2" fill="white"/><circle cx="150" cy="50" r="1.4" fill="white"/>
-            <circle cx="180" cy="20" r="1.8" fill="white"/><circle cx="20" cy="60" r="1.4" fill="white"/>
-            <path d="M0 110 Q60 85 120 105 Q180 80 280 100 V130 H0 Z" fill="#0A1325"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/jungle-rhythm-safari-night-dictation.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/jungle-rhythm-safari-night-dictation.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp rhythm">Rhythm</span>
           <h3>Jungle Rhythm Safari: Night Dictation</h3>
           <p>The same jungle trek, but after dark so there are no notations shown while the pattern plays and students have to inner hear before they can tap or notate it. A blind dictation drill across five levels.</p>
-          <div class="card-meta">
-            <span>5 levels</span>
-            <span>Year 7&ndash;8</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 7&ndash;8</span><span>5 levels</span></div>
           <a href="games/jungle-rhythm-safari-night-dictation.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B2A33, #0E171D);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="140" cy="65" r="38" fill="none" stroke="#FF9F1C" stroke-width="5"/>
-            <circle cx="140" cy="65" r="22" fill="none" stroke="#FF9F1C" stroke-width="4"/>
-            <circle cx="140" cy="65" r="7" fill="#FF9F1C"/>
-            <rect x="20" y="20" width="3" height="90" fill="#FF9F1C" opacity="0.4"/>
-            <rect x="257" y="20" width="3" height="90" fill="#FF9F1C" opacity="0.4"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/vault-breakers.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/vault-breakers.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp rhythm">Rhythm</span>
           <h3>Vault Breakers</h3>
           <p>A heist-themed dictation game built for compound time. Crack seven rooms of a vault by tapping back 6/8 rhythms while the tempo and the stakes climb!</p>
-          <div class="card-meta">
-            <span>7 levels</span>
-            <span>6/8 time</span>
-            <span>Year 8&ndash;9</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 8&ndash;9</span><span>7 levels</span><span>6/8 time</span></div>
           <a href="games/vault-breakers.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B2030, #14171F);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="140" cy="50" r="34" fill="none" stroke="#E8A33D" stroke-width="2" opacity="0.5"/>
-            <path d="M70 50 L210 50" stroke="#E8A33D" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.4"/>
-            <text x="100" y="62" font-size="30" font-family="Georgia, serif" font-weight="700" fill="#E8463B" opacity="0.9">&#9836;</text>
-            <rect x="30" y="95" width="220" height="14" rx="3" fill="#0E1018"/>
-            <rect x="34" y="98" width="16" height="8" rx="2" fill="#E8A33D"/>
-            <rect x="54" y="98" width="16" height="8" rx="2" fill="#2a3045"/>
-            <rect x="74" y="98" width="16" height="8" rx="2" fill="#E8A33D"/>
-            <rect x="94" y="98" width="16" height="8" rx="2" fill="#2a3045"/>
-            <rect x="114" y="98" width="16" height="8" rx="2" fill="#2a3045"/>
-            <rect x="134" y="98" width="16" height="8" rx="2" fill="#E8A33D"/>
-            <rect x="154" y="98" width="16" height="8" rx="2" fill="#2a3045"/>
-            <rect x="174" y="98" width="16" height="8" rx="2" fill="#2a3045"/>
-            <rect x="194" y="98" width="16" height="8" rx="2" fill="#E8A33D"/>
-            <rect x="214" y="98" width="16" height="8" rx="2" fill="#2a3045"/>
-            <rect x="234" y="98" width="16" height="8" rx="2" fill="#2a3045"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/blue-note-call-response.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/blue-note-call-response.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp rhythm">Rhythm</span>
-          <h3>Blue Note &mdash; Call &amp; Response</h3>
+          <h3>Blue Note: Call &amp; Response</h3>
           <p>A 12-bar-blues lounge sets the scene for call-and-response rhythm dictation. Listen to the band's 2-bar call, then tap or spacebar the pattern straight back in swung eighths. Three sets build from straightforward <em>ta</em> and <em>ti-ti</em> up through to off-beat patterns.</p>
-          <div class="card-meta">
-            <span>3 levels</span>
-            <span>Swung eighths</span>
-            <span>Year 8</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 8</span><span>3 levels</span><span>Swung eighths</span></div>
           <a href="games/blue-note-call-response.html" class="btn">Play now</a>
         </div>
       </div>
 <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #35205F, #150E2C);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="30" cy="18" r="1.4" fill="#FFF6E6"/><circle cx="70" cy="30" r="1.1" fill="#FFF6E6"/><circle cx="118" cy="14" r="1.5" fill="#FFF6E6"/>
-            <circle cx="160" cy="26" r="1.1" fill="#FFF6E6"/><circle cx="196" cy="12" r="1.3" fill="#FFF6E6"/><circle cx="262" cy="40" r="1.2" fill="#FFF6E6"/>
-            <circle cx="232" cy="30" r="16" fill="#FFEFC8"/>
-            <path d="M0 82 Q50 66 110 80 Q170 64 220 78 Q250 70 280 76 V130 H0 Z" fill="#2A1850"/>
-            <rect x="0" y="92" width="280" height="38" fill="#2E2466"/>
-            <path d="M0 92 L44 92 Q52 94 54 104 L50 130 L0 130 Z" fill="#3B2A45"/>
-            <rect x="0" y="89" width="48" height="6" rx="3" fill="#5AA95E"/>
-            <ellipse cx="92" cy="96" rx="20" ry="5" fill="#5FBF6A"/>
-            <ellipse cx="150" cy="96" rx="14" ry="4" fill="#5FBF6A"/>
-            <ellipse cx="184" cy="96" rx="14" ry="4" fill="#5FBF6A"/>
-            <path d="M216 96 A18 11 0 0 1 252 96 Z" fill="#B97A3E"/><circle cx="256" cy="93" r="4" fill="#8CC46A"/>
-            <path d="M92 90 Q120 44 148 90" stroke="#FFC857" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/>
-            <ellipse cx="120" cy="60" rx="11" ry="8" fill="#8FD16A"/>
-            <circle cx="118" cy="52" r="3.6" fill="#8FD16A"/><circle cx="126" cy="52" r="3.6" fill="#8FD16A"/>
-            <circle cx="119" cy="51.6" r="1.4" fill="#1A1230"/><circle cx="127" cy="51.6" r="1.4" fill="#1A1230"/>
-            <ellipse cx="111" cy="55" rx="2.6" ry="3.4" fill="#FF4FA3"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/lily-pad-leap.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/lily-pad-leap.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp rhythm">Rhythm</span>
           <h3>Lily Pad Leap</h3>
-          <p>Read the rhythm and tap on every note to hop the frog across the pond &mdash; each hop lasts exactly as long as the note, and on a rest you ride the turtle. Eight worlds build from <em>ta</em> and <em>ti-ti</em> through <em>ti-ka-ti-ka</em> and <em>ti-ta-ti</em> to <em>tam-ti</em> and <em>tim-ka</em>, played in 2/4, 3/4 or 4/4.</p>
-          <div class="card-meta">
-            <span>8 worlds</span>
-            <span>2/4 &middot; 3/4 &middot; 4/4</span>
-            <span>Years 7&ndash;8</span>
-          </div>
+          <p>Read the rhythm and tap on every note to hop the frog across the pond. Each hop lasts exactly as long as the note, and on a rest you ride the turtle. Eight worlds build from <em>ta</em> and <em>ti-ti</em> through <em>ti-ka-ti-ka</em> and <em>ti-ta-ti</em> to <em>tam-ti</em> and <em>tim-ka</em>, played in 2/4, 3/4 or 4/4.</p>
+          <div class="card-meta"><span class="yr">Years 7&ndash;8</span><span>8 worlds</span><span>2/4 &middot; 3/4 &middot; 4/4</span></div>
           <a href="games/lily-pad-leap.html" class="btn">Play now</a>
         </div>
       </div>
@@ -205,171 +132,84 @@
 <section class="section">
   <div class="shell">
     <div class="section-head">
-      <h2>Melodic dictation</h2>
+      <h2 id="pitch">Melodic dictation</h2>
       <span class="section-note">Solfa, inner-hearing, melodic contour</span>
     </div>
     <div class="card-grid">
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B2A4A, #0D1730);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="220" cy="35" r="26" fill="#F3E9D2"/>
-            <circle cx="232" cy="28" r="26" fill="#0D1730"/>
-            <circle cx="40" cy="20" r="2" fill="white"/><circle cx="70" cy="40" r="1.6" fill="white"/>
-            <circle cx="110" cy="15" r="2" fill="white"/><circle cx="150" cy="50" r="1.4" fill="white"/>
-            <path d="M0 110 Q60 85 120 105 Q180 80 280 100 V130 H0 Z" fill="#0A1325"/>
-            <circle cx="40" cy="88" r="6" fill="#E63946"/>
-            <circle cx="85" cy="78" r="6" fill="#FF9F1C"/>
-            <circle cx="130" cy="96" r="6" fill="#FBFF12"/>
-            <circle cx="178" cy="84" r="6" fill="#2EC4B6"/>
-            <circle cx="222" cy="94" r="6" fill="#7F2CCB"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/jungle-rhythm-safari-night-dictation-pitch.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/jungle-rhythm-safari-night-dictation-pitch.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp pitch">Pitch &amp; rhythm</span>
           <h3>Jungle Rhythm Safari: Night Dictation + Pitch</h3>
           <p>The toughest combination in the series: blind rhythm dictation <em>and</em> solfège entry, with no notation visible while the pattern plays. By the final level students are dictating both rhythm and the full pentatonic set purely by ear.</p>
-          <div class="card-meta">
-            <span>5 levels</span>
-            <span>Pentatonic</span>
-            <span>Year 7&ndash;8</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 7&ndash;8</span><span>5 levels</span><span>Pentatonic</span></div>
           <a href="games/jungle-rhythm-safari-night-dictation-pitch.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B3A5C, #0E2438);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 95 Q40 78 90 94 Q140 76 190 92 Q230 78 280 90 V130 H0 Z" fill="#0E2438"/>
-            <path d="M0 105 Q40 90 90 103 Q140 86 190 100 Q230 90 280 100 V130 H0 Z" fill="#16344F" opacity="0.85"/>
-            <path d="M125 75 L20 95 L70 100 Z" fill="#E8D7F1"/>
-            <rect x="68" y="35" width="2.5" height="60" fill="#7F2CCB"/>
-            <path d="M70.5 38 L92 48 L70.5 58 Z" fill="#FBFF12"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/charting-the-melody.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/charting-the-melody.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp pitch">Pitch</span>
           <h3>Charting the Melody</h3>
-          <p>Hear a short phrase, then pick the squiggle that matches its melodic contour &mdash; charting a course across four increasingly demanding voyages, from three gentle pentatonic pitches up to the full diatonic scale with close, easily-confused intervals.</p>
-          <div class="card-meta">
-            <span>4 levels</span>
-            <span>Pentatonic&ndash;diatonic</span>
-            <span>Year 8</span>
-          </div>
+          <p>Hear a short phrase, then pick the squiggle that matches its melodic contour, charting a course across four increasingly demanding voyages, from three gentle pentatonic pitches up to the full diatonic scale with close, easily-confused intervals.</p>
+          <div class="card-meta"><span class="yr">Year 8</span><span>4 levels</span><span>Pentatonic&ndash;diatonic</span></div>
           <a href="games/charting-the-melody.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #0E2438, #071420);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="40" cy="20" r="1.6" fill="white"/><circle cx="80" cy="14" r="1.3" fill="white"/>
-            <circle cx="200" cy="18" r="1.6" fill="white"/><circle cx="240" cy="28" r="1.3" fill="white"/>
-            <path d="M0 95 Q40 78 90 94 Q140 76 190 92 Q230 78 280 90 V130 H0 Z" fill="#0A1B2B"/>
-            <path d="M0 105 Q40 90 90 103 Q140 86 190 100 Q230 90 280 100 V130 H0 Z" fill="#12283D" opacity="0.85"/>
-            <path d="M170 70 L60 92 L115 98 Z" fill="#E8D7F1"/>
-            <rect x="113" y="30" width="2.5" height="62" fill="#FF9F1C"/>
-            <path d="M115.5 33 L140 44 L115.5 55 Z" fill="#FBFF12"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/charting-the-melody-2.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/charting-the-melody-2.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp pitch">Pitch</span>
           <h3>Charting the Melody 2</h3>
           <p>Picks up where the first voyage left off. Longer phrases, denser rhythms, and a course that pushes all the way to the full octave. Built for ears that already know their pentatonic bearings.</p>
-          <div class="card-meta">
-            <span>5 levels</span>
-            <span>Diatonic &middot; full octave</span>
-            <span>Year 9</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 9</span><span>5 levels</span><span>Diatonic &middot; full octave</span></div>
           <a href="games/charting-the-melody-2.html" class="btn">Play now</a>
         </div>
       </div>
       
 <div class="game-card">
-  <div class="card-art" style="background:linear-gradient(160deg, #F7A8C4, #A855D9);">
-    <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <ellipse cx="140" cy="100" rx="70" ry="10" fill="#00000022"/>
-      <rect x="95" y="55" width="90" height="35" rx="8" fill="#F3C77A" stroke="#FFFFFF66" stroke-width="2"/>
-      <path d="M95 55 q12 -16 24 0 q12 -16 24 0 q12 -16 24 0 q12 -16 18 0 L185 60 L95 60 Z" fill="#FFFFFF" opacity="0.95"/>
-      <circle cx="120" cy="45" r="4" fill="#C1483B"/>
-      <circle cx="140" cy="42" r="4" fill="#C1483B"/>
-      <circle cx="160" cy="45" r="4" fill="#C1483B"/>
-    </svg>
-  </div>
+  <a class="card-art" href="games/solfa-dictation.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/solfa-dictation.jpg" alt=""></a>
   <div class="card-body">
     <span class="card-stamp pitch">Pitch</span>
     <h3>Solfa Dictation</h3>
-    <p>Hear a short pentatonic phrase and write down the solfa, one syllable at a time &mdash; eight levels building from do-re-mi-so up to the full pentatonic set starting anywhere, with a bakery twist: get it right and bake your way up from cupcakes to a full showstopper cake.</p>
+    <p>Hear a short pentatonic phrase and write down the solfa, one syllable at a time. Eight levels build from do-re-mi-so up to the full pentatonic set starting anywhere, with a bakery twist: get it right and bake your way up from cupcakes to a full showstopper cake.</p>
     <div class="card-meta">
       <span>8 levels · Choose your phrase count</span>
     </div>
-    <a class="btn" href="/games/solfa-dictation">Play now</a>
+    <a class="btn" href="games/solfa-dictation.html">Play now</a>
   </div>
 </div>
 <div class="game-card">
-  <div class="card-art" style="background:linear-gradient(160deg, #2C1F52, #120C24);">
-    <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="140" cy="40" r="46" fill="#FFC857" opacity="0.14"/>
-      <circle cx="40" cy="18" r="1.8" fill="white"/><circle cx="70" cy="34" r="1.4" fill="white"/>
-      <circle cx="205" cy="16" r="1.6" fill="white"/><circle cx="245" cy="36" r="1.8" fill="white"/>
-      <path d="M0 112 H280 V130 H0 Z" fill="#0A0618"/>
-      <rect x="96" y="46" width="88" height="64" rx="3" fill="#8B5E0F"/>
-      <rect x="103" y="53" width="74" height="50" fill="#F5E9CC"/>
-      <circle cx="128" cy="72" r="9" fill="#c93c3c"/>
-      <circle cx="152" cy="80" r="9" fill="#3f9c64"/>
-      <circle cx="140" cy="92" r="9" fill="#f1d24d"/>
-      <line x1="140" y1="18" x2="140" y2="4" stroke="#FFC857" stroke-width="2"/>
-      <circle cx="140" cy="4" r="3" fill="#FFC857"/>
-      <circle cx="42" cy="98" r="6" fill="#c93c3c"/>
-      <circle cx="82" cy="106" r="6" fill="#f0a04b"/>
-      <circle cx="200" cy="106" r="6" fill="#3f9c64"/>
-      <circle cx="238" cy="98" r="6" fill="#4a86d8"/>
-    </svg>
-  </div>
+  <a class="card-art" href="games/spot-the-fake.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/spot-the-fake.jpg" alt=""></a>
   <div class="card-body">
     <span class="card-stamp pitch">Pitch</span>
     <h3>Spot the Fake: The Art Forgery Files</h3>
     <p>Solfa ear-training in a detective art gallery. Hear the original phrase, judge the suspect painting, and pinpoint the forged note. Earn coins to dress up your inspector as you unlock new galleries.</p>
-    <div class="card-meta">
-      <span>5 levels</span>
-      <span>Diatonic + low la/so</span>
-      <span>Year 7&ndash;9</span>
-    </div>
+    <div class="card-meta"><span class="yr">Year 7&ndash;9</span><span>5 levels</span><span>Diatonic + low la/so</span></div>
     <a href="games/spot-the-fake.html" class="btn">Play now</a>
   </div>
 </div>
+
 </section>
 
 <section class="section">
   <div class="shell">
     <div class="section-head">
-      <h2>Rhythm &amp; pitch together</h2>
+      <h2 id="rhythm-pitch">Rhythm &amp; pitch together</h2>
       <span class="section-note">Solfa from pentatonic to full diatonic</span>
     </div>
     <div class="card-grid">
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #2E8B6B, #155A48);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 98 Q40 80 90 95 Q140 75 190 93 Q230 80 280 90 V130 H0 Z" fill="#0E3D31"/>
-            <path d="M20 30 Q90 10 140 45 Q190 75 260 35" stroke="#0A2E25" stroke-width="3" fill="none" opacity="0.5"/>
-            <circle cx="40" cy="36" r="7" fill="#E63946"/>
-            <circle cx="85" cy="22" r="7" fill="#FF9F1C"/>
-            <circle cx="135" cy="44" r="7" fill="#FBFF12"/>
-            <circle cx="185" cy="60" r="7" fill="#2EC4B6"/>
-            <circle cx="232" cy="40" r="7" fill="#1B2A6B"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/jungle-rhythm-pitch-safari.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/jungle-rhythm-pitch-safari.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp pitch">Pitch &amp; rhythm</span>
           <h3>Jungle Rhythm &amp; Pitch Safari</h3>
           <p>Builds on Jungle Rhythm Safari by adding solfège. Students enter <em>do&ndash;re&ndash;mi&ndash;so&ndash;la</em> using number keys as the pentatonic set grows note by note across five levels, alongside the rhythm tapping.</p>
-          <div class="card-meta">
-            <span>5 levels</span>
-            <span>Pentatonic</span>
-            <span>Year 7</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 7</span><span>5 levels</span><span>Pentatonic</span></div>
           <a href="games/jungle-rhythm-pitch-safari.html" class="btn">Play now</a>
         </div>
       </div>
@@ -381,107 +221,55 @@
 <section class="section">
   <div class="shell">
     <div class="section-head">
-      <h2>Ear Training</h2>
-      <span class="section-note">Chord progressions and Interval training</span>
+      <h2 id="harmony">Ear training</h2>
+      <span class="section-note">Chord progressions and interval training</span>
     </div>
     <div class="card-grid">
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B4FA0, #0D2654);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="125" cy="55" r="32" fill="none" stroke="#FBFF12" stroke-width="6"/>
-            <rect x="146" y="76" width="10" height="42" rx="5" fill="#FBFF12" transform="rotate(45 151 97)"/>
-            <circle cx="110" cy="45" r="3" fill="#E8D7F1"/>
-            <circle cx="135" cy="62" r="3" fill="#E8D7F1"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/chord-detectives.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/chord-detectives.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp harmony">Harmony</span>
           <h3>Chord Detectives</h3>
           <p>The case file that started it all: identify I, IV and V by ear in root position, levelling up from two-chord recognition through four-chord sequences to a race-the-clock final case.</p>
-          <div class="card-meta">
-            <span>4 levels</span>
-            <span>I &middot; IV &middot; V</span>
-            <span>Year 8&ndash;9</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 8&ndash;9</span><span>4 levels</span><span>I &middot; IV &middot; V</span></div>
           <a href="games/chord-detectives.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B4FA0, #0D2654);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="125" cy="55" r="32" fill="none" stroke="#FBFF12" stroke-width="6"/>
-            <rect x="146" y="76" width="10" height="42" rx="5" fill="#FBFF12" transform="rotate(45 151 97)"/>
-            <circle cx="110" cy="45" r="3" fill="#E8D7F1"/>
-            <circle cx="135" cy="62" r="3" fill="#E8D7F1"/>
-            <path d="M195 40 a14 14 0 1 1 0 28" stroke="#E8D7F1" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M195 40 l-5 -5 M195 40 l-5 5" stroke="#E8D7F1" stroke-width="3" fill="none" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/chord-detectives-2.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/chord-detectives-2.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp harmony">Harmony</span>
           <h3>Chord Detectives 2</h3>
           <p>Same I&ndash;IV&ndash;V case work, with inversions added to the mix: students have to listen past the bass note to identify the chord underneath, not just match a familiar bassline.</p>
-          <div class="card-meta">
-            <span>4 levels</span>
-            <span>+ inversions</span>
-            <span>Year 9</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 9</span><span>4 levels</span><span>+ inversions</span></div>
           <a href="games/chord-detectives-2.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B4FA0, #0D2654);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="125" cy="55" r="32" fill="none" stroke="#FBFF12" stroke-width="6"/>
-            <rect x="146" y="76" width="10" height="42" rx="5" fill="#FBFF12" transform="rotate(45 151 97)"/>
-            <circle cx="110" cy="45" r="3" fill="#E8D7F1"/>
-            <circle cx="135" cy="62" r="3" fill="#E8D7F1"/>
-            <circle cx="200" cy="50" r="3" fill="#FF9F1C"/>
-            <circle cx="215" cy="65" r="3" fill="#FF9F1C"/>
-            <circle cx="200" cy="80" r="3" fill="#FF9F1C"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/chord-detectives-3.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/chord-detectives-3.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp harmony">Harmony</span>
           <h3>Chord Detectives 3</h3>
           <p>The detective squad takes on a fourth suspect: the vi chord joins I, IV and V in root position, sharpening the ear for the relative-minor colour against the major-key cases.</p>
-          <div class="card-meta">
-            <span>4 levels</span>
-            <span>I &middot; IV &middot; V &middot; vi</span>
-            <span>Year 9</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 9</span><span>4 levels</span><span>I &middot; IV &middot; V &middot; vi</span></div>
           <a href="games/chord-detectives-3.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #1B4FA0, #0D2654);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <circle cx="125" cy="55" r="32" fill="none" stroke="#FBFF12" stroke-width="6"/>
-            <rect x="146" y="76" width="10" height="42" rx="5" fill="#FBFF12" transform="rotate(45 151 97)"/>
-            <circle cx="110" cy="45" r="3" fill="#E8D7F1"/>
-            <circle cx="135" cy="62" r="3" fill="#E8D7F1"/>
-            <path d="M195 40 a14 14 0 1 1 0 28" stroke="#E8D7F1" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M195 40 l-5 -5 M195 40 l-5 5" stroke="#E8D7F1" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <circle cx="205" cy="85" r="3" fill="#FF9F1C"/>
-            <circle cx="220" cy="95" r="3" fill="#FF9F1C"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/chord-detectives-4.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/chord-detectives-4.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp harmony">Harmony</span>
           <h3>Chord Detectives 4</h3>
           <p>The full case load: I, IV, V and vi, with inversions back in play. The most demanding chord ID challenge in the series, built for students who've already cracked the first three.</p>
-          <div class="card-meta">
-            <span>4 levels</span>
-            <span>I &middot; IV &middot; V &middot; vi + inversions</span>
-            <span>Year 9&ndash;10</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 9&ndash;10</span><span>4 levels</span><span>I &middot; IV &middot; V &middot; vi + inversions</span></div>
           <a href="games/chord-detectives-4.html" class="btn">Play now</a>
         </div>
       </div>
+
 
       <div class="game-card">
         <a class="card-art" href="games/interval-grand-prix.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/interval-grand-prix.jpg" alt=""></a>
@@ -503,50 +291,29 @@
 <section class="section">
   <div class="shell">
     <div class="section-head">
-      <h2>Note naming</h2>
+      <h2 id="notes">Note naming</h2>
       <span class="section-note">Staff reading &middot; treble &amp; bass clef</span>
     </div>
     <div class="card-grid">
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #7FE0F5, #C8F5DC);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 100 Q60 80 120 100 Q180 75 280 95 V130 H0 Z" fill="#9FE8A8" opacity="0.6"/>
-            <text x="65" y="80" font-family="Georgia, serif" font-size="78" fill="#2f6b34" text-anchor="middle">&#119070;</text>
-            <ellipse cx="200" cy="75" rx="30" ry="26" fill="#4a9650"/>
-            <circle cx="220" cy="60" r="8" fill="#2f6b34"/>
-            <path d="M225 55 C235 50 242 56 240 64" stroke="#4a9650" stroke-width="6" fill="none" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/chameleon-note-snacks-treble_clef.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/chameleon-note-snacks-treble_clef.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp pitch">Pitch</span>
           <h3>Chameleon Note Snacks</h3>
           <p>A colourful bug crawls across the treble clef staff toward a hungry chameleon. Name the note before it arrives. Each bug shape always matches the same note, so pattern recognition builds fast. Speed ramps up the better you get.</p>
-          <div class="card-meta">
-            <span>Treble clef</span>
-            <span>Year 7</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 7</span><span>Treble clef</span></div>
           <a href="games/chameleon-note-snacks-treble_clef.html" class="btn">Play now</a>
         </div>
       </div>
 
       <div class="game-card">
-        <div class="card-art" style="background:linear-gradient(160deg, #E0B97F, #C98A4F);">
-          <svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0 100 Q60 85 120 100 Q180 80 280 95 V130 H0 Z" fill="#8A5A2F" opacity="0.5"/>
-            <text x="60" y="78" font-family="Georgia, serif" font-size="78" fill="#5C3A1A" text-anchor="middle">&#x1D122;</text>
-            <ellipse cx="205" cy="80" rx="26" ry="22" fill="#7A4A22"/>
-            <path d="M228 78 C245 75 252 68 248 60" stroke="#7A4A22" stroke-width="9" fill="none" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <a class="card-art" href="games/anteater-ant-snacks-bass-clef.html" tabindex="-1" aria-hidden="true"><img src="images/ingame/anteater-ant-snacks-bass-clef.jpg" alt=""></a>
         <div class="card-body">
           <span class="card-stamp pitch">Pitch</span>
           <h3>Anteater Note Snacks</h3>
           <p>The bass clef version. Ants march across the staff toward an anteater's waiting tongue. Same fast-paced game like Chameleon Note Snacks, built for students who are ready to take on the bass clef.</p>
-          <div class="card-meta">
-            <span>Bass clef</span>
-            <span>Year 7</span>
-          </div>
+          <div class="card-meta"><span class="yr">Year 7</span><span>Bass clef</span></div>
           <a href="games/anteater-ant-snacks-bass-clef.html" class="btn">Play now</a>
         </div>
       </div>
@@ -558,7 +325,6 @@
 <footer class="site-footer">
   <div class="shell">
     <span>&copy; 2026 Tsun-En Cheng</span>
-    <span>Built for music classrooms everywhere</span>
   </div>
 </footer>
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
@@ -566,7 +332,7 @@
   kofiWidgetOverlay.draw('levelupmusicianship', {
     'type': 'floating-chat',
     'floating-chat.donateButton.text': 'Donate',
-    'floating-chat.donateButton.background-color': '#794bc4',
+    'floating-chat.donateButton.background-color': '#1C2541',
     'floating-chat.donateButton.text-color': '#fff'
   });
 </script>
