@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frog Note Snacks | Alto clef note naming game | Level Up Musicianship</title>
+<meta name="description" content="Free alto clef note naming game for Year 8. Name each note before the bugs reach the frog. The speed ramps up as you improve.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Music&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#c6ecff;
+    --sky-bottom:#e3faf0;
+    --leaf-dark:#2d6b30;
+    --leaf-mid:#4caf5a;
+    --leaf-light:#9be3a0;
+    --bark:#6b4a2f;
+    --ink:#1b2d24;
+    --card:#ffffffee;
+    --gold:#ffcf4d;
+    --coral:#ff6f59;
+    --sky-accent:#2f9fb8;
+    --wrong:#e85d5d;
+    --right:#3fae5a;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    height:100%;
+    font-family:'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+    background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-bottom) 70%);
+    color:var(--ink);
+    overflow:hidden;
+  }
+  #app{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .cloud{
+    position:absolute;
+    background:#ffffff;
+    border-radius:50%;
+    opacity:.8;
+    filter:blur(.5px);
+  }
+
+  header{
+    width:100%;
+    max-width:1040px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    padding:14px 22px 6px;
+    z-index:5;
+  }
+  h1{
+    font-size:1.4rem;
+    margin:0;
+    color:var(--leaf-dark);
+    text-shadow:1px 1px 0 #fff;
+  }
+  @media (max-width: 480px){
+    h1{ font-size:1.1rem; }
+    .stat-pill{ font-size:.8rem; padding:6px 10px; gap:7px 10px; }
+    .hearts-row{ font-size:.9rem; }
+  }
+  .stat-pill{
+    background:var(--card);
+    border-radius:999px;
+    padding:8px 16px;
+    font-weight:bold;
+    box-shadow:0 3px 0 rgba(0,0,0,.08);
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 14px;
+    align-items:center;
+    font-size:.95rem;
+    max-width:100%;
+  }
+  .stat-pill span.label{font-weight:normal; color:#666; margin-right:4px;}
+  #score{color:var(--coral);}
+  .hearts-row{ display:flex; gap:3px; align-items:center; }
+  .hearts-row.heart-shake{ animation: heartShake .4s; }
+  @keyframes heartShake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-4px);}
+    75%{transform:translateX(4px);}
+  }
+  .heart-slot{ width:1.15em; height:1.15em; flex-shrink:0; }
+  .final-stats{
+    display:flex; gap:24px; justify-content:center;
+    margin:14px 0; font-weight:bold; font-size:1.1rem;
+  }
+  .final-stats .label{ font-weight:normal; color:#666; display:block; font-size:.8rem; }
+  #streak{color:var(--sky-accent);}
+
+  #stage-wrap{
+    position:relative;
+    flex:1;
+    width:100%;
+    max-width:1080px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:3;
+  }
+  #stageSvg{ width:100%; height:100%; max-height:64vh; }
+
+  .staff-line{ stroke:#3a3a3a; stroke-width:2.2; }
+
+  .feedback-flash{
+    position:absolute;
+    font-size:2.1rem;
+    font-weight:bold;
+    pointer-events:none;
+    animation:floatUp 0.9s ease-out forwards;
+    z-index:10;
+    text-shadow:0 2px 0 rgba(0,0,0,.15);
+  }
+  @keyframes floatUp{
+    0%{transform:translateY(0) scale(.6); opacity:0;}
+    15%{transform:translateY(-6px) scale(1.15); opacity:1;}
+    100%{transform:translateY(-70px) scale(1); opacity:0;}
+  }
+
+  #controls{
+    width:100%;
+    max-width:1040px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    padding:8px 18px 22px;
+    z-index:5;
+  }
+  #answerForm{ display:flex; gap:10px; align-items:center; }
+  #letterInput{
+    width:88px;
+    font-size:2rem;
+    text-align:center;
+    text-transform:uppercase;
+    border:4px solid var(--leaf-mid);
+    border-radius:16px;
+    padding:6px 0;
+    background:#fffef8;
+    color:var(--ink);
+    outline:none;
+    font-weight:bold;
+    box-shadow:inset 0 2px 4px rgba(0,0,0,.08);
+    transition:border-color .15s, transform .15s;
+  }
+  #letterInput:focus{ border-color:var(--sky-accent); }
+  #letterInput.shake{ border-color:var(--wrong); animation:shake .35s; }
+  #letterInput.good{ border-color:var(--right); }
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-8px);}
+    40%{transform:translateX(8px);}
+    60%{transform:translateX(-6px);}
+    80%{transform:translateX(6px);}
+  }
+
+  .letter-btns{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; }
+  .letter-btns button{
+    width:42px; height:42px;
+    border-radius:12px;
+    border:none;
+    background:var(--card);
+    font-weight:bold;
+    font-size:1.05rem;
+    color:var(--leaf-dark);
+    box-shadow:0 3px 0 rgba(0,0,0,.1);
+    cursor:pointer;
+    transition:transform .08s;
+  }
+  .letter-btns button:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,.1); }
+
+  #hint{ font-size:.85rem; color:#2f5a4a; opacity:.85; min-height:1.1em; }
+
+  #startOverlay, #gameOverOverlay{
+    position:absolute;
+    inset:0;
+    background:rgba(15,40,35,.55);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:50;
+    text-align:center;
+    color:#fff;
+    padding:20px;
+    overflow-y:auto;
+  }
+  #startOverlay .card, #gameOverOverlay .card{
+    background:var(--card);
+    color:var(--ink);
+    border-radius:24px;
+    padding:28px 32px;
+    max-width:560px;
+    box-shadow:0 10px 0 rgba(0,0,0,.15);
+  }
+  #startOverlay h2, #gameOverOverlay h2{ margin-top:0; color:var(--leaf-dark); }
+  #startOverlay button, #gameOverOverlay button{
+    margin-top:14px;
+    font-size:1.1rem;
+    font-weight:bold;
+    padding:12px 28px;
+    border:none;
+    border-radius:999px;
+    background:var(--coral);
+    color:#fff;
+    cursor:pointer;
+    box-shadow:0 4px 0 #c44b3c;
+  }
+  #startOverlay button:hover, #gameOverOverlay button:hover{ filter:brightness(1.06); }
+
+  ol.how-to{
+    text-align:left;
+    margin:12px 0 10px 0;
+    padding-left:1.4em;
+    font-size:.95rem;
+    line-height:1.7;
+    color:var(--ink);
+  }
+  ol.how-to li{ margin-bottom:3px; }
+
+  .bug-note{
+    font-size:.82rem;
+    background:#dff4ff;
+    border-radius:10px;
+    padding:7px 12px;
+    margin:8px 0 4px;
+    color:#1f5a6b;
+    text-align:center;
+  }
+
+  .bug-key{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-top:10px;
+  }
+  .bug-key div{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-size:.7rem;
+    width:58px;
+  }
+  .bug-key svg{ width:34px; height:34px; }
+
+  .difficulty-row{
+    display:flex; gap:8px; align-items:center; justify-content:center; flex-wrap:wrap;
+    margin-top:10px;
+  }
+  select{
+    font-size:1rem;
+    padding:6px 10px;
+    border-radius:10px;
+    border:2px solid var(--leaf-mid);
+    background:#fffef8;
+  }
+
+  footer{
+    font-size:.7rem;
+    color:#2f5a4a88;
+    text-align:center;
+    padding-bottom:6px;
+  }
+</style>
+<!-- SEO -->
+<link rel="canonical" href="https://levelupmusicianship.com/games/frog-note-snacks-alto-clef">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Level Up Musicianship">
+<meta property="og:title" content="Frog Note Snacks | Alto clef note naming game | Level Up Musicianship">
+<meta property="og:description" content="Free alto clef note naming game for Year 8. Name each note before the bugs reach the frog. The speed ramps up as you improve.">
+<meta property="og:url" content="https://levelupmusicianship.com/games/frog-note-snacks-alto-clef">
+<meta property="og:image" content="https://levelupmusicianship.com/images/ingame/frog-note-snacks-alto-clef.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Frog Note Snacks",
+  "description": "Free alto clef note naming game for Year 8. Name each note before the bugs reach the frog. The speed ramps up as you improve.",
+  "url": "https://levelupmusicianship.com/games/frog-note-snacks-alto-clef",
+  "image": "https://levelupmusicianship.com/images/ingame/frog-note-snacks-alto-clef.jpg",
+  "learningResourceType": "Game",
+  "interactivityType": "active",
+  "educationalLevel": "Year 8 (secondary school)",
+  "audience": {
+    "@type": "EducationalAudience",
+    "educationalRole": "student"
+  },
+  "teaches": [
+    "note reading",
+    "alto clef",
+    "music theory"
+  ],
+  "keywords": "note reading, alto clef, music theory",
+  "inLanguage": "en-AU",
+  "isAccessibleForFree": true,
+  "author": {
+    "@type": "Person",
+    "name": "Tsun-En (Nami) Cheng",
+    "jobTitle": "Music teacher",
+    "url": "https://levelupmusicianship.com/about"
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Level Up Musicianship",
+    "url": "https://levelupmusicianship.com/"
+  }
+}
+</script>
+<!-- /SEO -->
+</head>
+<body>
+<div id="app">
+
+  <div id="bg-dressing"></div>
+
+  <header>
+    <h1>🐸 Frog Note Snacks</h1>
+    <div class="stat-pill">
+      <div id="healthHearts" class="hearts-row"></div>
+      <div><span class="label">Score</span><span id="score">0</span></div>
+      <div><span class="label">Streak</span><span id="streak">0</span></div>
+      <div><span class="label">Best</span><span id="best">0</span></div>
+    </div>
+  </header>
+
+  <div id="stage-wrap">
+    <svg id="stageSvg" viewBox="0 0 1040 460" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+
+  <div id="controls">
+    <form id="answerForm" autocomplete="off">
+      <input id="letterInput" maxlength="1" placeholder="?" autocapitalize="characters" />
+    </form>
+    <div class="letter-btns" id="letterButtons"></div>
+    <div id="hint">Type the natural note name (A–G) — it submits instantly, no Enter needed.</div>
+  </div>
+
+  <footer>Natural notes only · no sharps or flats · made for alto-clef practice</footer>
+
+  <div id="startOverlay">
+    <div class="card">
+      <h2>Feed the frog the right note!</h2>
+      <ol class="how-to">
+        <li>A bug buzzes onto the <strong>alto clef staff</strong> and flies toward the frog.</li>
+        <li>Remember: the <strong>middle line is middle C</strong> — the clef points right at it.</li>
+        <li><strong>Type the note name</strong> (A – G) — it submits the instant you press the key.</li>
+        <li>Correct? The frog's tongue <strong>zaps it up</strong> ✓ — Wrong? Blech, it's spat back out.</li>
+        <li>If a bug reaches the frog without being named, it flies off and you <strong>lose a heart</strong> ♥.</li>
+        <li>Your first wrong guess on each bug is free — after that, wrong guesses nibble your health.</li>
+        <li>The bugs <strong>speed up</strong> the more you get right — stay sharp!</li>
+      </ol>
+      <p class="bug-note">🪰 Bug types are random — read the <strong>staff position</strong>, not the bug!</p>
+      <div class="bug-key" id="bugKey"></div>
+      <div class="difficulty-row">
+        <label for="rangeSelect">Note range:</label>
+        <select id="rangeSelect">
+          <option value="easy">Easy — lines &amp; spaces on the staff</option>
+          <option value="full" selected>Full — low C to the B above the staff</option>
+        </select>
+      </div>
+      <button id="startBtn">Start feeding 🐸</button>
+    </div>
+  </div>
+
+  <div id="gameOverOverlay" style="display:none;">
+    <div class="card">
+      <h2>Out of hearts!</h2>
+      <p>The frog let a few too many bugs buzz away — but here's how you did:</p>
+      <div class="final-stats">
+        <div><span class="label">Final score</span><span id="finalScore">0</span></div>
+        <div><span class="label">Best streak</span><span id="finalBest">0</span></div>
+      </div>
+      <button id="restartBtn">Try again 🐸</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------
+     MUSIC DATA
+     Alto clef, natural notes only (no sharps/flats).
+     Lines bottom to top: F3 A3 C4 E4 G4 — the middle line is
+     middle C, which is where the C clef is centred.
+  --------------------------------------------------------- */
+  const STAFF_TOP_Y = 165;      // y of top staff line (line 5, G4 in alto clef)
+  const STAFF_LINE_GAP = 18;
+  const STAFF_LEFT_X = 130;
+  const STAFF_RIGHT_X = 760;
+  const STEP = STAFF_LINE_GAP / 2; // one diatonic step = half a line-gap
+  const MIDDLE_LINE_Y = STAFF_TOP_Y + 2 * STAFF_LINE_GAP;
+
+  const LETTERS = ['C','D','E','F','G','A','B'];
+
+  // Absolute diatonic index: C4 (middle C) = 0, D4 = 1 ... C5 = 7, etc.
+  function diatonicIndex(letter, octave){
+    return LETTERS.indexOf(letter) + (octave - 4) * 7;
+  }
+  const TOP_LINE_INDEX = diatonicIndex('G',4);
+
+  // steps (svg-down-positive) from the top staff line for a given note
+  function stepsFromTopLine(letter, octave){
+    return TOP_LINE_INDEX - diatonicIndex(letter, octave);
+  }
+  function yForNote(letter, octave){
+    return STAFF_TOP_Y + stepsFromTopLine(letter, octave) * STEP;
+  }
+  function ledgerStepsNeeded(letter, octave){
+    const s = stepsFromTopLine(letter, octave);
+    const lines = [];
+    if(s > 8){ for(let L=10; L<=s; L+=2) lines.push(L); }
+    else if (s < 0){ for(let L=-2; L>=s; L-=2) lines.push(L); }
+    return lines;
+  }
+
+  /* ---------------------------------------------------------
+     BUG DEFINITIONS
+     Pond insects seen from above, each centred on (0,0) and kept
+     within a tight ~13px vertical radius so they sit
+     unambiguously ON a line or dead-centre IN a space. No vertical
+     bob animation — only a gentle rotation wiggle.
+     Bug type is picked at random on each spawn, so no bug ever
+     "means" a particular note.
+  --------------------------------------------------------- */
+  const BUG_TYPES = [
+    { name:'Blowfly',     color:'#2f8f7a', spots:'#1c5a4c', draw: drawBlowfly },
+    { name:'Mozzie',      color:'#8a7560', spots:'#3e342a', draw: drawMozzie },
+    { name:'Moth',        color:'#c9a46a', spots:'#7d5f33', draw: drawMoth },
+    { name:'Firefly',     color:'#3a3a3a', spots:'#1a1a1a', draw: drawFirefly },
+    { name:'Damselfly',   color:'#3a7bd5', spots:'#1f4f99', draw: drawDamselfly },
+    { name:'Water Beetle',color:'#35604a', spots:'#15261d', draw: drawWaterBeetle },
+    { name:'Gnat',        color:'#9bd36b', spots:'#4f8a30', draw: drawGnat },
+  ];
+
+  function drawBlowfly(c){
+    return `<g>
+      <g stroke="${c.spots}" stroke-width="1.1" stroke-linecap="round">
+        <line x1="-4" y1="1" x2="-9" y2="-1"/><line x1="4" y1="1" x2="9" y2="-1"/>
+        <line x1="-4" y1="4" x2="-9" y2="6"/><line x1="4" y1="4" x2="9" y2="6"/>
+      </g>
+      <ellipse cx="-7" cy="-1" rx="7.5" ry="3.8" fill="#e4f7ff" opacity=".8" stroke="#9cc6d4" stroke-width=".8" transform="rotate(-25 -7 -1)"/>
+      <ellipse cx="7" cy="-1" rx="7.5" ry="3.8" fill="#e4f7ff" opacity=".8" stroke="#9cc6d4" stroke-width=".8" transform="rotate(25 7 -1)"/>
+      <ellipse cx="0" cy="4" rx="5.2" ry="7.5" fill="${c.color}" stroke="${c.spots}" stroke-width="1.3"/>
+      <ellipse cx="-1.6" cy="2" rx="1.6" ry="3" fill="#bff2e2" opacity=".55"/>
+      <circle cx="0" cy="-6" r="4.4" fill="${c.color}" stroke="${c.spots}" stroke-width="1.2"/>
+      <circle cx="-2.6" cy="-7.2" r="2.4" fill="#c0392b"/>
+      <circle cx="2.6" cy="-7.2" r="2.4" fill="#c0392b"/>
+    </g>`;
+  }
+
+  function drawMozzie(c){
+    return `<g>
+      <g stroke="${c.spots}" stroke-width=".9" fill="none" stroke-linecap="round">
+        <path d="M -1.5 -2 L -8 -7 L -12 -5"/><path d="M 1.5 -2 L 8 -7 L 12 -5"/>
+        <path d="M -1.5 0 L -9 1 L -12.5 4"/><path d="M 1.5 0 L 9 1 L 12.5 4"/>
+        <path d="M -1.5 2 L -7 7 L -9 11"/><path d="M 1.5 2 L 7 7 L 9 11"/>
+      </g>
+      <ellipse cx="-6" cy="-1" rx="7.5" ry="2.3" fill="#eef8ff" opacity=".85" stroke="#a9c4d0" stroke-width=".7" transform="rotate(-20 -6 -1)"/>
+      <ellipse cx="6" cy="-1" rx="7.5" ry="2.3" fill="#eef8ff" opacity=".85" stroke="#a9c4d0" stroke-width=".7" transform="rotate(20 6 -1)"/>
+      <ellipse cx="0" cy="3.5" rx="2.2" ry="8" fill="${c.color}" stroke="${c.spots}" stroke-width="1"/>
+      <path d="M -2 2 H 2 M -2 5 H 2 M -1.8 8 H 1.8" stroke="${c.spots}" stroke-width=".9"/>
+      <circle cx="0" cy="-6.5" r="2.7" fill="${c.spots}"/>
+      <line x1="0" y1="-9" x2="0" y2="-13" stroke="${c.spots}" stroke-width="1" stroke-linecap="round"/>
+    </g>`;
+  }
+
+  function drawMoth(c){
+    return `<g>
+      <path d="M -1 -4 C -7 -12 -14 -9 -13.5 -2 C -13 3 -7 5 -1 2 Z" fill="${c.color}" stroke="${c.spots}" stroke-width="1.1"/>
+      <path d="M 1 -4 C 7 -12 14 -9 13.5 -2 C 13 3 7 5 1 2 Z" fill="${c.color}" stroke="${c.spots}" stroke-width="1.1"/>
+      <path d="M -1 2 C -6 3 -10 7 -8 10 C -6 12 -2 9 -1 6 Z" fill="${c.color}" stroke="${c.spots}" stroke-width="1"/>
+      <path d="M 1 2 C 6 3 10 7 8 10 C 6 12 2 9 1 6 Z" fill="${c.color}" stroke="${c.spots}" stroke-width="1"/>
+      <circle cx="-7.5" cy="-3.5" r="2.2" fill="${c.spots}" opacity=".7"/>
+      <circle cx="7.5" cy="-3.5" r="2.2" fill="${c.spots}" opacity=".7"/>
+      <ellipse cx="0" cy="1.5" rx="2.4" ry="8" fill="#6b4a2f"/>
+      <path d="M -1 -6 Q -4 -11 -6 -12 M 1 -6 Q 4 -11 6 -12" stroke="#6b4a2f" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+    </g>`;
+  }
+
+  function drawFirefly(c){
+    return `<g>
+      <circle cx="0" cy="6" r="8" fill="#fff59a" opacity=".45"/>
+      <g stroke="${c.spots}" stroke-width="1" stroke-linecap="round">
+        <line x1="-3.5" y1="-2" x2="-8" y2="-4"/><line x1="3.5" y1="-2" x2="8" y2="-4"/>
+        <line x1="-3.5" y1="1" x2="-8.5" y2="2"/><line x1="3.5" y1="1" x2="8.5" y2="2"/>
+      </g>
+      <ellipse cx="0" cy="7" rx="4.2" ry="4.6" fill="#ffe94d" stroke="#c9a92a" stroke-width="1"/>
+      <path d="M 0 -4 C -6 -4 -6 4 -4.5 7 L 0 5 Z" fill="${c.color}" stroke="${c.spots}" stroke-width="1"/>
+      <path d="M 0 -4 C 6 -4 6 4 4.5 7 L 0 5 Z" fill="${c.color}" stroke="${c.spots}" stroke-width="1"/>
+      <ellipse cx="0" cy="-6.5" rx="4" ry="3" fill="#e8653c" stroke="${c.spots}" stroke-width="1"/>
+      <circle cx="0" cy="-9.5" r="2" fill="${c.spots}"/>
+      <path d="M -1 -11 L -3 -13 M 1 -11 L 3 -13" stroke="${c.spots}" stroke-width=".9" stroke-linecap="round"/>
+    </g>`;
+  }
+
+  function drawDamselfly(c){
+    return `<g>
+      <ellipse cx="-8" cy="-5" rx="8.5" ry="2" fill="#e9f6ff" opacity=".85" stroke="#9cbfd6" stroke-width=".7" transform="rotate(-8 -8 -5)"/>
+      <ellipse cx="8" cy="-5" rx="8.5" ry="2" fill="#e9f6ff" opacity=".85" stroke="#9cbfd6" stroke-width=".7" transform="rotate(8 8 -5)"/>
+      <ellipse cx="-7.5" cy="-1" rx="8" ry="1.9" fill="#e9f6ff" opacity=".8" stroke="#9cbfd6" stroke-width=".7" transform="rotate(10 -7.5 -1)"/>
+      <ellipse cx="7.5" cy="-1" rx="8" ry="1.9" fill="#e9f6ff" opacity=".8" stroke="#9cbfd6" stroke-width=".7" transform="rotate(-10 7.5 -1)"/>
+      <rect x="-1.4" y="-7" width="2.8" height="19" rx="1.4" fill="${c.color}"/>
+      <path d="M -1.4 -1 H 1.4 M -1.4 3 H 1.4 M -1.4 7 H 1.4" stroke="${c.spots}" stroke-width="1"/>
+      <ellipse cx="0" cy="-5" rx="2.6" ry="3" fill="${c.color}" stroke="${c.spots}" stroke-width=".9"/>
+      <circle cx="-2.4" cy="-9.5" r="2" fill="${c.spots}"/>
+      <circle cx="2.4" cy="-9.5" r="2" fill="${c.spots}"/>
+    </g>`;
+  }
+
+  function drawWaterBeetle(c){
+    return `<g>
+      <g stroke="${c.spots}" stroke-width="1.4" stroke-linecap="round" fill="none">
+        <path d="M -8 -3 L -12 -6"/><path d="M 8 -3 L 12 -6"/>
+        <path d="M -8.5 2 L -13 2"/><path d="M 8.5 2 L 13 2"/>
+        <path d="M -7 7 Q -11 9 -13 12"/><path d="M 7 7 Q 11 9 13 12"/>
+      </g>
+      <ellipse cx="0" cy="1.5" rx="8.5" ry="10.5" fill="${c.color}" stroke="${c.spots}" stroke-width="1.4"/>
+      <line x1="0" y1="-5" x2="0" y2="12" stroke="${c.spots}" stroke-width="1.1"/>
+      <ellipse cx="-3.5" cy="0" rx="1.8" ry="4" fill="#ffffff" opacity=".3"/>
+      <ellipse cx="0" cy="-9" rx="4.6" ry="3.4" fill="${c.spots}"/>
+      <circle cx="-2" cy="-10" r=".9" fill="#fff"/>
+      <circle cx="2" cy="-10" r=".9" fill="#fff"/>
+    </g>`;
+  }
+
+  function drawGnat(c){
+    return `<g>
+      <circle cx="-6" cy="-2" r="5.5" fill="#f2fbff" opacity=".85" stroke="#a9c9d6" stroke-width=".7"/>
+      <circle cx="6" cy="-2" r="5.5" fill="#f2fbff" opacity=".85" stroke="#a9c9d6" stroke-width=".7"/>
+      <g stroke="${c.spots}" stroke-width=".8" stroke-linecap="round">
+        <line x1="-2" y1="2" x2="-7" y2="7"/><line x1="2" y1="2" x2="7" y2="7"/>
+        <line x1="-2" y1="4" x2="-5" y2="10"/><line x1="2" y1="4" x2="5" y2="10"/>
+      </g>
+      <ellipse cx="0" cy="3" rx="2.8" ry="6.5" fill="${c.color}" stroke="${c.spots}" stroke-width="1"/>
+      <circle cx="0" cy="-5" r="2.8" fill="${c.color}" stroke="${c.spots}" stroke-width="1"/>
+      <g stroke="${c.spots}" stroke-width=".8" fill="none" stroke-linecap="round">
+        <path d="M -1 -7 Q -3 -10 -6 -12"/><path d="M 1 -7 Q 3 -10 6 -12"/>
+        <path d="M -3 -9.5 L -4.5 -8.5 M -4.5 -11 L -6 -10 M 3 -9.5 L 4.5 -8.5 M 4.5 -11 L 6 -10"/>
+      </g>
+    </g>`;
+  }
+
+  function bugSvgString(bugType){ return bugType.draw(bugType); }
+
+  /* ---------------------------------------------------------
+     NOTE POOLS — alto clef (viola) range
+  --------------------------------------------------------- */
+  const EASY_NOTES = [
+    {letter:'F', octave:3}, {letter:'G', octave:3}, {letter:'A', octave:3},
+    {letter:'B', octave:3}, {letter:'C', octave:4}, {letter:'D', octave:4},
+    {letter:'E', octave:4}, {letter:'F', octave:4}, {letter:'G', octave:4},
+  ];
+  const FULL_NOTES = [
+    {letter:'C', octave:3}, {letter:'D', octave:3}, {letter:'E', octave:3},
+    {letter:'F', octave:3}, {letter:'G', octave:3}, {letter:'A', octave:3},
+    {letter:'B', octave:3}, {letter:'C', octave:4}, {letter:'D', octave:4},
+    {letter:'E', octave:4}, {letter:'F', octave:4}, {letter:'G', octave:4},
+    {letter:'A', octave:4}, {letter:'B', octave:4},
+  ];
+
+  /* ---------------------------------------------------------
+     STATE
+  --------------------------------------------------------- */
+  let score = 0, streak = 0, best = 0;
+  let pool = FULL_NOTES;
+  let current = null;
+  let awaitingAnswer = false;
+  let gameRunning = false;
+  const bugSpawnX = 300;
+
+  const MAX_HEALTH = 5;
+  const PIPS_PER_HEART = 4;
+  const MAX_PIPS = MAX_HEALTH * PIPS_PER_HEART;
+  let healthPips = MAX_PIPS;
+  let wrongStreak = 0;
+  let lastBugType = null;
+  let correctCount = 0;
+  const CRAWL_START_MS = 6500;
+  const CRAWL_FLOOR_MS = 2200;
+  const CRAWL_RAMP_STEPS = 18;
+  let crawlRAF = null;
+  let crawlStartTime = 0;
+  let crawlDuration = CRAWL_START_MS;
+  let crawlFromX = bugSpawnX, crawlToX = bugSpawnX;
+  let crawlActive = false;
+
+  const svg = document.getElementById('stageSvg');
+  const scoreEl = document.getElementById('score');
+  const streakEl = document.getElementById('streak');
+  const bestEl = document.getElementById('best');
+  const input = document.getElementById('letterInput');
+
+  function currentCrawlDuration(){
+    const t = Math.min(correctCount / CRAWL_RAMP_STEPS, 1);
+    return CRAWL_START_MS + (CRAWL_FLOOR_MS - CRAWL_START_MS) * t;
+  }
+
+  /* ---------------------------------------------------------
+     AUDIO
+  --------------------------------------------------------- */
+  let actx = null;
+  function getCtx(){
+    if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    return actx;
+  }
+  function blip(freqStart, freqEnd, dur, type, gainPeak){
+    try{
+      const ctx = getCtx();
+      const t0 = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freqStart, t0);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd,20), t0+dur);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(gainPeak||0.18, t0+0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t0);
+      osc.stop(t0+dur+0.02);
+    }catch(e){ /* audio unavailable */ }
+  }
+  function gulpSound(){
+    // a little "ribbit-gulp": two quick low croaks
+    blip(180, 90, 0.09, 'square', 0.2);
+    setTimeout(()=>blip(150, 60, 0.12, 'square', 0.18), 90);
+  }
+  function spitSound(){ blip(140, 320, 0.16, 'sawtooth', 0.12); }
+  function correctDing(){ blip(660, 880, 0.18, 'triangle', 0.12); }
+
+  /* ---------------------------------------------------------
+     STAFF + ALTO CLEF
+     Uses the real Unicode C-clef glyph (U+1D121, MUSICAL SYMBOL
+     C CLEF) via the Noto Music web font.
+     Rather than hand-calibrating an offset, the glyph's actual ink
+     bounds are measured with canvas measureText once the font has
+     loaded, then it's scaled to span the staff and centred exactly
+     on the middle line (C4) — which is precisely where an alto clef
+     belongs, since the C clef is symmetric about the note it marks.
+  --------------------------------------------------------- */
+  const CLEF_CHAR = '\u{1D121}';
+  const CLEF_FONT = "'Noto Music', 'Bravura Text', serif";
+  const CLEF_X = STAFF_LEFT_X + 24;
+  // Fallback placement used only until (or if) measurement succeeds
+  let clefFit = { fontSize: 76, baselineY: MIDDLE_LINE_Y + 38 };
+
+  function measureClef(){
+    try{
+      const cnv = document.createElement('canvas');
+      const ctx = cnv.getContext('2d');
+      const probe = 100;
+      ctx.font = `${probe}px ${CLEF_FONT}`;
+      const m = ctx.measureText(CLEF_CHAR);
+      const asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
+      if(!(asc + desc > 0)) return false;
+      // Target ink height: spans the full staff, top line to bottom line
+      const targetH = STAFF_LINE_GAP * 4 + 2;
+      const scale = targetH / (asc + desc);
+      const inkCentreBelowBaseline = (desc - asc) / 2; // at probe size
+      clefFit = {
+        fontSize: probe * scale,
+        baselineY: MIDDLE_LINE_Y - inkCentreBelowBaseline * scale,
+      };
+      return true;
+    }catch(e){ return false; }
+  }
+
+  function applyClefFit(){
+    const el = document.getElementById('clefGlyph');
+    if(!el) return;
+    el.setAttribute('font-size', clefFit.fontSize);
+    el.setAttribute('y', clefFit.baselineY);
+  }
+
+  if(document.fonts && document.fonts.load){
+    document.fonts.load(`100px 'Noto Music'`, CLEF_CHAR)
+      .then(()=>{ if(measureClef()) applyClefFit(); })
+      .catch(()=>{ if(measureClef()) applyClefFit(); });
+  } else {
+    measureClef();
+  }
+
+  function drawStaffStatic(){
+    let s = '';
+    for(let i=0;i<5;i++){
+      const y = STAFF_TOP_Y + i*STAFF_LINE_GAP;
+      s += `<line class="staff-line" x1="${STAFF_LEFT_X}" y1="${y}" x2="${STAFF_RIGHT_X}" y2="${y}"/>`;
+    }
+    s += `<text id="clefGlyph" x="${CLEF_X}" y="${clefFit.baselineY}"
+        font-family="${CLEF_FONT.replace(/"/g,'')}"
+        font-size="${clefFit.fontSize}" fill="#1f3326" text-anchor="start">${CLEF_CHAR}</text>`;
+    return s;
+  }
+
+  /* ---------------------------------------------------------
+     POND SCENE: overhanging foliage across the top, reeds at the
+     edges, water along the bottom and a big lily pad on the right
+     for the frog to sit on.
+  --------------------------------------------------------- */
+  function drawPond(){
+    let s = `<defs>
+      <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#86d6d8"/>
+        <stop offset="1" stop-color="#3d9fb5"/>
+      </linearGradient>
+    </defs>`;
+
+    // Foliage canopy — kept above y≈95 so it never crowds the highest
+    // playable note (B4, one ledger line above the staff at y≈147).
+    const blobs = [
+      [40,20,42,'#4caf5a'], [120,6,50,'#2d6b30'], [220,22,46,'#8fd89a'],
+      [330,2,54,'#4caf5a'], [450,18,48,'#2d6b30'], [570,0,52,'#8fd89a'],
+      [690,16,46,'#4caf5a'], [800,2,54,'#2d6b30'], [910,20,44,'#8fd89a'],
+      [1000,4,42,'#4caf5a']
+    ];
+    blobs.forEach(([cx,cy,r,col])=>{
+      s += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" opacity="0.95"/>`;
+    });
+    s += `<rect x="0" y="40" width="1040" height="14" fill="#2d6b30" opacity="0.15"/>`;
+    // a few hanging willow strands
+    [[90,58,88],[260,60,84],[505,58,90],[745,60,86],[960,56,84]].forEach(([x,y1,y2])=>{
+      s += `<path d="M ${x} ${y1} Q ${x-4} ${(y1+y2)/2} ${x+2} ${y2}" stroke="#3f9a4a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+      s += `<ellipse cx="${x+2}" cy="${y2}" rx="3" ry="5" fill="#4caf5a"/>`;
+    });
+
+    // Water
+    s += `<path d="M 0 304 Q 60 298 130 304 T 260 304 T 390 304 T 520 304 T 650 304 T 780 304 T 910 304 T 1040 304 L 1040 460 L 0 460 Z" fill="url(#waterGrad)"/>`;
+    // ripples
+    [[200,340,40],[460,370,56],[680,420,44],[110,410,34],[560,330,30]].forEach(([cx,cy,rx])=>{
+      s += `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${rx*0.18}" fill="none" stroke="#ffffff" stroke-width="1.6" opacity=".45"/>`;
+    });
+
+    // Small lily pads floating on the water (below the staff area)
+    function lilyPad(cx, cy, rx, ry, rot){
+      return `<g transform="rotate(${rot} ${cx} ${cy})">
+        <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#4caf5a" stroke="#2d6b30" stroke-width="2"/>
+        <path d="M ${cx} ${cy} L ${cx+rx*0.95} ${cy-ry*0.35} L ${cx+rx*0.95} ${cy+ry*0.35} Z" fill="#6fc8cf"/>
+        <path d="M ${cx} ${cy} L ${cx-rx*0.7} ${cy} M ${cx} ${cy} L ${cx-rx*0.4} ${cy-ry*0.7} M ${cx} ${cy} L ${cx-rx*0.4} ${cy+ry*0.7}" stroke="#2d6b30" stroke-width="1" opacity=".4"/>
+      </g>`;
+    }
+    s += lilyPad(190, 372, 34, 9, -4);
+    s += lilyPad(420, 404, 42, 10, 3);
+    s += lilyPad(640, 358, 30, 8, -2);
+    // a lotus flower on one pad
+    s += `<g transform="translate(628,352)">
+      <path d="M 0 0 C -10 -4 -12 -14 -6 -18 C -3 -10 0 -6 0 0 Z" fill="#ffb3c7" stroke="#d9748f" stroke-width="1"/>
+      <path d="M 0 0 C 10 -4 12 -14 6 -18 C 3 -10 0 -6 0 0 Z" fill="#ffb3c7" stroke="#d9748f" stroke-width="1"/>
+      <path d="M 0 0 C -5 -8 -4 -18 0 -22 C 4 -18 5 -8 0 0 Z" fill="#ffd1dd" stroke="#d9748f" stroke-width="1"/>
+    </g>`;
+
+    // Reeds / bulrushes at the far edges (clear of the staff and clef)
+    function reed(x, topY, lean){
+      return `<path d="M ${x} 312 Q ${x+lean/2} ${(312+topY)/2} ${x+lean} ${topY}" stroke="#3d8a44" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <rect x="${x+lean-3.5}" y="${topY-2}" width="7" height="22" rx="3.5" fill="#7a4e2a" transform="rotate(${lean*0.6} ${x+lean} ${topY+9})"/>`;
+    }
+    function blade(x, topY, lean){
+      return `<path d="M ${x-3} 312 Q ${x+lean*0.4} ${(312+topY)/2} ${x+lean} ${topY} Q ${x+lean*0.3+2} ${(312+topY)/2} ${x+3} 312 Z" fill="#4caf5a"/>`;
+    }
+    s += blade(20, 230, 6) + reed(38, 205, -6) + blade(58, 250, 10) + reed(78, 225, 4);
+    s += blade(990, 240, -8) + reed(1008, 200, 5) + blade(1028, 225, -4);
+
+    // The frog's big lily pad
+    s += `<g>
+      <ellipse cx="880" cy="324" rx="96" ry="17" fill="#2d6b30" opacity=".25"/>
+      <ellipse cx="880" cy="320" rx="94" ry="16" fill="#5cbc62" stroke="#2d6b30" stroke-width="2.5"/>
+      <path d="M 880 320 L 972 312 L 972 326 Z" fill="#7fcdd2"/>
+      <path d="M 880 320 L 800 320 M 880 320 L 828 309 M 880 320 L 828 331 M 880 320 L 930 332" stroke="#2d6b30" stroke-width="1.2" opacity=".35"/>
+    </g>`;
+    return s;
+  }
+
+  /* ---------------------------------------------------------
+     FROG
+     A chunky green tree frog sitting on the lily pad, facing LEFT
+     toward the staff. The tongue fires from the front of its wide
+     mouth.
+  --------------------------------------------------------- */
+  const FROG_X = 885, FROG_Y = 262, FROG_SCALE = 1.25;
+  const MOUTH_LOCAL_X = -66, MOUTH_LOCAL_Y = 0;
+  const MOUTH_X = FROG_X + MOUTH_LOCAL_X * FROG_SCALE;
+  const MOUTH_Y = FROG_Y + MOUTH_LOCAL_Y * FROG_SCALE;
+
+  function toeDisc(x,y){
+    return `<circle cx="${x}" cy="${y}" r="3.3" fill="#8edc8a" stroke="#2d6b30" stroke-width="1.4"/>`;
+  }
+
+  function eye(cx, cy, r){
+    return `<g>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#5cc05a" stroke="#2d6b30" stroke-width="2.4"/>
+      <circle cx="${cx-1}" cy="${cy}" r="${r*0.74}" fill="#f5b83a" stroke="#b37a16" stroke-width="1"/>
+      <ellipse cx="${cx-1.5}" cy="${cy+0.5}" rx="${r*0.46}" ry="${r*0.26}" fill="#1c1a14"/>
+      <circle cx="${cx-r*0.35}" cy="${cy-r*0.35}" r="${r*0.2}" fill="#fff"/>
+    </g>`;
+  }
+
+  function drawFrog(x,y){
+    return `<g id="frog" transform="translate(${x},${y}) scale(${FROG_SCALE})">
+
+      <!-- back foot stretched along the pad -->
+      <path d="M 44 36 Q 18 46 -6 45" stroke="#2d6b30" stroke-width="11" fill="none" stroke-linecap="round"/>
+      <path d="M 44 36 Q 18 46 -6 45" stroke="#4aa84c" stroke-width="8" fill="none" stroke-linecap="round"/>
+      ${toeDisc(-9,41)}${toeDisc(-10,47)}${toeDisc(-4,50)}
+
+      <!-- body -->
+      <path d="M 50 28 C 56 2 34 -24 -2 -28 C -34 -31 -60 -20 -66 -4 C -70 8 -64 22 -50 30 C -30 42 34 44 50 28 Z"
+            fill="#5cc05a" stroke="#2d6b30" stroke-width="3"/>
+      <!-- pale throat and belly -->
+      <path d="M -63 5 C -58 24 -38 34 -14 33 C 2 32 8 24 4 17 C -16 21 -42 16 -63 5 Z" fill="#fff3d2"/>
+      <!-- back shine -->
+      <path d="M -20 -22 Q 10 -26 34 -8" stroke="#8edc8a" stroke-width="4" fill="none" opacity=".7" stroke-linecap="round"/>
+      <!-- back spots -->
+      <circle cx="10" cy="-12" r="4" fill="#3f9a42" opacity=".55"/>
+      <circle cx="28" cy="-2" r="3.4" fill="#3f9a42" opacity=".55"/>
+      <circle cx="-6" cy="-19" r="2.8" fill="#3f9a42" opacity=".55"/>
+
+      <!-- back thigh, folded -->
+      <ellipse cx="30" cy="20" rx="24" ry="16" fill="#4fb050" stroke="#2d6b30" stroke-width="2.6" transform="rotate(-22 30 20)"/>
+      <path d="M 16 14 Q 30 8 44 16" stroke="#3f9a42" stroke-width="2" fill="none" opacity=".6" stroke-linecap="round"/>
+
+      <!-- front leg -->
+      <path d="M -32 20 Q -38 34 -46 42" stroke="#2d6b30" stroke-width="13" fill="none" stroke-linecap="round"/>
+      <path d="M -32 20 Q -38 34 -46 42" stroke="#5cc05a" stroke-width="9.5" fill="none" stroke-linecap="round"/>
+      ${toeDisc(-53,41)}${toeDisc(-50,47)}${toeDisc(-43,48)}
+
+      <!-- eyes: the far one sits a little behind the near one -->
+      ${eye(-24,-30,11)}
+      ${eye(-46,-28,13)}
+
+      <!-- nostril -->
+      <ellipse cx="-62" cy="-8" rx="1.6" ry="1.1" fill="#2d6b30"/>
+
+      <!-- wide froggy smile -->
+      <path d="M -66 0 Q -48 12 -22 5" stroke="#2d6b30" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <!-- rosy cheek -->
+      <ellipse cx="-36" cy="12" rx="5" ry="3" fill="#ff9aa8" opacity=".5"/>
+    </g>`;
+  }
+
+  function drawTongueLayer(){
+    return `<g id="tongueGroup" opacity="0">
+        <line id="tongueLine" x1="0" y1="0" x2="0" y2="0" stroke="#ff7a8a" stroke-width="5" stroke-linecap="round"/>
+        <circle id="tongueTip" cx="0" cy="0" r="7" fill="#ff7a8a" stroke="#d9566a" stroke-width="1.4"/>
+      </g>`;
+  }
+
+  /* ---------------------------------------------------------
+     RENDER
+  --------------------------------------------------------- */
+  function renderStaticScene(){
+    svg.innerHTML =
+      drawPond() +
+      drawStaffStatic() +
+      `<g id="bug-layer"></g>` +
+      drawFrog(FROG_X, FROG_Y) +
+      drawTongueLayer() +
+      `<g id="fx-layer"></g>`;
+  }
+
+  function pickNewNote(){
+    let next;
+    do{
+      next = pool[Math.floor(Math.random()*pool.length)];
+    } while(current && next.letter===current.letter && next.octave===current.octave && pool.length>1);
+    current = next;
+    spawnBug(current);
+  }
+
+  function spawnBug(note){
+    wrongStreak = 0;
+    const layer = document.getElementById('bug-layer');
+    const y = yForNote(note.letter, note.octave);
+    const ly_list = ledgerStepsNeeded(note.letter, note.octave).map(L => STAFF_TOP_Y + L*STEP);
+
+    let bugType;
+    do {
+      bugType = BUG_TYPES[Math.floor(Math.random() * BUG_TYPES.length)];
+    } while(BUG_TYPES.length > 1 && bugType === lastBugType);
+    lastBugType = bugType;
+
+    let ledgerSvg = '';
+    ly_list.forEach(ly=>{
+      ledgerSvg += `<line class="staff-line ledger-line" x1="${bugSpawnX-20}" y1="${ly}" x2="${bugSpawnX+20}" y2="${ly}"/>`;
+    });
+
+    layer.innerHTML = `
+      <g id="currentBug">
+        ${ledgerSvg}
+        <g id="bugWrap" data-cur-x="${bugSpawnX}" data-cur-y="${y}" transform="translate(${bugSpawnX},${y})">
+          <g id="bugWiggle">${bugSvgString(bugType)}</g>
+        </g>
+      </g>`;
+
+    animateWiggle();
+    awaitingAnswer = true;
+
+    crawlDuration = currentCrawlDuration();
+    crawlFromX = bugSpawnX;
+    crawlToX = MOUTH_X;
+    crawlStartTime = performance.now();
+    crawlActive = true;
+    if(crawlRAF) cancelAnimationFrame(crawlRAF);
+    crawlRAF = requestAnimationFrame(animateCrawlFrame);
+  }
+
+  function animateCrawlFrame(now){
+    if(!crawlActive) return;
+    const bugWrap = document.getElementById('bugWrap');
+    if(!bugWrap){ crawlActive = false; return; }
+
+    const p = Math.min((now - crawlStartTime) / crawlDuration, 1);
+    const x = crawlFromX + (crawlToX - crawlFromX) * p;
+    const y = parseFloat(bugWrap.getAttribute('data-cur-y'));
+
+    bugWrap.setAttribute('data-cur-x', x);
+    bugWrap.setAttribute('transform', `translate(${x},${y})`);
+
+    document.querySelectorAll('.ledger-line').forEach(line=>{
+      line.setAttribute('x1', x-20);
+      line.setAttribute('x2', x+20);
+    });
+
+    if(p >= 1){
+      crawlActive = false;
+      bugEscaped();
+      return;
+    }
+    crawlRAF = requestAnimationFrame(animateCrawlFrame);
+  }
+
+  // Rotation-only wiggle — the bug's centre never leaves its line/space.
+  let wiggleRAF = null;
+  function animateWiggle(){
+    if(wiggleRAF) cancelAnimationFrame(wiggleRAF);
+    const node = document.getElementById('bugWiggle');
+    if(!node) return;
+    const start = performance.now();
+    function frame(t){
+      if(!document.getElementById('bugWiggle')) return;
+      const elapsed = (t-start)/1000;
+      node.setAttribute('transform', `rotate(${Math.sin(elapsed*2.4)*5})`);
+      wiggleRAF = requestAnimationFrame(frame);
+    }
+    wiggleRAF = requestAnimationFrame(frame);
+  }
+
+  /* ---------------------------------------------------------
+     TONGUE ANIMATION
+  --------------------------------------------------------- */
+  function fireTongueTo(targetX, targetY, onReachTarget, onReturnDone){
+    const tongueGroup = document.getElementById('tongueGroup');
+    const tongueLine = document.getElementById('tongueLine');
+    const tongueTip = document.getElementById('tongueTip');
+    const mouthX = MOUTH_X, mouthY = MOUTH_Y;
+    const dx = targetX - mouthX, dy = targetY - mouthY;
+    tongueGroup.setAttribute('opacity','1');
+
+    const t0 = performance.now();
+    const outDur = 150, holdDur = 70, backDur = 180;
+    let reached = false;
+
+    function step(now){
+      const elapsed = now - t0;
+      let x2, y2;
+      if(elapsed < outDur){
+        const p = elapsed/outDur;
+        x2 = mouthX + dx*p; y2 = mouthY + dy*p;
+      } else if(elapsed < outDur+holdDur){
+        x2 = targetX; y2 = targetY;
+        if(!reached){ reached = true; onReachTarget && onReachTarget(); }
+      } else if(elapsed < outDur+holdDur+backDur){
+        if(!reached){ reached = true; onReachTarget && onReachTarget(); }
+        const p = (elapsed-outDur-holdDur)/backDur;
+        x2 = targetX + (mouthX-targetX)*p; y2 = targetY + (mouthY-targetY)*p;
+      } else {
+        tongueGroup.setAttribute('opacity','0');
+        onReturnDone && onReturnDone();
+        return;
+      }
+      tongueLine.setAttribute('x1', mouthX); tongueLine.setAttribute('y1', mouthY);
+      tongueLine.setAttribute('x2', x2); tongueLine.setAttribute('y2', y2);
+      tongueTip.setAttribute('cx', x2); tongueTip.setAttribute('cy', y2);
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function eatBugCorrect(callback){
+    const bugWrap = document.getElementById('bugWrap');
+    if(!bugWrap){ callback && callback(); return; }
+    crawlActive = false;
+    if(crawlRAF) cancelAnimationFrame(crawlRAF);
+    const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+    const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+
+    fireTongueTo(curX, curY,
+      ()=>{ gulpSound(); bugWrap.setAttribute('opacity','0'); },
+      ()=>{ bugWrap.remove(); callback && callback(); }
+    );
+  }
+
+  function spitBugBack(callback){
+    const bugWrap = document.getElementById('bugWrap');
+    if(!bugWrap){ callback && callback(); return; }
+    const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+    const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+    bugWrap.setAttribute('opacity','0');
+
+    fireTongueTo(curX, curY,
+      ()=>{ spitSound(); },
+      ()=>{ bugWrap.setAttribute('opacity','1'); callback && callback(); }
+    );
+  }
+
+  /* ---------------------------------------------------------
+     FEEDBACK TEXT POP
+  --------------------------------------------------------- */
+  function showFlash(text, color, x, y){
+    const wrap = document.getElementById('stage-wrap');
+    const el = document.createElement('div');
+    el.className = 'feedback-flash';
+    el.textContent = text;
+    el.style.color = color;
+    el.style.left = x+'px';
+    el.style.top = y+'px';
+    wrap.appendChild(el);
+    setTimeout(()=>el.remove(), 950);
+  }
+  function svgPointToScreen(x,y){
+    const rect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    // account for preserveAspectRatio="xMidYMid meet" letterboxing
+    const scale = Math.min(rect.width/vb.width, rect.height/vb.height);
+    const offX = (rect.width - vb.width*scale)/2;
+    const offY = (rect.height - vb.height*scale)/2;
+    const wrapRect = document.getElementById('stage-wrap').getBoundingClientRect();
+    return { x: rect.left - wrapRect.left + offX + x*scale, y: rect.top - wrapRect.top + offY + y*scale };
+  }
+
+  /* ---------------------------------------------------------
+     ANSWER HANDLING
+  --------------------------------------------------------- */
+  function submitAnswer(letter){
+    if(!awaitingAnswer || !gameRunning) return;
+    letter = (letter||'').toUpperCase().trim();
+    if(!letter) return;
+
+    const correct = letter === current.letter;
+    awaitingAnswer = false;
+
+    const bugWrap = document.getElementById('bugWrap');
+    let sx=500, sy=200;
+    if(bugWrap){
+      const pt = svgPointToScreen(parseFloat(bugWrap.getAttribute('data-cur-x')), parseFloat(bugWrap.getAttribute('data-cur-y')));
+      sx = pt.x; sy = pt.y;
+    }
+
+    if(correct){
+      score += 10 + Math.min(streak,10);
+      streak += 1;
+      correctCount += 1;
+      wrongStreak = 0;
+      if(streak>best){ best=streak; bestEl.textContent=best; }
+      scoreEl.textContent = score;
+      streakEl.textContent = streak;
+      input.classList.remove('shake');
+      input.classList.add('good');
+      correctDing();
+      showFlash(`${current.letter}! ✓`, 'var(--right)', sx, sy-20);
+      eatBugCorrect(()=>{
+        input.value='';
+        input.classList.remove('good');
+        setTimeout(()=>{ if(gameRunning) { pickNewNote(); input.focus(); } }, 160);
+      });
+    } else {
+      streak = 0;
+      streakEl.textContent = streak;
+      input.classList.remove('good');
+      input.classList.add('shake');
+
+      wrongStreak += 1;
+      const WRONG_FORGIVENESS = 1;
+      const PIPS_PER_WRONG = 1;
+      if(wrongStreak > WRONG_FORGIVENESS && gameRunning){
+        nibbleHealth(PIPS_PER_WRONG);
+      }
+
+      showFlash(`Blech!`, 'var(--wrong)', sx, sy-20);
+      const pausedElapsed = crawlActive ? performance.now() - crawlStartTime : 0;
+      crawlActive = false;
+      if(crawlRAF) cancelAnimationFrame(crawlRAF);
+      spitBugBack(()=>{
+        input.classList.remove('shake');
+        input.value='';
+        if(gameRunning){
+          awaitingAnswer = true;
+          input.focus();
+          crawlStartTime = performance.now() - pausedElapsed;
+          crawlActive = true;
+          crawlRAF = requestAnimationFrame(animateCrawlFrame);
+        }
+      });
+    }
+  }
+
+  /* ---------------------------------------------------------
+     MISS HANDLING — the bug reaches the frog un-named and buzzes
+     away: lose a heart, fresh bug spawns.
+  --------------------------------------------------------- */
+  function bugEscaped(){
+    if(!gameRunning) return;
+    awaitingAnswer = false;
+    const bugWrap = document.getElementById('bugWrap');
+
+    streak = 0;
+    streakEl.textContent = streak;
+    loseHealth();
+
+    if(bugWrap){
+      bugWrap.style.transition = 'transform .4s ease-in, opacity .4s ease-in';
+      const curX = parseFloat(bugWrap.getAttribute('data-cur-x'));
+      const curY = parseFloat(bugWrap.getAttribute('data-cur-y'));
+      bugWrap.setAttribute('transform', `translate(${curX+30},${curY-90}) rotate(-30)`);
+      bugWrap.setAttribute('opacity','0');
+    }
+    const pt = svgPointToScreen(MOUTH_X, MOUTH_Y);
+    showFlash(`Buzzed off!`, 'var(--wrong)', pt.x - 60, pt.y - 10);
+
+    setTimeout(()=>{
+      const layer = document.getElementById('bug-layer');
+      if(layer) layer.innerHTML = '';
+      if(gameRunning && healthPips>0){ pickNewNote(); input.focus(); }
+    }, 420);
+  }
+
+  /* ---------------------------------------------------------
+     HEALTH SYSTEM (quarter-heart pips)
+  --------------------------------------------------------- */
+  const HEART_PATH = "M12 21 C 12 21 3 14.5 3 8.5 C 3 5 5.5 3 8.5 3 C 10.5 3 12 4.5 12 4.5 C 12 4.5 13.5 3 15.5 3 C 18.5 3 21 5 21 8.5 C 21 14.5 12 21 12 21 Z";
+
+  function renderHealthUI(){
+    const wrap = document.getElementById('healthHearts');
+    if(!wrap) return;
+    let html = '';
+    for(let i=0;i<MAX_HEALTH;i++){
+      const pipsInThisHeart = Math.max(0, Math.min(PIPS_PER_HEART, healthPips - i*PIPS_PER_HEART));
+      const fraction = pipsInThisHeart / PIPS_PER_HEART;
+      const fillTopY = 21 - fraction*18;
+      html += `<svg class="heart-slot" viewBox="0 0 24 24" width="1em" height="1em">
+          <path d="${HEART_PATH}" fill="#e0e0e0" stroke="#b0b0b0" stroke-width="0.6"/>
+          <clipPath id="heartClip${i}"><rect x="0" y="${fillTopY}" width="24" height="${24-fillTopY}"/></clipPath>
+          <path d="${HEART_PATH}" fill="#ff5a5f" clip-path="url(#heartClip${i})"/>
+        </svg>`;
+    }
+    wrap.innerHTML = html;
+  }
+
+  function shakeHearts(){
+    const wrap = document.getElementById('healthHearts');
+    if(wrap){
+      wrap.classList.remove('heart-shake');
+      void wrap.offsetWidth;
+      wrap.classList.add('heart-shake');
+    }
+  }
+
+  function loseHealth(){
+    healthPips = Math.max(0, healthPips - PIPS_PER_HEART);
+    renderHealthUI();
+    shakeHearts();
+    if(healthPips<=0) endGame();
+  }
+
+  function nibbleHealth(pips){
+    healthPips = Math.max(0, healthPips - pips);
+    renderHealthUI();
+    shakeHearts();
+    if(healthPips<=0) endGame();
+  }
+
+  function endGame(){
+    gameRunning = false;
+    crawlActive = false;
+    if(crawlRAF) cancelAnimationFrame(crawlRAF);
+    if(wiggleRAF) cancelAnimationFrame(wiggleRAF);
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalBest').textContent = best;
+    document.getElementById('gameOverOverlay').style.display = 'flex';
+  }
+
+  function resetGameState(){
+    score = 0; streak = 0; best = 0; correctCount = 0; healthPips = MAX_PIPS; wrongStreak = 0; lastBugType = null; current = null;
+    scoreEl.textContent = 0; streakEl.textContent = 0; bestEl.textContent = 0;
+    renderHealthUI();
+  }
+
+  /* ---------------------------------------------------------
+     INPUT WIRING — auto-submits on any A–G key
+  --------------------------------------------------------- */
+  document.getElementById('answerForm').addEventListener('submit', (e)=>{ e.preventDefault(); });
+
+  let submitLock = false;
+  function trySubmitLetter(letter){
+    if(submitLock) return;
+    submitLock = true;
+    submitAnswer(letter);
+    setTimeout(()=>{ submitLock = false; }, 50);
+  }
+
+  input.addEventListener('input', ()=>{
+    const v = input.value.toUpperCase().replace(/[^A-G]/g,'').slice(0,1);
+    input.value = v;
+    if(v){
+      trySubmitLetter(v);
+      setTimeout(()=>{ input.value=''; }, 0);
+    }
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if(!gameRunning) return;
+    if(e.ctrlKey || e.metaKey || e.altKey) return;
+    const key = e.key.toUpperCase();
+    if(key.length===1 && key>='A' && key<='G'){
+      e.preventDefault();
+      trySubmitLetter(key);
+    }
+  });
+
+  const letterButtonsWrap = document.getElementById('letterButtons');
+  ['A','B','C','D','E','F','G'].forEach(L=>{
+    const btn = document.createElement('button');
+    btn.textContent = L;
+    btn.addEventListener('click', ()=>{ trySubmitLetter(L); });
+    letterButtonsWrap.appendChild(btn);
+  });
+
+  /* ---------------------------------------------------------
+     BUG KEY (legend) on the start screen
+  --------------------------------------------------------- */
+  function renderBugKey(){
+    const wrap = document.getElementById('bugKey');
+    wrap.innerHTML = '';
+    BUG_TYPES.forEach(b => {
+      const cell = document.createElement('div');
+      cell.innerHTML = `<svg viewBox="-16 -16 32 32">${b.draw(b)}</svg><span>${b.name}</span>`;
+      wrap.appendChild(cell);
+    });
+  }
+
+  function renderBgDressing(){
+    const wrap = document.getElementById('bg-dressing');
+    let html = '';
+    [[6,8,90],[18,14,60],[78,6,110],[88,16,70]].forEach(([leftPct,topPct,size])=>{
+      html += `<div class="cloud" style="left:${leftPct}%; top:${topPct}%; width:${size}px; height:${size*0.55}px;"></div>`;
+    });
+    wrap.innerHTML = html;
+  }
+
+  /* ---------------------------------------------------------
+     START / GAME OVER / RESTART
+  --------------------------------------------------------- */
+  function startGame(){
+    pool = document.getElementById('rangeSelect').value === 'easy' ? EASY_NOTES : FULL_NOTES;
+    resetGameState();
+    gameRunning = true;
+    renderStaticScene();
+    pickNewNote();
+    input.focus();
+  }
+
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    document.getElementById('startOverlay').style.display = 'none';
+    startGame();
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    document.getElementById('gameOverOverlay').style.display = 'none';
+    startGame();
+  });
+
+  renderBugKey();
+  renderBgDressing();
+  renderHealthUI();
+  renderStaticScene(); // show the pond behind the start card
+
+  document.getElementById('stage-wrap').addEventListener('click', ()=>{ if(gameRunning) input.focus(); });
+
+})();
+</script>
+<!-- TEACHERS -->
+<style>
+.lum-teach{position:relative;z-index:5;box-sizing:border-box;max-width:760px;margin:48px auto 32px;padding:24px 28px;background:#FFFDF8;color:#1F2430;border:1px solid #E3DCCD;border-radius:12px;font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.6;text-align:left;text-transform:none;letter-spacing:normal}
+.lum-teach h2{margin:0 0 12px;font:700 20px/1.3 Georgia,serif;color:#1F2430;text-transform:none;letter-spacing:normal;text-shadow:none}
+.lum-teach h3{margin:16px 0 4px;font:700 15px/1.4 Georgia,serif;color:#1F2430;text-transform:none;letter-spacing:normal}
+.lum-teach p{margin:0 0 8px;color:#1F2430}
+.lum-teach .lum-meta{margin-top:14px;padding-top:12px;border-top:1px solid #E3DCCD;font-size:14px;color:#4A5160}
+.lum-teach a{color:#1B6F6D;text-decoration:underline}
+@media (max-width:600px){.lum-teach{margin:32px 16px 24px;padding:20px}}
+</style>
+<style>body{overflow-x:hidden;overflow-y:auto}</style>
+<section class="lum-teach" aria-labelledby="lum-teach-h">
+  <h2 id="lum-teach-h">For teachers</h2>
+  <h3>What students practise</h3>
+  <p>The alto clef version of Chameleon Note Snacks. Bugs fly across the staff and students name the note before the frog snaps them up. The start screen reminds students that the middle line is middle C, which is the anchor for reading everything else.</p>
+  <h3>Using it in class</h3>
+  <p>Great for viola players, or for any class exploring how the C clef works once they know treble and bass. Start on the Easy range (notes on the staff only) and move to Full once students are confident with the ledger lines.</p>
+  <p class="lum-meta">Year 8 &middot; Note reading, alto clef &middot; Free, no login needed &middot; <a href="/games">See all the games</a></p>
+</section>
+<script>
+/* Stop the spacebar scrolling down to the teacher notes while a game is being played */
+window.addEventListener('keydown',function(e){
+  if(e.code!=='Space'&&e.key!==' ')return;
+  var t=e.target,n=t&&t.tagName;
+  if(n==='INPUT'||n==='TEXTAREA'||n==='SELECT'||n==='BUTTON'||(t&&t.isContentEditable))return;
+  e.preventDefault();
+});
+</script>
+<!-- /TEACHERS -->
+</body>
+</html>
