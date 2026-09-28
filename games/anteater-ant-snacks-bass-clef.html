@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anteater Note Snacks | Bass clef note naming game | Level Up Musicianship</title>
-<meta name="description" content="Free bass clef note naming game for Year 7. Name each note before the ants reach the anteater. The speed ramps up as you improve.">
+<title>Anteater Note Snacks (Bass Clef)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Music&display=swap" rel="stylesheet">
@@ -317,52 +316,6 @@
     padding-bottom:6px;
   }
 </style>
-<!-- SEO -->
-<link rel="canonical" href="https://levelupmusicianship.com/games/anteater-ant-snacks-bass-clef">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Level Up Musicianship">
-<meta property="og:title" content="Anteater Note Snacks | Bass clef note naming game | Level Up Musicianship">
-<meta property="og:description" content="Free bass clef note naming game for Year 7. Name each note before the ants reach the anteater. The speed ramps up as you improve.">
-<meta property="og:url" content="https://levelupmusicianship.com/games/anteater-ant-snacks-bass-clef">
-<meta property="og:image" content="https://levelupmusicianship.com/images/ingame/anteater-ant-snacks-bass-clef.jpg">
-<meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "LearningResource",
-  "name": "Anteater Note Snacks",
-  "description": "Free bass clef note naming game for Year 7. Name each note before the ants reach the anteater. The speed ramps up as you improve.",
-  "url": "https://levelupmusicianship.com/games/anteater-ant-snacks-bass-clef",
-  "image": "https://levelupmusicianship.com/images/ingame/anteater-ant-snacks-bass-clef.jpg",
-  "learningResourceType": "Game",
-  "interactivityType": "active",
-  "educationalLevel": "Year 7 (secondary school)",
-  "audience": {
-    "@type": "EducationalAudience",
-    "educationalRole": "student"
-  },
-  "teaches": [
-    "note reading",
-    "bass clef",
-    "music theory"
-  ],
-  "keywords": "note reading, bass clef, music theory",
-  "inLanguage": "en-AU",
-  "isAccessibleForFree": true,
-  "author": {
-    "@type": "Person",
-    "name": "Tsun-En (Nami) Cheng",
-    "jobTitle": "Music teacher",
-    "url": "https://levelupmusicianship.com/about"
-  },
-  "isPartOf": {
-    "@type": "WebSite",
-    "name": "Level Up Musicianship",
-    "url": "https://levelupmusicianship.com/"
-  }
-}
-</script>
-<!-- /SEO -->
 </head>
 <body>
 <div id="app">
@@ -761,21 +714,23 @@
   }
 
   function bassClefGlyph(originX, topLineY){
-    // Uses the real Unicode F-clef glyph (U+1D122) rendered through the
-    // Noto Music web font. It needs internet access to fetch the font;
-    // if that's unavailable the glyph falls back to a generic serif
-    // rendering, which looks wrong, but in a normal browser with
-    // internet access (i.e. however this file is actually opened) the
-    // real font loads fine.
-    //
-    // Positioned using the standard convention (matching how every
-    // reference diagram draws it): the top of the clef's hook sits AT
-    // the top staff line — never above it — the two dots straddle the
-    // F3 line (second line from the top), and the tail finishes within
-    // the staff. Calibrated by direct visual comparison against the
-    // staff lines at this font size.
-    const fontSize = 100;
-    const baselineOffset = 66; // baseline sits this far below the top staff line
+    // Bass clef drawn as SVG paths so positioning is exact regardless of font.
+    // Staff lines: topLineY, topLineY+18, topLineY+36, topLineY+54, topLineY+72
+    // Convention: the two dots straddle the 4th line (F3, topLineY+54),
+    //   sitting in the spaces above and below it (topLineY+45 and topLineY+63).
+    //   The hook curl starts just above the top line.
+    // We draw everything in a local coord system then translate.
+    // Local y=0 = topLineY. Staff lines at y=0,18,36,54,72.
+    const x = originX;
+    const y = topLineY;
+    const col = '#27331f';
+
+    // The main body: a backwards-C / hook curl that starts just above the
+    // top line (y≈-8), curls around to the left, then sweeps down as a
+    // long tail through all 5 lines and below.
+    // Dots straddle the 4th line (y=54): one at y=45, one at y=63.
+    const fontSize = 88;
+    const baselineOffset = 77;
     return `<text x="${originX}" y="${topLineY + baselineOffset}"
         font-family="'Noto Music', 'Bravura Text', serif"
         font-size="${fontSize}" fill="#27331f" text-anchor="start">&#x1D122;</text>`;
@@ -1450,34 +1405,5 @@
 
 })();
 </script>
-<!-- TEACHERS -->
-<style>
-.lum-teach{position:relative;z-index:5;box-sizing:border-box;max-width:760px;margin:48px auto 32px;padding:24px 28px;background:#FFFDF8;color:#1F2430;border:1px solid #E3DCCD;border-radius:12px;font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.6;text-align:left;text-transform:none;letter-spacing:normal}
-.lum-teach h2{margin:0 0 12px;font:700 20px/1.3 Georgia,serif;color:#1F2430;text-transform:none;letter-spacing:normal;text-shadow:none}
-.lum-teach h3{margin:16px 0 4px;font:700 15px/1.4 Georgia,serif;color:#1F2430;text-transform:none;letter-spacing:normal}
-.lum-teach p{margin:0 0 8px;color:#1F2430}
-.lum-teach .lum-meta{margin-top:14px;padding-top:12px;border-top:1px solid #E3DCCD;font-size:14px;color:#4A5160}
-.lum-teach a{color:#1B6F6D;text-decoration:underline}
-@media (max-width:600px){.lum-teach{margin:32px 16px 24px;padding:20px}}
-</style>
-<style>body{overflow-x:hidden;overflow-y:auto}</style>
-<section class="lum-teach" aria-labelledby="lum-teach-h">
-  <h2 id="lum-teach-h">For teachers</h2>
-  <h3>What students practise</h3>
-  <p>The bass clef version of Chameleon Note Snacks. Ants march across the staff and students name the note before the anteater gets them.</p>
-  <h3>Using it in class</h3>
-  <p>Good for students who are comfortable with treble clef and need to start reading bass clef, like piano, bass guitar or low brass players.</p>
-  <p class="lum-meta">Year 7 &middot; Note reading, bass clef &middot; Free, no login needed &middot; <a href="/games">See all the games</a></p>
-</section>
-<script>
-/* Stop the spacebar scrolling down to the teacher notes while a game is being played */
-window.addEventListener('keydown',function(e){
-  if(e.code!=='Space'&&e.key!==' ')return;
-  var t=e.target,n=t&&t.tagName;
-  if(n==='INPUT'||n==='TEXTAREA'||n==='SELECT'||n==='BUTTON'||(t&&t.isContentEditable))return;
-  e.preventDefault();
-});
-</script>
-<!-- /TEACHERS -->
 </body>
 </html>
