@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="description" content="Free rhythm reading game for Years 7 and 8. Tap every note to hop the frog across the pond, from ta and ti-ti to tam-ti and tim-ka, in 2/4, 3/4 or 4/4.">
-<title>Lily Pad Leap | Rhythm reading game | Level Up Musicianship</title>
+<meta name="description" content="Lily Pad Leap: a rhythm-reading arcade game. Tap every note to hop the frog across the pond, in 2/4, 3/4 or 4/4.">
+<title>Lily Pad Leap</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Lilita+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -154,52 +154,6 @@ html,body{margin:0;}
 @media (max-width:480px){ .gtitle strong{font-size:20px;} .play{font-size:22px;padding:10px 28px 8px;} .meter span{display:none;} }
 @media (prefers-reduced-motion:reduce){ .world,.play{transition:none;animation:none;} .world:hover{transform:none;} }
 </style>
-<!-- SEO -->
-<link rel="canonical" href="https://levelupmusicianship.com/games/lily-pad-leap">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Level Up Musicianship">
-<meta property="og:title" content="Lily Pad Leap | Rhythm reading game | Level Up Musicianship">
-<meta property="og:description" content="Free rhythm reading game for Years 7 and 8. Tap every note to hop the frog across the pond, from ta and ti-ti to tam-ti and tim-ka, in 2/4, 3/4 or 4/4.">
-<meta property="og:url" content="https://levelupmusicianship.com/games/lily-pad-leap">
-<meta property="og:image" content="https://levelupmusicianship.com/images/ingame/lily-pad-leap.jpg">
-<meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "LearningResource",
-  "name": "Lily Pad Leap",
-  "description": "Free rhythm reading game for Years 7 and 8. Tap every note to hop the frog across the pond, from ta and ti-ti to tam-ti and tim-ka, in 2/4, 3/4 or 4/4.",
-  "url": "https://levelupmusicianship.com/games/lily-pad-leap",
-  "image": "https://levelupmusicianship.com/images/ingame/lily-pad-leap.jpg",
-  "learningResourceType": "Game",
-  "interactivityType": "active",
-  "educationalLevel": "Years 7-8 (secondary school)",
-  "audience": {
-    "@type": "EducationalAudience",
-    "educationalRole": "student"
-  },
-  "teaches": [
-    "rhythm reading",
-    "rhythm syllables",
-    "time signatures"
-  ],
-  "keywords": "rhythm reading, rhythm syllables, time signatures",
-  "inLanguage": "en-AU",
-  "isAccessibleForFree": true,
-  "author": {
-    "@type": "Person",
-    "name": "Tsun-En (Nami) Cheng",
-    "jobTitle": "Music teacher",
-    "url": "https://levelupmusicianship.com/about"
-  },
-  "isPartOf": {
-    "@type": "WebSite",
-    "name": "Level Up Musicianship",
-    "url": "https://levelupmusicianship.com/"
-  }
-}
-</script>
-<!-- /SEO -->
 </head>
 <body>
 <div class="wrap">
@@ -533,7 +487,7 @@ function renderNotation(cells, ev, meter){
   });
   notEl.innerHTML=`<svg viewBox="0 0 ${W} 112" role="img" aria-label="Rhythm in ${meter}/4: ${ev.map(e=>e.syl).join(' ')}" class="${settings.syl?'':'nosyl'}">${back}${evs.join('')}</svg>`;
 }
-function markEv(i,cls){ const g=notEl.querySelector(`.ev[data-i="${i}"]`); if(g){ g.classList.remove('active'); g.classList.add(cls); } }
+function markEv(i,cls){ const g=notEl.querySelector(`.ev[data-i="${i}"]`); if(g){ g.classList.remove('active','perfect','good','miss'); g.classList.add(cls); } }
 function setActive(i){
   if(i===G.active) return;
   const prev=notEl.querySelector('.ev.active'); if(prev) prev.classList.remove('active');
@@ -563,7 +517,7 @@ function loadPhrase(){
   toReady();
 }
 function resetRun(){
-  G.ev.forEach(e=>{ delete e.status; delete e.tap; delete e.err; delete e.grade; delete e.dunk; });
+  G.ev.forEach(e=>{ delete e.status; delete e.tap; delete e.err; delete e.grade; delete e.dunk; delete e.mashed; });
   G.extras=0; G.restErrs=0; G.floaters=[]; G.tapLog=[]; G.combo=0; G.bestCombo=0; G.flashAt=0; clearMarks();
 }
 function toReady(){ stopAll(); resetRun(); G.mode='ready'; G.demo=false; resEl.hidden=true; updateControls(); }
@@ -599,6 +553,7 @@ function handleTap(ts){
   G.ev.forEach(e=>{ if(e.rest||e.status) return; const d=Math.abs(tb-e.t)*G.spb; if(d<bd){bd=d;bi=e.i;} });
   if(bi>=0 && bd<=G.good){
     const e=G.ev[bi]; e.status='hit'; e.tap=tb; e.err=(tb-e.t)*G.spb; e.grade=bd<=G.perfect?'perfect':'good';
+    if(e.mashed){ e.grade='mash'; markEv(e.i,'miss'); sfx.hop(ctx.currentTime,false); breakCombo(); addFloater('TOO MANY TAPS',e.t,'m'); return; }
     markEv(e.i,e.grade); sfx.hop(ctx.currentTime,true); G.tapLog.push({err:e.err,grade:e.grade,at:performance.now()});
     G.combo++; G.bestCombo=Math.max(G.bestCombo,G.combo); G.comboAt=performance.now();
     if(G.combo>=5 && G.combo%5===0) sfx.combo(ctx.currentTime+.05);
@@ -606,9 +561,13 @@ function handleTap(ts){
     return;
   }
   sfx.hop(ctx.currentTime,false); breakCombo();
+  if(tb>G.beats+.3) return;
+  // Anti-mashing: a stray tap spoils any note close to it, so spamming the key can't score.
+  G.ev.forEach(e=>{ if(e.rest || Math.abs(tb-e.t)*G.spb>G.good*1.5) return; e.mashed=true;
+    if(e.status==='hit' && e.grade!=='mash'){ e.grade='mash'; markEv(e.i,'miss'); addFloater('TOO MANY TAPS',e.t,'m'); } });
   const r=G.ev.find(e=>e.rest && tb>=e.t && tb<e.t+e.dur);
-  if(r && r.dunk==null){ r.dunk=tb; G.restErrs++; markEv(r.i,'miss'); addFloater('SHH! REST',tb,'x'); splashSnd(ctx.currentTime+.3*G.spb); return; }
-  if(tb<G.beats+.3){ G.extras++; addFloater('EXTRA TAP',tb,'x'); }
+  if(r){ G.restErrs++; if(r.dunk==null){ r.dunk=tb; markEv(r.i,'miss'); splashSnd(ctx.currentTime+.3*G.spb); } addFloater('SHH! REST',tb,'x'); return; }
+  G.extras++; addFloater('EXTRA TAP',tb,'x');
 }
 function addFloater(text,t,kind){ G.floaters.push({text,t,kind,born:performance.now()}); }
 
@@ -626,7 +585,8 @@ function finishRun(){
   const notes=G.ev.filter(e=>!e.rest); let pts=0,per=0,goo=0,mis=0; const errs=[];
   notes.forEach(e=>{ if(e.grade==='perfect'){pts+=100;per++;} else if(e.grade==='good'){pts+=70;goo++;} else mis++; if(e.status==='hit') errs.push(e.err); });
   const slips=G.extras+G.restErrs;
-  const acc=clamp((pts-25*slips)/(notes.length*100),0,1);
+  // every stray tap counts as a wrong answer, so accuracy = points ÷ (notes + stray taps)
+  const acc=clamp(pts/((notes.length+slips)*100),0,1);
   const stars=acc>=.9?3:acc>=.7?2:acc>=.45?1:0;
   G.stars[G.phraseIdx]=Math.max(G.stars[G.phraseIdx]||0,stars);
   const mean=errs.length?errs.reduce((a,b)=>a+b,0)/errs.length*1000:0;
@@ -635,7 +595,8 @@ function finishRun(){
   else if(mean<-40) tend=`You're rushing a little (about ${Math.round(-mean)} ms early). Let the frog land before you tap.`;
   else if(mean>40) tend=`You're dragging a little (about ${Math.round(mean)} ms late). Get ready for each hop earlier.`;
   else tend='Your timing is right on the beat.';
-  if(G.restErrs) tend+=` You tapped on ${G.restErrs===1?'a rest':G.restErrs+' rests'}; stay on the turtle.`;
+  if(slips>=Math.max(3,notes.length*.3)) tend='Too many taps! Only tap on the notes. Extra taps cost you notes.';
+  if(G.restErrs) tend+=` You tapped during ${G.restErrs===1?'a rest':'rests '+G.restErrs+' times'}; stay on the turtle.`;
   const last=G.phraseIdx===PHRASES-1;
   const msg=['Splash! Try again','Nice hopping','Great rhythm','Perfect pond!'][stars];
   resPanel.innerHTML=`
@@ -1130,33 +1091,5 @@ function frame(){
 syncSettingsUI(); sizeView(heroV); setMeter(G.meter); requestAnimationFrame(frame);
 })();
 </script>
-<!-- TEACHERS -->
-<style>
-.lum-teach{position:relative;z-index:5;box-sizing:border-box;max-width:760px;margin:48px auto 32px;padding:24px 28px;background:#FFFDF8;color:#1F2430;border:1px solid #E3DCCD;border-radius:12px;font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.6;text-align:left;text-transform:none;letter-spacing:normal}
-.lum-teach h2{margin:0 0 12px;font:700 20px/1.3 Georgia,serif;color:#1F2430;text-transform:none;letter-spacing:normal;text-shadow:none}
-.lum-teach h3{margin:16px 0 4px;font:700 15px/1.4 Georgia,serif;color:#1F2430;text-transform:none;letter-spacing:normal}
-.lum-teach p{margin:0 0 8px;color:#1F2430}
-.lum-teach .lum-meta{margin-top:14px;padding-top:12px;border-top:1px solid #E3DCCD;font-size:14px;color:#4A5160}
-.lum-teach a{color:#1B6F6D;text-decoration:underline}
-@media (max-width:600px){.lum-teach{margin:32px 16px 24px;padding:20px}}
-</style>
-<section class="lum-teach" aria-labelledby="lum-teach-h">
-  <h2 id="lum-teach-h">For teachers</h2>
-  <h3>What students practise</h3>
-  <p>Students read the rhythm on screen and tap each note to make the frog hop. Each hop lasts as long as the note, so they have to hold the longer notes, and on a rest the turtle carries them. The eight worlds go from <em>ta</em> and <em>ti-ti</em> up to <em>tam-ti</em> and <em>tim-ka</em>, in 2/4, 3/4 or 4/4.</p>
-  <h3>Using it in class</h3>
-  <p>Run the timing check in Settings before students start, especially with Bluetooth speakers or headphones. Space, J, F or tapping the screen all work, so it's fine on laptops or tablets.</p>
-  <p class="lum-meta">Years 7 to 8 &middot; Rhythm reading, time signatures &middot; Free, no login needed &middot; <a href="/games">See all the games</a></p>
-</section>
-<script>
-/* Stop the spacebar scrolling down to the teacher notes while a game is being played */
-window.addEventListener('keydown',function(e){
-  if(e.code!=='Space'&&e.key!==' ')return;
-  var t=e.target,n=t&&t.tagName;
-  if(n==='INPUT'||n==='TEXTAREA'||n==='SELECT'||n==='BUTTON'||(t&&t.isContentEditable))return;
-  e.preventDefault();
-});
-</script>
-<!-- /TEACHERS -->
 </body>
 </html>
