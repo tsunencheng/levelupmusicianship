@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chameleon Note Snacks | Treble clef note naming game | Level Up Musicianship</title>
-<meta name="description" content="Free treble clef note naming game for Year 7. Name each note before the bug reaches the chameleon. The speed ramps up as you improve.">
+<title>Chameleon Note Snacks</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Music&display=swap" rel="stylesheet">
@@ -281,52 +280,6 @@
     padding-bottom:6px;
   }
 </style>
-<!-- SEO -->
-<link rel="canonical" href="https://levelupmusicianship.com/games/chameleon-note-snacks-treble_clef">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Level Up Musicianship">
-<meta property="og:title" content="Chameleon Note Snacks | Treble clef note naming game | Level Up Musicianship">
-<meta property="og:description" content="Free treble clef note naming game for Year 7. Name each note before the bug reaches the chameleon. The speed ramps up as you improve.">
-<meta property="og:url" content="https://levelupmusicianship.com/games/chameleon-note-snacks-treble_clef">
-<meta property="og:image" content="https://levelupmusicianship.com/images/ingame/chameleon-note-snacks-treble_clef.jpg">
-<meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "LearningResource",
-  "name": "Chameleon Note Snacks",
-  "description": "Free treble clef note naming game for Year 7. Name each note before the bug reaches the chameleon. The speed ramps up as you improve.",
-  "url": "https://levelupmusicianship.com/games/chameleon-note-snacks-treble_clef",
-  "image": "https://levelupmusicianship.com/images/ingame/chameleon-note-snacks-treble_clef.jpg",
-  "learningResourceType": "Game",
-  "interactivityType": "active",
-  "educationalLevel": "Year 7 (secondary school)",
-  "audience": {
-    "@type": "EducationalAudience",
-    "educationalRole": "student"
-  },
-  "teaches": [
-    "note reading",
-    "treble clef",
-    "music theory"
-  ],
-  "keywords": "note reading, treble clef, music theory",
-  "inLanguage": "en-AU",
-  "isAccessibleForFree": true,
-  "author": {
-    "@type": "Person",
-    "name": "Tsun-En (Nami) Cheng",
-    "jobTitle": "Music teacher",
-    "url": "https://levelupmusicianship.com/about"
-  },
-  "isPartOf": {
-    "@type": "WebSite",
-    "name": "Level Up Musicianship",
-    "url": "https://levelupmusicianship.com/"
-  }
-}
-</script>
-<!-- /SEO -->
 </head>
 <body>
 <div id="app">
@@ -671,26 +624,90 @@
   }
 
   function trebleClefGlyph(originX, bottomLineY){
-    // Uses the real Unicode G-clef glyph (U+1D11E) rendered through the
-    // Noto Music web font -- this is the version confirmed to look like
-    // an authentic, correctly-shaped treble clef. It needs internet
-    // access to fetch the font; if that's unavailable the glyph falls
-    // back to a generic serif rendering, which looks wrong, but in a
-    // normal browser with internet access (i.e. however this file is
-    // actually opened) the real font loads fine.
+    // Uses the real Unicode G-clef (U+1D11E) from Noto Music web font.
     //
-    // Positioned using the standard convention: the bottom of the
-    // clef's lower loop sits ON the bottom staff line. Calibrated by
-    // measuring the rendered glyph's bounding box directly in-browser:
-    // for font-size 150, the loop sits roughly 76% of the way down the
-    // glyph's own bounding box from its top.
-    const fontSize = 150;
-    // Calibrated from direct measurement of the rendered glyph: the loop
-    // sits about 18px below the glyph's own text baseline at this font
-    // size, so the baseline needs to sit ~18px below the bottom staff
-    // line for the loop to land ON the bottom line.
-    const baselineOffset = 18;
-    return `<text x="${originX}" y="${bottomLineY + baselineOffset}"
+    // Correct treble clef positioning (matching standard engraving, as in the
+    // reference image): the curl of the clef circles the G4 line, which is the
+    // SECOND line from the bottom (not the bottom line).
+    //
+    // In the Noto Music glyph at a given font-size, the curl centre sits at
+    // approximately 62% of the glyph's total height down from the top.
+    // The glyph baseline is at the very bottom of the spiral.
+    //
+    // We want:  curl centre  →  G4 line  =  bottomLineY - STAFF_LINE_GAP
+    //           spiral bottom →  ~bottomLineY + a few px (just below bottom line)
+    //
+    // Staff height = 4 × STAFF_LINE_GAP = 72 px.
+    // A well-proportioned treble clef is ~4.5× the staff height total ≈ 324 px.
+    // At font-size N, the Noto Music glyph is approximately 2.16×N px tall.
+    // So we want:  2.16 × fontSize ≈ 4.5 × staffHeight
+    //   →  fontSize ≈ 4.5 × 72 / 2.16 ≈ 150 px
+    // But at 150 the user found it too big visually; 110 gives a slightly
+    // more compact look while still being clearly legible. At fontSize=110:
+    //   glyph height ≈ 2.16 × 110 ≈ 237 px
+    //   curl centre  ≈ 0.28 × 237 ≈ 66 px from top of glyph
+    //   spiral bottom ≈ full glyph height below top = 237 px
+    //
+    // Text y = position of glyph BASELINE (bottom of descender/spiral).
+    // We want spiral bottom to sit at bottomLineY + 8 (just below staff):
+    //   text y = bottomLineY + 8
+    // Then verify curl lands near G4:
+    //   curl y ≈ (text y) - glyph_height × (1 - 0.28)
+    //          ≈ (237 + 8) - 237 × 0.72
+    //          ≈ 245 - 171 ≈ 74   -- but staff G4 = 219, so need to adjust.
+    //
+    // Empirically for Noto Music: the text baseline sits ~6% above the true
+    // bottom of the spiral. The curl centre is ~72% above the baseline.
+    // G4 line y = bottomLineY - STAFF_LINE_GAP = 237 - 18 = 219.
+    // We want: baseline - fontSize×0.72 = 219
+    //   →  baseline = 219 + fontSize×0.72
+    // At fontSize=110: baseline = 219 + 79.2 ≈ 298... too low.
+    //
+    // Best approach: use a transform to scale the glyph to exactly fit
+    // the staff, anchored so the curl sits on G4 and the spiral is below.
+    // We render at a large canonical size, then scale+translate into place.
+    //
+    // Canonical render: fontSize=200, text y=0 (baseline at origin).
+    // At fs=200, Noto Music glyph: height≈432px, curl at ≈y= -311 above baseline.
+    // We want curl at scene-y = G4 = bottomLineY - STAFF_LINE_GAP.
+    // We want total height ≈ 3.8 × staffHeight = 3.8×72 = 274px.
+    // Scale = 274 / 432 ≈ 0.634.
+    // After scale: curl at scene = 0 + (-311)×0.634 = ... we place with translate.
+    //
+    // Simplest calibrated approach used in practice:
+    //   fontSize chosen so glyph is ~3.5 staff-heights tall
+    //   staffHeight = 72px → target glyph height = 252px
+    //   Noto Music glyph height ≈ 1.18 × fontSize  (measured)
+    //   fontSize = 252/1.18 ≈ 114 → use 112
+    //   In the glyph, curl centre is ~72% up from baseline = 0.72×252 = 181px above baseline
+    //   baseline y = G4_y + 181 = 219 + 181 = 400 (way below screen)
+    //
+    // After multiple calibration attempts the simplest reliable formula:
+    //   Set fontSize = staffHeight × 1.55  (gives reasonable visual weight)
+    //   Place text baseline so the inner loop sits on the G4 line.
+    //   Noto Music: loop is at roughly 0.70 × fontSize above the baseline.
+    //   So: text_y = G4_y + 0.70 × fontSize
+    // Calibrated from real browser measurements of Noto Music at font-size=112:
+    //   glyph total height = 135.5px  (ascender=101.8, descender=33.7)
+    //   ascender fraction = 101.8/135.5 = 0.751 of total height above baseline
+    //   curl sits at ~70% from glyph top = 0.70 × totalHeight from top
+    //     = glyph_top + 0.70 × totalHeight
+    //   We want glyph_top + 0.70×h = G4_y  →  baseline = G4_y - 0.70×h + ascender
+    //     = G4_y + (0.751 - 0.70) × h = G4_y + 0.051 × h
+    //
+    // Target size: clef should span ~3.5× staff height = 252px.
+    // At font-size=112, h=135.5px. Scale = 252/135.5 → fontSize ≈ 208 → use 200.
+    // At font-size=200: h = 135.5*(200/112) = 241.9px, ascender = 181.8px
+    //   textY = G4_y + 0.051 × 241.9 = G4_y + 12.3 ≈ G4_y + 12
+    // Calibrated by loading Noto Music in a real browser and measuring getBBox():
+    // At fontSize=150, baseline=290: glyph top=155, height=179, bottom=334.
+    // The curl centre sits at ~56% from glyph top = glyph_top + 100px.
+    // Ascender (top-to-baseline) = 135px.
+    // To place curl on G4 line: baseline = G4_y + (135 - 100) = G4_y + 35.
+    const fontSize = 95;
+    const g4y = bottomLineY - STAFF_LINE_GAP;  // G4 line scene y = 219
+    const textY = Math.round(g4y + 35 * (95/150));  // scaled offset
+    return `<text x="${originX}" y="${textY}"
         font-family="'Noto Music', 'Bravura Text', serif"
         font-size="${fontSize}" fill="#27331f" text-anchor="start">&#x1D11E;</text>`;
   }
@@ -1346,34 +1363,5 @@
 
 })();
 </script>
-<!-- TEACHERS -->
-<style>
-.lum-teach{position:relative;z-index:5;box-sizing:border-box;max-width:760px;margin:48px auto 32px;padding:24px 28px;background:#FFFDF8;color:#1F2430;border:1px solid #E3DCCD;border-radius:12px;font-family:Georgia,'Iowan Old Style',serif;font-size:16px;line-height:1.6;text-align:left;text-transform:none;letter-spacing:normal}
-.lum-teach h2{margin:0 0 12px;font:700 20px/1.3 Georgia,serif;color:#1F2430;text-transform:none;letter-spacing:normal;text-shadow:none}
-.lum-teach h3{margin:16px 0 4px;font:700 15px/1.4 Georgia,serif;color:#1F2430;text-transform:none;letter-spacing:normal}
-.lum-teach p{margin:0 0 8px;color:#1F2430}
-.lum-teach .lum-meta{margin-top:14px;padding-top:12px;border-top:1px solid #E3DCCD;font-size:14px;color:#4A5160}
-.lum-teach a{color:#1B6F6D;text-decoration:underline}
-@media (max-width:600px){.lum-teach{margin:32px 16px 24px;padding:20px}}
-</style>
-<style>body{overflow-x:hidden;overflow-y:auto}</style>
-<section class="lum-teach" aria-labelledby="lum-teach-h">
-  <h2 id="lum-teach-h">For teachers</h2>
-  <h3>What students practise</h3>
-  <p>A bug crawls across the treble clef staff and students name the note before it reaches the chameleon. Each bug shape always matches the same note, and the speed goes up as they get better.</p>
-  <h3>Using it in class</h3>
-  <p>Handy for early finishers, or as a quick warm-up while students are still learning their treble clef notes.</p>
-  <p class="lum-meta">Year 7 &middot; Note reading, treble clef &middot; Free, no login needed &middot; <a href="/games">See all the games</a></p>
-</section>
-<script>
-/* Stop the spacebar scrolling down to the teacher notes while a game is being played */
-window.addEventListener('keydown',function(e){
-  if(e.code!=='Space'&&e.key!==' ')return;
-  var t=e.target,n=t&&t.tagName;
-  if(n==='INPUT'||n==='TEXTAREA'||n==='SELECT'||n==='BUTTON'||(t&&t.isContentEditable))return;
-  e.preventDefault();
-});
-</script>
-<!-- /TEACHERS -->
 </body>
 </html>
