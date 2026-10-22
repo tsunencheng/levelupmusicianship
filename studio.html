@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio: a free music maker for the classroom | Level Up Musicianship</title>
+<meta name="description" content="A free browser-based music studio for students. Build beats on a drum grid, write melodies in a piano roll, mix your tracks and export WAV or MIDI. No logins or installs.">
+<link rel="stylesheet" href="style.css">
+<!-- SEO -->
+<link rel="canonical" href="https://levelupmusicianship.com/studio">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Level Up Musicianship">
+<meta property="og:title" content="Studio | Level Up Musicianship">
+<meta property="og:description" content="A free browser-based music studio for students. Build beats on a drum grid, write melodies in a piano roll, mix your tracks and export WAV or MIDI. No logins or installs.">
+<meta property="og:url" content="https://levelupmusicianship.com/studio">
+<meta property="og:image" content="https://levelupmusicianship.com/images/nami-headshot.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<!-- /SEO -->
+<style>
+.studio-frame-wrap { border: 1px solid #DCE1E8; border-radius: 14px; overflow: hidden; background: #0B1320; }
+.studio-frame { display: block; width: 100%; height: 82vh; min-height: 620px; border: 0; }
+.studio-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.studio-bar p { margin: 0; color: var(--ink-soft); }
+.studio-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 28px; }
+.studio-tip { background: #fff; border: 1px solid #DCE1E8; border-radius: 12px; padding: 16px 18px; }
+.studio-tip h3 { font-size: 18px; margin: 0 0 6px; }
+.studio-tip p { margin: 0; font-size: 15px; color: var(--ink-soft); line-height: 1.5; }
+@media (max-width: 760px) { .studio-frame { height: 78vh; min-height: 560px; } }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="shell">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="-5 -22 50 57" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="2" y="24" width="10" height="11" rx="2.4" fill="var(--winery)" opacity="0.5"/>
+        <rect x="14" y="14" width="10" height="21" rx="2.4" fill="var(--winery)" opacity="0.75"/>
+        <rect x="26" y="4" width="10" height="31" rx="2.4" fill="var(--winery)" opacity="0.92"/>
+        <g transform="rotate(-32 19 8)">
+          <ellipse cx="19" cy="13" rx="3.4" ry="2.5" fill="var(--ink)"/>
+          <path d="M21.5 -3 L22.7 -3 L22.7 13.4 C22.7 13.8 22.4 14 22.1 14 L21.9 14 C21.6 14 21.5 13.8 21.5 13.4 Z" fill="var(--ink)"/>
+          <path d="M22.7 -3 C 26 -1.6 27.1 1.6 26.3 4.7 C 25.9 6.5 24.6 7.6 23.3 8.1 C 24.1 6.2 24.2 3.9 23.2 1.8 C 22.6 0.5 22.4 -1.3 22.7 -3 Z" fill="var(--ink)"/>
+        </g>
+      </svg>
+      Level Up Musicianship
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="games.html">Games</a>
+      <a href="activities.html">Activities</a>
+      <a href="studio.html" class="active">Studio</a>
+      <a href="contact.html">Contact</a>
+      <a href="donate.html">Donate</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero hero-compact hero-home">
+  <div class="staff-lines">
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <svg class="staff-notes" viewBox="0 -40 330 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g fill="#0B1320">
+      <!-- ta on G (2nd line) -->
+      <ellipse cx="30" cy="90" rx="15" ry="11" transform="rotate(-22 30 90)"/>
+      <rect x="39.8" y="-10" width="4.5" height="100"/>
+      <!-- ta on B (middle line) -->
+      <ellipse cx="100" cy="60" rx="15" ry="11" transform="rotate(-22 100 60)"/>
+      <rect x="85.7" y="60" width="4.5" height="98"/>
+      <!-- ti-ti on D and B, beamed -->
+      <ellipse cx="170" cy="30" rx="15" ry="11" transform="rotate(-22 170 30)"/>
+      <rect x="155.7" y="30" width="4.5" height="114"/>
+      <ellipse cx="230" cy="60" rx="15" ry="11" transform="rotate(-22 230 60)"/>
+      <rect x="215.7" y="60" width="4.5" height="84"/>
+      <rect x="155.7" y="132" width="64.5" height="12"/>
+      <!-- ta on G -->
+      <ellipse cx="295" cy="90" rx="15" ry="11" transform="rotate(-22 295 90)"/>
+      <rect x="304.8" y="-10" width="4.5" height="100"/>
+    </g>
+  </svg>
+  <div class="shell">
+    <h1>Studio</h1>
+    <p class="lede">Make a beat, write a melody and mix it all together, right in your browser.</p>
+  </div>
+</header>
+
+<section class="section" style="border-top: none;">
+  <div class="shell">
+    <div class="studio-bar">
+      <p>Works best on a laptop or Chromebook with headphones.</p>
+      <a class="btn ghost" id="fullscreenLink" href="studio/app.html" target="_blank" rel="noopener">Open full screen</a>
+    </div>
+    <div class="studio-frame-wrap">
+      <iframe class="studio-frame" id="studioFrame" src="studio/app.html" title="Level Up Studio music maker" allow="autoplay; clipboard-write"></iframe>
+    </div>
+
+    <div class="studio-tips">
+      <div class="studio-tip">
+        <h3>Build a beat</h3>
+        <p>Pick the Drums track and click the grid to add hits. Drag across a row to paint a pattern, then press Repeat bar 1 to loop it.</p>
+      </div>
+      <div class="studio-tip">
+        <h3>Write a melody</h3>
+        <p>Pick an instrument track to open the piano roll. Click to add a note, drag to make it longer, and drag a note to move it.</p>
+      </div>
+      <div class="studio-tip">
+        <h3>Mix it</h3>
+        <p>Use Vol and Pan on each track. M mutes a track and S lets you hear it on its own. The space bar plays and stops.</p>
+      </div>
+      <div class="studio-tip">
+        <h3>Save and hand in</h3>
+        <p>Copy song link puts your whole song in a link you can paste into Classroom or Teams. Export WAV for audio, or MIDI to keep working in another app.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // pass a shared song link through to the studio
+  if (location.hash.indexOf('song=') !== -1) {
+    document.getElementById('studioFrame').src = 'studio/app.html' + location.hash;
+    document.getElementById('fullscreenLink').href = 'studio/app.html' + location.hash;
+  }
+</script>
+
+<footer class="site-footer">
+  <div class="shell">
+    <span>&copy; 2026 Tsun-En Cheng</span>
+  </div>
+</footer>
+<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+<script>
+  kofiWidgetOverlay.draw('levelupmusicianship', {
+    'type': 'floating-chat',
+    'floating-chat.donateButton.text': 'Donate',
+    'floating-chat.donateButton.background-color': '#1C2541',
+    'floating-chat.donateButton.text-color': '#fff'
+  });
+</script>
+</body>
+</html>
