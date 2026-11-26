@@ -609,3 +609,9 @@ img { max-width: 100%; display: block; }
 @media (max-width: 340px) {
   .brand .brand-name { font-size: 0.75em; }
 }
+
+/* Band series */
+.card-stamp.band { background: #1C2541; color: #FDE74C; }
+.tile-band { background: #1C2541; color: #FFFFFF; }
+.tile-band .tile-name { color: #FDE74C; }
+@media (min-width: 861px) { .tile-grid.five { grid-template-columns: repeat(5, 1fr); } }
