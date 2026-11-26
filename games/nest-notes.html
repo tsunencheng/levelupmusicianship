@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nest Notes | Beginner note reading game | Level Up Musicianship</title>
+<meta name="description" content="Free beginner note reading game for treble, alto and bass clef. Hungry chicks sit on the stave as real noteheads. Find the landmark line, count up or down, and name the note to feed them.">
+<link rel="canonical" href="https://levelupmusicianship.com/games/nest-notes">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Level Up Musicianship">
+<meta property="og:title" content="Nest Notes | Beginner note reading game | Level Up Musicianship">
+<meta property="og:description" content="Free beginner note reading game for treble, alto and bass clef. Hungry chicks sit on the stave as real noteheads. Find the landmark line, count up or down, and name the note to feed them.">
+<meta property="og:url" content="https://levelupmusicianship.com/games/nest-notes">
+<meta property="og:image" content="https://levelupmusicianship.com/images/ingame/nest-notes.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Nest Notes",
+  "description": "Free beginner note reading game for treble, alto and bass clef. Hungry chicks sit on the stave as real noteheads. Find the landmark line, count up or down, and name the note to feed them.",
+  "url": "https://levelupmusicianship.com/games/nest-notes",
+  "image": "https://levelupmusicianship.com/images/ingame/nest-notes.jpg",
+  "learningResourceType": "Game",
+  "interactivityType": "active",
+  "educationalLevel": "Beginner",
+  "audience": {"@type": "EducationalAudience","educationalRole": "student"},
+  "teaches": ["note reading","landmark notes","treble clef","alto clef","bass clef","music theory"],
+  "isAccessibleForFree": true
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Sniglet:wght@800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: gentle, outdoorsy, a picture book morning in the garden; nothing moves while a student reads.
+   IDEA: birds on a wire. Five fence wires strung between two posts are the stave; hungry chicks perch as noteheads.
+   PICTURE: tree and robin on the left, posts and wires across the sky, grass below where wooden seed signs are the answer buttons.
+   COLOUR and TYPE: sky blue to pale mint, grass greens, timber browns, sunflower yellow, berry red for mistakes; Sniglet title, Atkinson Hyperlegible for everything students read.
+   LAYOUT: sky band (title, scene) over a ground band (robin's speech bubble, eggs, signs). No cards, no centred hero. */
+:root{color-scheme:light;--sky1:#B9E0EC;--sky2:#E4F2E2;--grass:#86B85E;--grass2:#6E9F4C;--soil:#5E8A40;--wood:#9A6A3E;--wood2:#C99A62;--cream:#FFF8E6;--ink:#2B2118;--leaf:#2F7D3A;--berry:#C2453A;--sun:#F4C243}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--grass2);color:var(--ink);font:17px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+button,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.sky{background:linear-gradient(var(--sky1),var(--sky2) 85%);position:relative}
+.top{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;padding:14px max(3vw,14px) 0;max-width:1180px;margin:0 auto}
+.top h1{font:800 clamp(30px,5vw,46px)/1 Sniglet,"Atkinson Hyperlegible",sans-serif;margin:0;color:#3D5A2A;letter-spacing:.5px}
+.top h1 span{color:var(--wood)}
+.top p{margin:0 0 4px;color:#4E6440;font-size:15px}
+.grow{flex:1}
+.site-back{display:inline-flex;font-size:14px;font-weight:700;color:#3D5A2A;text-decoration:none;border:1.5px solid #3D5A2A66;border-radius:999px;padding:5px 12px;margin-bottom:6px}
+.site-back:hover{border-color:#3D5A2A}
+.sign{min-height:44px;padding:6px 16px;border-radius:6px 9px 7px 10px;border:0;background:var(--wood2);color:var(--ink);font-weight:700;box-shadow:inset 0 -4px 0 #8a5d33,0 3px 0 #00000022;transform:rotate(-1.5deg)}
+.sign:nth-child(odd){transform:rotate(1.2deg)}
+.sign:hover{filter:brightness(1.06)}
+.scene{max-width:1180px;margin:0 auto;position:relative}
+.scene svg{display:block;width:100%;height:auto;max-height:60vh}
+.scene svg.tap{cursor:pointer}
+.twig{height:9px;margin:0 auto;max-width:1180px;padding:0 max(3vw,14px)}
+.twig i{display:block;height:100%;border-radius:9px;background:var(--leaf);transform-origin:left}
+.twig.hide{visibility:hidden}
+.ground{position:relative;background:var(--grass);padding:26px max(3vw,14px) 34px}
+.ground::before{content:"";position:absolute;left:0;right:0;top:-13px;height:14px;background:radial-gradient(circle at 10px 14px,var(--grass) 9px,transparent 10px) 0 0/20px 14px repeat-x}
+.wrap{max-width:1180px;margin:0 auto}
+.talk{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.bubble{position:relative;flex:1 1 420px;background:var(--cream);border:2.5px solid var(--ink);border-radius:22px 16px 24px 14px;padding:12px 18px 14px;min-height:64px}
+.bubble::before{content:"";position:absolute;left:30px;top:-11px;width:19px;height:19px;background:var(--cream);border-left:2.5px solid var(--ink);border-top:2.5px solid var(--ink);border-radius:4px 0 0 0;transform:rotate(45deg)}
+#msg{font-size:clamp(18px,2.3vw,21px);font-weight:700;margin:0}
+#msg.bad{color:var(--berry)}#msg.good{color:var(--leaf)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.acts:empty{display:none}
+.go{min-height:48px;padding:8px 24px;border:0;border-radius:24px 20px 26px 18px;background:var(--sun);font-weight:700;font-size:19px;box-shadow:inset 0 -4px 0 #c99520}
+.plain{min-height:48px;padding:8px 16px;border:2px solid var(--ink);border-radius:20px;background:transparent;font-weight:700}
+.eggs{display:flex;gap:6px;flex-wrap:wrap;align-self:center;padding:4px 0}
+.eggs b{width:16px;height:21px;border-radius:50% 50% 46% 46%/60% 60% 40% 40%;background:#F5EED9;box-shadow:inset 0 -3px 0 #d9ceb0}
+.eggs b.f{background:var(--sun);box-shadow:inset 0 -3px 0 #c99520}.eggs b.m{background:#D9A878;box-shadow:inset 0 -3px 0 #a87a4d}
+.eggs span{font-weight:700;color:var(--cream)}
+.keys{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:clamp(6px,1.4vw,16px);margin-top:20px}
+.keys button{position:relative;min-height:clamp(62px,10vw,90px);border:0;border-radius:8px 11px 9px 12px;background:var(--cream);color:var(--ink);font:700 clamp(26px,5vw,42px)/1 "Atkinson Hyperlegible",sans-serif;box-shadow:inset 0 -6px 0 #E3D2AC,0 6px 0 var(--wood);transition:transform .06s}
+.keys button:nth-child(3n+1){transform:rotate(-1.2deg)}.keys button:nth-child(3n+2){transform:rotate(.9deg)}
+.keys button:active,.keys button.hit{transform:translateY(4px);box-shadow:inset 0 -6px 0 #E3D2AC,0 2px 0 var(--wood)}
+.keys button:disabled{opacity:.55;cursor:default}
+.tip{color:#F2F7EA;font-size:15px;margin:18px 0 0}
+dialog{margin:0 0 0 auto;height:100%;max-height:100%;width:min(410px,100%);border:0;padding:0;background:var(--cream);color:var(--ink);box-shadow:-8px 0 0 var(--wood)}
+dialog::backdrop{background:#2B211866}
+.dr{padding:20px 22px 28px;display:grid;gap:18px}
+.dr h2{margin:0;font:800 28px Sniglet,sans-serif;color:#3D5A2A}
+.dr label,.dr .lab{font-weight:700;display:block;margin-bottom:6px}
+.dr select{width:100%;min-height:44px;font-size:16px;border-radius:8px;border:2px solid var(--wood);background:#fff;padding:6px 10px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{flex:1 1 auto;min-height:44px;border-radius:8px;border:2px solid var(--wood);background:#fff;font-weight:700;padding:6px 10px}
+.seg button[aria-pressed=true]{background:var(--leaf);color:#fff;border-color:var(--leaf)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tog{display:flex;align-items:center;gap:10px;font-weight:700;min-height:44px;cursor:pointer}
+.tog input{width:24px;height:24px;accent-color:var(--leaf)}
+.note{font-size:14px;color:#6b5a48;margin:0}
+.pop{animation:pop .3s ease-out both;transform-box:fill-box;transform-origin:center}
+.bye{animation:bye .55s ease-in forwards;transform-box:fill-box;transform-origin:center}
+.float{animation:fl 1s ease-out forwards}
+.glow{animation:gl 1.2s ease-in-out 2}
+@keyframes pop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes bye{30%{transform:translateY(4px) scale(1.05)}to{transform:translateY(-26px) scale(.5);opacity:0}}
+@keyframes fl{to{transform:translateY(-34px);opacity:0}}
+@keyframes gl{50%{stroke-width:8}}
+@media(prefers-reduced-motion:reduce){.pop,.bye,.float,.glow{animation:none}.bye{opacity:0}}
+@media(max-width:600px){.keys{gap:5px}.keys button{border-radius:7px}.top p{display:none}.bubble{flex-basis:100%}}
+</style>
+</head>
+<body>
+<div class="sky">
+  <div class="top">
+    <a class="site-back" href="../games.html">&larr; Level Up Musicianship</a><div style="flex-basis:100%;height:0"></div>
+    <div><h1>Nest <span>Notes</span></h1><p>Find the landmark line, count the steps, feed the chick.</p></div>
+    <div class="grow"></div>
+    <button class="sign" id="homeBtn" hidden>Home</button>
+    <button class="sign" id="setBtn">Settings</button>
+  </div>
+  <div class="scene"><svg id="sv" viewBox="0 0 560 220" role="img" aria-label="Five wires between two fence posts make a music stave. A hungry chick sits on a note."></svg></div>
+  <div class="twig hide" id="bar"><i id="barI"></i></div>
+</div>
+<div class="ground">
+  <div class="wrap">
+    <div class="talk">
+      <div class="bubble"><p id="msg" aria-live="polite"></p><div class="acts" id="acts"></div></div>
+      <div class="eggs" id="dots" aria-hidden="true"></div>
+    </div>
+    <div class="keys" id="keys"></div>
+    <p class="tip">You can also use the A to G keys. A wrong answer drops the seed on the note you chose, so you can see whether it is higher or lower.</p>
+    <p class="tip" style="margin-top:6px;font-size:13px">Piano sound: Salamander Grand Piano by Alexander Holm (CC BY 3.0). Clefs: Noto Music (SIL Open Font License).</p>
+  </div>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgH">
+  <form class="dr" method="dialog">
+    <h2 id="dlgH">Settings</h2>
+    <div><span class="lab">Clef</span><div class="seg" id="clefSeg"><button type="button" data-v="treble">Treble</button><button type="button" data-v="alto">Alto</button><button type="button" data-v="bass">Bass</button></div></div>
+    <div><label for="notesSel">Notes</label><select id="notesSel"></select></div>
+    <div class="two" id="customBox" hidden>
+      <div><label for="loSel">Lowest</label><select id="loSel"></select></div>
+      <div><label for="hiSel">Highest</label><select id="hiSel"></select></div>
+    </div>
+    <div><span class="lab">Timer</span><div class="seg" id="timerSeg"><button type="button" data-v="0">Off</button><button type="button" data-v="12">Relaxed</button><button type="button" data-v="7">Medium</button><button type="button" data-v="4">Quick</button></div></div>
+    <div><span class="lab">Chicks per round</span><div class="seg" id="roundSeg"><button type="button" data-v="10">10</button><button type="button" data-v="20">20</button><button type="button" data-v="0">Endless</button></div></div>
+    <div><span class="lab">Letter signs</span><div class="seg" id="orderSeg"><button type="button" data-v="C">C to B</button><button type="button" data-v="A">A to G</button></div></div>
+    <div>
+      <label class="tog"><input type="checkbox" id="lesChk"> Landmark lesson before each game</label>
+      <label class="tog"><input type="checkbox" id="lmChk"> Colour the landmark line</label>
+      <label class="tog"><input type="checkbox" id="sndChk"> Play note sounds</label>
+    </div>
+    <p class="note">Instrument ranges use written pitch. Settings are saved on this device.</p>
+    <button class="go" value="ok">Done</button>
+  </form>
+</dialog>
+
+<script>
+{
+const L='CDEFGAB';
+const nm=d=>L[d%7]+Math.floor(d/7);
+const PRE={
+ treble:[
+  ['Starter notes',[['t1','Middle C to G (C4 to G4)',28,32],['t2','Around the G line (E4 to C5)',30,35],['t3','Lines only (E G B D F)',30,38,'l'],['t4','Spaces only (F A C E)',30,38,'s'],['t5','Whole stave (E4 to F5)',30,38],['t6','Stave and ledger lines (A3 to C6)',26,42]]],
+  ['Instruments: first notes (Essential Elements)',[['ifl','Flute (C4 to F5)',28,38],['icl','Clarinet (C4 to G4)',28,32],['isx','Alto saxophone (G4 to D5)',32,36],['itp','Trumpet (C4 to G4)',28,32],['ihn','French horn (F4 to C5)',31,35],['ivn','Violin, D and A strings (D4 to D5)',29,36]]]],
+ alto:[
+  ['Starter notes',[['a1','Around the C line (A3 to E4)',26,30],['a2','Lines only (F A C E G)',24,32,'l'],['a3','Spaces only (G B D F)',24,32,'s'],['a4','Whole stave (F3 to G4)',24,32],['a5','Stave and ledger lines (B2 to D5)',20,36]]],
+  ['Instruments: first notes (Essential Elements)',[['iva','Viola, D and A strings (D4 to D5)',29,36]]]],
+ bass:[
+  ['Starter notes',[['b1','Around the F line (D3 to A3)',22,26],['b2','F to middle C (F3 to C4)',24,28],['b3','Lines only (G B D F A)',18,26,'l'],['b4','Spaces only (A C E G)',18,26,'s'],['b5','Whole stave (G2 to A3)',18,26],['b6','Stave and ledger lines (C2 to E4)',14,30]]],
+  ['Instruments: first notes (Essential Elements)',[['itb','Trombone, euphonium or baritone (B2 to F3)',20,24],['itu','Tuba (B1 to F2)',13,17],['ivc','Cello, D and A strings (D3 to D4)',22,29],['idb','Double bass, D string (D3 to G3)',22,25]]]]
+};
+const BOT={treble:30,alto:24,bass:18}, LM={treble:2,alto:4,bass:6};
+const CLEF={treble:['treble clef','curls around'],alto:['alto clef','points right at'],bass:['bass clef','puts its two dots either side of']};
+let S={clef:'treble',preset:'t1',lo:28,hi:32,timer:0,round:10,order:'C',lm:true,snd:true,lesson:true};
+try{const s=JSON.parse(localStorage.getItem('nestnotes-v2'));if(s)S={...S,...s}}catch(e){}
+if(!PRE[S.clef])S.clef='treble';
+const save=()=>{try{localStorage.setItem('nestnotes-v2',JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const sv=$('sv'), G=24;
+let W=560,RX=516,CX=350,GX=258,PX=112,geo,mode='home',cur=null,busy=false,fed=0,first=0,tries=0,missed={},results=[],tStart=0,tRaf=0,last=-1,lstep=0,timers=[];
+const lmDn=()=>BOT[S.clef]+LM[S.clef], LN=()=>L[lmDn()%7];
+const later=(f,ms)=>timers.push(setTimeout(f,ms));
+const clearLater=()=>{timers.forEach(clearTimeout);timers=[]};
+
+function findPre(){for(const[,list]of PRE[S.clef])for(const p of list)if(p[0]===S.preset)return p;return null}
+function pool(){
+  const p=findPre(),lo=p?p[2]:S.lo,hi=p?p[3]:S.hi,f=p?p[4]:null,out=[];
+  for(let d=Math.min(lo,hi);d<=Math.max(lo,hi);d++){const pos=d-BOT[S.clef];if(f==='l'&&pos%2)continue;if(f==='s'&&!(pos%2))continue;out.push(d)}
+  return out;
+}
+function rangeTxt(){const p=findPre();return p?p[1]:'Custom ('+nm(Math.min(S.lo,S.hi))+' to '+nm(Math.max(S.lo,S.hi))+')'}
+
+function makeGeo(){
+  const ps=pool().map(d=>d-BOT[S.clef]);
+  const top=Math.max(8,...ps)+5,bot=Math.min(0,...ps)-4;
+  geo={top,bot,H:(top-bot)*G/2,y:p=>(top-p)*G/2};
+  W=innerWidth<600?440:560;RX=W-40;CX=W<500?318:356;GX=CX-92;
+}
+function ledgers(x,pos,dash){
+  let s='';const st=dash?'stroke-dasharray="5 4" stroke="#C2453A"':'stroke="#2B2118"';
+  for(let p=-2;p>=pos;p-=2)s+=`<line x1="${x-G*1.05}" x2="${x+G*1.05}" y1="${geo.y(p)}" y2="${geo.y(p)}" ${st} stroke-width="2.2" stroke-linecap="round"/>`;
+  for(let p=10;p<=pos;p+=2)s+=`<line x1="${x-G*1.05}" x2="${x+G*1.05}" y1="${geo.y(p)}" y2="${geo.y(p)}" ${st} stroke-width="2.2" stroke-linecap="round"/>`;
+  return s;
+}
+const GLYPH={treble:'M314 801Q300 854 291.0 906.0Q282 958 282 1012Q282 1059 288.5 1100.5Q295 1142 307 1177Q320 1217 341.0 1252.5Q362 1288 385.5 1311.0Q409 1334 427 1334Q451 1334 493 1249Q514 1206 524.0 1156.0Q534 1106 534 1049Q534 978 515.0 907.5Q496 837 459.5 775.0Q423 713 372 666L407 498Q422 500 432.0 501.0Q442 502 447 502Q508 502 556.0 467.5Q604 433 632.5 377.0Q661 321 661 254Q661 177 621.5 115.5Q582 54 503 25Q508 8 532 -117Q538 -147 541.0 -164.5Q544 -182 545.0 -195.0Q546 -208 546 -225Q546 -275 521.5 -314.5Q497 -354 455.5 -376.0Q414 -398 363 -398Q311 -398 271.0 -378.5Q231 -359 208.0 -324.5Q185 -290 185 -245Q185 -197 211.5 -165.0Q238 -133 287 -133Q329 -133 355.5 -163.5Q382 -194 382 -236Q382 -272 357.0 -299.0Q332 -326 292 -326H282Q308 -365 364 -365Q433 -365 472.0 -320.0Q511 -275 511 -205Q511 -188 507.0 -159.5Q503 -131 493 -91Q483 -51 477.5 -25.0Q472 1 470 12Q436 2 390 2Q304 2 222 52Q142 102 96.0 184.0Q50 266 50 361Q50 451 91 530Q132 609 192.5 675.0Q253 741 314 801ZM341 826Q364 838 390.0 870.5Q416 903 440.0 945.0Q464 987 479.0 1029.5Q494 1072 494 1106Q494 1142 483.0 1163.0Q472 1184 445 1184Q421 1184 398.5 1162.0Q376 1140 358.5 1103.5Q341 1067 331.0 1022.0Q321 977 321 930Q321 898 327.5 872.0Q334 846 341 826ZM398 379Q371 373 347.0 353.5Q323 334 308.5 306.5Q294 279 294 248Q294 223 307.0 196.5Q320 170 339 154Q352 142 365 136Q380 129 380 123Q380 120 370 117Q332 126 301.5 151.0Q271 176 253.5 211.5Q236 247 236 287Q236 330 253.5 370.0Q271 410 302.5 442.0Q334 474 374 490L345 641Q229 547 174.5 456.5Q120 366 120 277Q120 212 154.0 156.0Q188 100 247.0 65.5Q306 31 380 31Q400 31 420.5 35.0Q441 39 464 45ZM495 55Q593 97 593 227Q593 270 571.0 305.5Q549 341 512.0 362.0Q475 383 429 383Z',alto:'M226 0V1000H263V510Q281 519 301.0 546.0Q321 573 339.0 608.5Q357 644 370.0 679.5Q383 715 386 742Q396 673 427.0 633.5Q458 594 503 594Q548 594 570 631Q593 668 593 775Q593 818 590.5 848.5Q588 879 582 898Q569 942 541.0 960.5Q513 979 470 979Q447 979 434.0 969.5Q421 960 421 951Q421 944 428.0 934.0Q435 924 443 914Q460 894 460 877Q460 853 442.5 833.5Q425 814 392 814Q362 814 342.5 835.5Q323 857 323 887Q323 924 347.5 952.0Q372 980 411.5 996.0Q451 1012 497 1012Q561 1012 612.0 982.0Q663 952 693.5 899.0Q724 846 724 777Q724 734 714.5 698.0Q705 662 685 633Q658 595 616.0 573.5Q574 552 527 552Q505 552 481.5 557.5Q458 563 437 574L390 500L437 426Q460 435 484.0 440.0Q508 445 532 445Q587 445 630.5 414.0Q674 383 699.0 332.0Q724 281 724 219Q724 157 694.0 104.5Q664 52 613.0 21.0Q562 -10 497 -10Q413 -10 368.0 23.5Q323 57 323 115Q323 145 342.5 166.5Q362 188 392 188Q425 188 442.5 168.5Q460 149 460 125Q460 106 443 88Q434 78 427.5 69.0Q421 60 421 52Q421 40 434.0 31.5Q447 23 470 23Q532 23 563.5 68.5Q595 114 595 219Q595 311 574.0 358.5Q553 406 503 406Q457 406 427.0 367.0Q397 328 388 260Q379 309 360.0 355.0Q341 401 316.0 437.0Q291 473 263 492V0ZM50 0V1000H167V0Z',bass:'M50 123Q216 231 288 301Q336 348 373.0 408.5Q410 469 431.5 536.0Q453 603 453 669Q453 728 435.0 773.5Q417 819 383.0 845.0Q349 871 302 871Q284 871 264.5 867.0Q245 863 224 855Q181 839 158.0 813.5Q135 788 135 765Q135 756 143.0 752.0Q151 748 158 748Q168 748 183 752Q190 754 196.5 755.0Q203 756 210 756Q248 756 272.0 733.5Q296 711 296 674Q296 638 266.0 612.0Q236 586 195 586Q146 586 111.0 617.0Q76 648 76 697Q76 756 109.0 802.0Q142 848 198.5 874.0Q255 900 324 900Q400 900 460.0 867.0Q520 834 555.5 776.5Q591 719 591 646Q591 551 538 464Q511 419 476.5 379.0Q442 339 389.0 297.5Q336 256 256.0 208.0Q176 160 57 101ZM687 809Q710 809 726.0 793.0Q742 777 742 754Q742 731 726.0 715.5Q710 700 687 700Q664 700 648.0 715.5Q632 731 632 754Q632 777 648.0 793.0Q664 809 687 809ZM687 589Q710 589 726.0 573.0Q742 557 742 534Q742 511 726.0 495.5Q710 480 687 480Q664 480 648.0 495.5Q632 511 632 534Q632 557 648.0 573.0Q664 589 687 589Z'};
+function clef(col){
+  // engraved clef outlines from Noto Music (SIL OFL); one staff space is 250 font units, bottom line at 0
+  return `<path transform="translate(${PX+14} ${geo.y(0)}) scale(${G/250} ${-G/250})" fill="${col?'#2F7D3A':'#2B2118'}" d="${GLYPH[S.clef]}"/>`;
+}
+function tree(){
+  const by=geo.y(4)+G*1.15,H=geo.H;
+  return `<rect x="-8" y="0" width="30" height="${H}" fill="#7B5537"/><path d="M6 ${H*.2}v40M14 ${H*.55}v30" stroke="#5E3F28" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M14 ${by+6}C40 ${by+2} 70 ${by-2} 98 ${by-6}" stroke="#7B5537" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <path d="M84 ${by-5}q8-12 18-8q-6 10-18 8z" fill="#6FA654"/><path d="M60 ${by-1}q4 12 15 12q-2-12-15-12z" fill="#5A8F45"/>
+  ${[[0,44,42],[36,30,34],[64,48,26],[18,74,30]].map(([cx,cy,r],i)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${['#5A8F45','#6FA654','#7DB65C','#4E8040'][i]}"/>`).join('')}`;
+}
+function robin(){
+  const by=geo.y(4)+G*1.15,x=60,y=by-G*.95;
+  return `<g id="robin" transform="translate(${x} ${y})">
+   <path d="M-${G*.7} ${G*.2}l-${G*.55} ${G*.45}l${G*.2} ${G*.1}z" fill="#5E3F28"/>
+   <path d="M-${G*.1} ${G*.7}v${G*.3}M${G*.18} ${G*.7}v${G*.3}" stroke="#B8651C" stroke-width="2.5" stroke-linecap="round"/>
+   <ellipse rx="${G*.92}" ry="${G*.78}" fill="#7A5236"/>
+   <ellipse cx="${G*.32}" cy="${G*.12}" rx="${G*.55}" ry="${G*.56}" fill="#E8783A"/>
+   <circle cx="${G*.5}" cy="-${G*.5}" r="${G*.48}" fill="#7A5236"/>
+   <path d="M${G*.55} -${G*.2}a${G*.38} ${G*.3} 0 0 0 ${G*.42} -${G*.12}" fill="#E8783A"/>
+   <circle cx="${G*.66}" cy="-${G*.62}" r="${G*.11}" fill="#1a120c"/><circle cx="${G*.69}" cy="-${G*.66}" r="${G*.035}" fill="#fff"/>
+   <path d="M${G*.9} -${G*.55}l${G*.42} ${G*.1}l-${G*.4} ${G*.12}z" fill="#F0B23E"/>
+   <path d="M-${G*.55} -${G*.05}q${G*.45} ${G*.55} ${G*.85} ${G*.15}" stroke="#5E3F28" stroke-width="2.4" fill="none" stroke-linecap="round"/></g>`;
+}
+function drawStatic(hideLm){
+  makeGeo();
+  const {y,H}=geo,top=y(8),bot=y(0),col=S.lm&&!hideLm;
+  sv.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  let s=`<g opacity=".95"><path d="M${W-150} ${G*1.2}a16 16 0 0 1 28-10a20 20 0 0 1 36 2a13 13 0 0 1 4 24h-62a12 12 0 0 1-6-16z" fill="#fff" opacity=".85"/><path d="M${W*.42} ${G*.9}a12 12 0 0 1 22-6a14 14 0 0 1 26 4a10 10 0 0 1 0 18h-44a9 9 0 0 1-4-16z" fill="#fff" opacity=".7"/></g>`;
+  // fence posts hold the five wires
+  for(const x of[PX,RX])s+=`<rect x="${x-7}" y="${top-G*1.1}" width="14" height="${H-top+G*1.2}" fill="#9A6A3E"/><rect x="${x-7}" y="${top-G*1.1}" width="5" height="${H-top+G*1.2}" fill="#B98552"/><path d="M${x-9} ${top-G*1.1}h18l-9-${G*.5}z" fill="#7B5537"/>`;
+  for(let p=0;p<=8;p+=2){const lm=col&&p===LM[S.clef];s+=`<line ${lm?'id="lmLine"':''} x1="${PX}" x2="${RX}" y1="${y(p)}" y2="${y(p)}" stroke="${lm?'#2F7D3A':'#2B2118'}" stroke-width="${lm?4.5:2.2}"/>`}
+  if(col)s+=`<text x="${RX+12}" y="${y(LM[S.clef])+6}" font-size="17" font-weight="700" fill="#2F7D3A" font-family="Atkinson Hyperlegible,sans-serif">${LN()}</text>`;
+  s+=tree()+robin()+clef(col)+`<g id="les"></g><g id="hint"></g><g id="ghost"></g><g id="chick"></g><g id="fx"></g>`;
+  sv.innerHTML=s;
+}
+function chickSvg(d,state,x=CX,cls='pop'){
+  const pos=d-BOT[S.clef],y=geo.y(pos),open=state==='open',up=open?-34:-6,dn=open?30:6;
+  const eye=state==='happy'?`<path d="M${G*.08} -${G*.1}q${G*.14} -${G*.17} ${G*.28} 0" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/>`
+   :`<circle cx="${G*.22}" cy="-${G*.12}" r="${G*.16}" fill="#fff"/><circle cx="${G*.26}" cy="-${G*.11}" r="${G*.085}" fill="#1a120c"/><circle cx="${G*.29}" cy="-${G*.15}" r="${G*.03}" fill="#fff"/>`;
+  return ledgers(x,pos,false)+`<g class="${cls}"><g transform="translate(${x} ${y}) rotate(-20)">
+   <g transform="translate(${G*.56} 0)">${open?`<path d="M0 0L${G*.46} -${G*.24}L${G*.42} ${G*.22}z" fill="#E86A7A"/>`:''}
+    <g transform="rotate(${up})"><path d="M0 -${G*.19}Q${G*.3} -${G*.14} ${G*.6} 0L0 ${G*.04}z" fill="#F09A3E" stroke="#B8651C" stroke-width="1.2" stroke-linejoin="round"/></g>
+    <g transform="rotate(${dn})"><path d="M0 -${G*.04}L${G*.54} 0Q${G*.26} ${G*.14} 0 ${G*.19}z" fill="#F09A3E" stroke="#B8651C" stroke-width="1.2" stroke-linejoin="round"/></g></g>
+   <path d="M-${G*.12} -${G*.42}c-${G*.02} -${G*.22} ${G*.22} -${G*.28} ${G*.24} -${G*.1}" stroke="#2E2419" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+   <ellipse rx="${G*.66}" ry="${G*.47}" fill="#2E2419"/>
+   <path d="M-${G*.42} ${G*.04}q${G*.24} ${G*.26} ${G*.5} 0" stroke="#4E3C2B" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+   ${eye}<ellipse cx="${G*.36}" cy="${G*.14}" rx="${G*.09}" ry="${G*.055}" fill="#F29C9C"/></g></g>`;
+}
+function ghostSvg(d){
+  const pos=d-BOT[S.clef],y=geo.y(pos);
+  return `<g class="pop">${ledgers(GX,pos,true)}<g transform="translate(${GX} ${y}) rotate(-20)"><ellipse rx="${G*.66}" ry="${G*.47}" fill="#C2453A22" stroke="#C2453A" stroke-width="2.4" stroke-dasharray="5 3"/></g>
+   <text x="${GX-G*1.5}" y="${y+7}" text-anchor="end" font-size="22" font-weight="700" fill="#C2453A" font-family="Atkinson Hyperlegible,sans-serif">${L[d%7]}</text></g>`;
+}
+const label=(x,pos,t,c='#2F7D3A',sz=15)=>`<text x="${x}" y="${geo.y(pos)+sz*.35}" font-size="${sz}" font-weight="700" fill="${c}" font-family="Atkinson Hyperlegible,sans-serif">${t}</text>`;
+function fly(tx,ty,done){
+  const fx=$('fx'),by=geo.y(4)+G*1.15,sx=60+G*1.25,sy=by-G*1.45;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  fx.innerHTML=`<g id="seed"><ellipse rx="7" ry="4.5" fill="#3B3027"/><path d="M-5 0h10" stroke="#EDE3CF" stroke-width="1.4"/></g>`;
+  const seed=$('seed'),t0=performance.now(),dur=reduce?1:430,peak=Math.min(sy,ty)-G*2.2;
+  (function step(t){
+    const k=Math.min(1,(t-t0)/dur),x=sx+(tx-sx)*k,y=(1-k)*(1-k)*sy+2*(1-k)*k*peak+k*k*ty;
+    seed.setAttribute('transform',`translate(${x} ${y}) rotate(${k*300})`);
+    if(k<1)requestAnimationFrame(step);else done();
+  })(t0);
+}
+let ac=null;const BUF={};let loading=null;
+const SAMP=[];for(let o=2;o<=5;o++)for(const[n,st]of[['C',0],['Ds',3],['Fs',6],['A',9]])SAMP.push([n+o,12*(o+1)+st]);SAMP.push(['C6',84]);
+function audio(){
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){return null}
+  if(!loading)loading=Promise.all(SAMP.map(([n,m])=>fetch('../audio/piano/'+n+'.mp3').then(r=>r.arrayBuffer()).then(b=>ac.decodeAudioData(b)).then(buf=>{BUF[m]=buf}).catch(()=>{})));
+  return ac;
+}
+function tone(d,vol=.8){
+  if(!S.snd||!audio())return;
+  const midi=[0,2,4,5,7,9,11][d%7]+12*(Math.floor(d/7)+1),t=ac.currentTime,g=ac.createGain();
+  let best=null;for(const[,m]of SAMP)if(BUF[m]&&(best===null||Math.abs(m-midi)<Math.abs(best-midi)))best=m;
+  g.connect(ac.destination);
+  if(best!==null){
+    const src=ac.createBufferSource();src.buffer=BUF[best];src.playbackRate.value=2**((midi-best)/12);
+    g.gain.setValueAtTime(vol,t);g.gain.setValueAtTime(vol,t+1.6);g.gain.linearRampToValueAtTime(0,t+2.4);
+    src.connect(g);src.start(t);src.stop(t+2.5);return;
+  }
+  const o=ac.createOscillator(),f=440*2**((midi-69)/12);
+  o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol*.3,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.7);
+  o.connect(g);o.start(t);o.stop(t+.75);
+}
+function say(t,c='',acts=''){const m=$('msg');m.textContent=t;m.className=c;$('acts').innerHTML=acts}
+function dots(){
+  const n=S.round||0,el=$('dots');
+  if(mode!=='play'){el.innerHTML='';return}
+  if(!n){el.innerHTML=`<span>Fed: ${fed}</span>`;return}
+  el.innerHTML=Array.from({length:n},(_,i)=>`<b class="${results[i]===1?'f':results[i]===0?'m':''}"></b>`).join('');
+}
+function keys(){
+  const order=S.order==='A'?'ABCDEFG':'CDEFGAB';
+  $('keys').innerHTML=[...order].map(k=>`<button type="button" data-k="${k}" aria-label="${k}" ${mode==='play'?'':'disabled'}>${k}</button>`).join('');
+}
+
+/* ---------- home and the landmark lesson ---------- */
+function home(){
+  mode='home';busy=false;clearLater();cancelAnimationFrame(tRaf);cur=null;
+  drawStatic();keys();dots();$('bar').classList.add('hide');sv.classList.remove('tap');$('homeBtn').hidden=true;
+  const p=pool();$('chick').innerHTML=chickSvg(p[Math.floor(p.length/2)],'open');
+  say(`Morning! My chicks are hungry. ${S.clef==='treble'?'Treble':S.clef==='alto'?'Alto':'Bass'} clef, ${rangeTxt().replace(/ \(.*\)/,'')}${S.timer?', with a timer':''}.`,'',
+   `<button class="go" data-a="start">Let's feed them</button>${S.lesson?'':'<button class="plain" data-a="lesson">Landmark lesson</button>'}`);
+}
+function lesson(n){
+  mode='lesson';lstep=n;clearLater();$('homeBtn').hidden=false;
+  const [cn,how]=CLEF[S.clef],N=LN(),lm=LM[S.clef],d=lmDn(),skip='<button class="plain" data-a="play">Skip to the game</button>';
+  if(n===0){
+    drawStatic(true);sv.classList.add('tap');
+    say(`This is the ${cn}. It ${how} the ${N} line, so the ${N} line is our landmark. Tap the ${N} line.`,'',skip);return;
+  }
+  sv.classList.remove('tap');drawStatic();
+  if(n===1){
+    $('les').innerHTML='';
+    const l=$('lmLine');if(l)l.classList.add('glow');
+    say(`Yes, that's the ${N} line! Whenever you're stuck, find the ${N} line first.`,'good',`<button class="go" data-a="l2">Next</button>${skip}`);return;
+  }
+  const dir=n===2?1:-1,steps=[d,d+dir,d+2*dir];
+  say(n===2?`Counting up is like climbing a ladder: line, space, line. From ${N}, one step up is ${L[(d+1)%7]}, two steps up is ${L[(d+2)%7]}.`
+           :`Counting down works the same way, climbing down: line, space, line. From ${N}, one step down is ${L[(d+6)%7]}, two steps down is ${L[(d+5)%7]}.`,
+      '',`<button class="plain" data-a="again">Show me again</button><button class="go" data-a="${n===2?'l3':'l4'}">Next</button>${skip}`);
+  demo(steps);
+}
+function demo(steps){
+  clearLater();$('les').innerHTML='';$('chick').innerHTML='';
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  steps.forEach((d,i)=>later(()=>{
+    const pos=d-BOT[S.clef],x=CX+(i-1)*G*3.4;
+    if(i)$('les').innerHTML+=chickSvg(steps[i-1],'happy',CX+(i-2)*G*3.4,'');
+    $('chick').innerHTML=chickSvg(d,'open',x,'pop');
+    $('les').innerHTML+=`<g class="pop">${label(x-G*.35,-3.2,L[d%7],i?'#2B2118':'#2F7D3A',20)}</g>`;
+    tone(d,.7);
+  },reduce?0:i*900));
+}
+function lessonFinal(){
+  mode='lesson';lstep=4;drawStatic();$('chick').innerHTML='';
+  say(`Every chick sits on a line or a space. Find the ${LN()} line, count up or down to the chick, then tap its letter.`,'',`<button class="go" data-a="play">Let's go!</button>`);
+}
+sv.addEventListener('click',e=>{
+  if(mode!=='lesson'||lstep!==0)return;
+  const pt=sv.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;
+  const p=pt.matrixTransform(sv.getScreenCTM().inverse()),pos=geo.top-p.y/(G/2),line=Math.round(pos/2)*2;
+  if(line<0||line>8||Math.abs(pos-line)>.8)return;
+  if(line===LM[S.clef]){tone(lmDn());lesson(1)}
+  else say(`Not that one. Look at where the ${CLEF[S.clef][0]} ${S.clef==='treble'?'curls':S.clef==='alto'?'points':'puts its dots'}, then tap the ${LN()} line.`,'bad','<button class="plain" data-a="play">Skip to the game</button>');
+});
+
+/* ---------- the game ---------- */
+function play(){
+  mode='play';clearLater();drawStatic();fed=0;first=0;missed={};results=[];last=-1;
+  sv.classList.remove('tap');$('homeBtn').hidden=false;keys();dots();next();
+}
+function next(){
+  const p=pool();let d;
+  do{d=p[Math.floor(Math.random()*p.length)]}while(p.length>1&&d===last);
+  last=d;cur=d;tries=0;busy=false;
+  ['ghost','fx','hint','les'].forEach(i=>$(i).innerHTML='');
+  $('chick').innerHTML=chickSvg(d,'open');
+  say('Which note is this chick on?');startTimer();
+}
+function startTimer(){
+  cancelAnimationFrame(tRaf);$('bar').classList.toggle('hide',!S.timer);
+  if(!S.timer)return;tStart=performance.now();
+  (function tick(t){
+    if(mode!=='play'||cur===null)return;
+    const k=Math.max(0,1-(t-tStart)/(S.timer*1000));$('barI').style.transform=`scaleX(${k})`;
+    if(k<=0)timeUp();else tRaf=requestAnimationFrame(tick);
+  })(tStart);
+}
+function timeUp(){
+  busy=true;const d=cur;cur=null;missed[L[d%7]]=(missed[L[d%7]]||0)+1;
+  say(`Time's up. This chick was on ${L[d%7]}.`,'bad');
+  fly(CX+G*.8,geo.y(d-BOT[S.clef]),()=>{tone(d);done(0)});
+}
+function showHint(d){
+  const lm=lmDn(),N=LN();
+  if(d===lm)return `This chick is sitting right on the ${N} line!`;
+  const dir=d>lm?1:-1;let s='';
+  for(let c=lm;c!==d;c+=dir)s+=label(CX+G*2.3,c-BOT[S.clef],L[c%7],c===lm?'#2F7D3A':'#2B2118',14);
+  s+=label(CX+G*2.3,d-BOT[S.clef],'?','#C2453A',16);
+  $('hint').innerHTML=`<g class="pop">${s}</g>`;
+  return `Start on the ${N} line and count ${dir>0?'up':'down'}, one step at a time.`;
+}
+function answer(k){
+  if(mode!=='play'||busy||cur===null)return;
+  const d=cur,pos=d-BOT[S.clef];tries++;
+  if(L[d%7]===k){
+    busy=true;cancelAnimationFrame(tRaf);cur=null;
+    fly(CX+G*.8,geo.y(pos),()=>{
+      tone(d);$('chick').innerHTML=chickSvg(d,'happy');$('hint').innerHTML='';
+      $('fx').innerHTML=`<text class="float" x="${CX+G*.9}" y="${geo.y(pos)-G*.7}" font-size="26" fill="#C2453A">♥</text>`;
+      say(tries===1?`Yum! That's ${k}.`:`Yum! That's ${k}. You counted it out.`,'good');
+      if(tries>1)missed[k]=(missed[k]||0)+1;
+      done(tries===1?1:0);
+    });
+  }else{
+    // place the seed on the chosen letter inside the selected range first, then on the stave, then nearest the chick
+    const li=L.indexOf(k),pl=pool(),lo=Math.min(...pl),hi=Math.max(...pl),b0=BOT[S.clef];
+    const rank=c=>(c>=lo&&c<=hi?0:(c-b0>=-1&&c-b0<=9?1:2))*100+Math.abs(c-d);
+    let best=null;
+    for(let c=d-7;c<=d+7;c++)if(c%7===li&&c!==d&&(best===null||rank(c)<rank(best)))best=c;
+    busy=true;$('ghost').innerHTML='';
+    fly(GX,geo.y(best-BOT[S.clef]),()=>{
+      $('ghost').innerHTML=ghostSvg(best);tone(best,.5);
+      const dir=best>d?'higher':'lower';
+      let m=`That's ${k}. ${k} is ${dir} than this chick.`;
+      m+=tries>=2?' '+showHint(d):' Try again!';
+      say(m,'bad');later(()=>{$('fx').innerHTML='';busy=false},350);
+    });
+  }
+}
+function done(r){
+  results.push(r);fed++;if(r)first++;dots();
+  later(()=>{
+    $('chick').innerHTML=$('chick').innerHTML.replace('class="pop"','class="bye"');$('ghost').innerHTML='';
+    later(()=>{if(S.round&&fed>=S.round)finish();else if(mode==='play')next()},500);
+  },900);
+}
+function finish(){
+  mode='end';cancelAnimationFrame(tRaf);$('bar').classList.add('hide');
+  const ms=Object.entries(missed).sort((a,b)=>b[1]-a[1]).map(([k])=>k);
+  say(`Thank you! ${fed} chicks fed, ${first} on the first try.`+(ms.length?` Notes to practise: ${ms.join(', ')}.`:' Every note first time. Brilliant reading!'),'good',
+   `<button class="go" data-a="play">Play again</button><button class="plain" data-a="lesson">Landmark lesson</button><button class="plain" data-a="home">Home</button>`);
+  keys();
+}
+$('acts').addEventListener('click',e=>{
+  const a=e.target.closest('button')?.dataset.a;if(!a)return;
+  if(a==='start')S.lesson?lesson(0):play();
+  else if(a==='lesson')lesson(0);
+  else if(a==='l2')lesson(2);
+  else if(a==='l3')lesson(3);
+  else if(a==='l4')lessonFinal();
+  else if(a==='again')lesson(lstep);
+  else if(a==='play')play();
+  else if(a==='home')home();
+});
+
+/* ---------- settings ---------- */
+function seg(id,key,num){
+  const el=$(id);
+  el.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(String(S[key])===b.dataset.v)));
+  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;S[key]=num?+b.dataset.v:b.dataset.v;
+    if(key==='clef'){const f=PRE[S.clef][0][1][0];S.preset=f[0];S.lo=f[2];S.hi=f[3]}
+    save();fillDrawer()};
+}
+function fillDrawer(){
+  seg('clefSeg','clef');seg('timerSeg','timer',1);seg('roundSeg','round',1);seg('orderSeg','order');
+  const sel=$('notesSel');
+  sel.innerHTML=PRE[S.clef].map(([g,list])=>`<optgroup label="${g}">${list.map(p=>`<option value="${p[0]}">${p[1]}</option>`).join('')}</optgroup>`).join('')+`<option value="custom">Custom range</option>`;
+  sel.value=findPre()?S.preset:'custom';$('customBox').hidden=sel.value!=='custom';
+  const b=BOT[S.clef],opts=[];for(let d=b-6;d<=b+14;d++)opts.push(`<option value="${d}">${nm(d)}</option>`);
+  $('loSel').innerHTML=$('hiSel').innerHTML=opts.join('');$('loSel').value=S.lo;$('hiSel').value=S.hi;
+  $('lmChk').checked=S.lm;$('sndChk').checked=S.snd;$('lesChk').checked=S.lesson;
+}
+$('notesSel').onchange=e=>{S.preset=e.target.value;const p=findPre();if(p){S.lo=p[2];S.hi=p[3]}save();fillDrawer()};
+$('loSel').onchange=e=>{S.lo=+e.target.value;save()};
+$('hiSel').onchange=e=>{S.hi=+e.target.value;save()};
+$('lmChk').onchange=e=>{S.lm=e.target.checked;save()};
+$('sndChk').onchange=e=>{S.snd=e.target.checked;save()};
+$('lesChk').onchange=e=>{S.lesson=e.target.checked;save()};
+$('setBtn').onclick=()=>{clearLater();cancelAnimationFrame(tRaf);mode='home';fillDrawer();$('dlg').showModal()};
+$('dlg').addEventListener('close',home);
+$('homeBtn').onclick=home;
+$('keys').onclick=e=>{const b=e.target.closest('button');if(b)answer(b.dataset.k)};
+addEventListener('keydown',e=>{
+  if($('dlg').open||e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key.toUpperCase();
+  if(k.length===1&&L.includes(k)&&mode==='play'){answer(k);const b=document.querySelector(`[data-k="${k}"]`);if(b){b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),120)}}
+});
+let wasNarrow=innerWidth<600;
+addEventListener('resize',()=>{const n=innerWidth<600;if(n===wasNarrow||busy)return;wasNarrow=n;
+  if(mode==='play'&&cur!==null){drawStatic();$('chick').innerHTML=chickSvg(cur,'open')}else if(mode==='home')home()});
+addEventListener('pointerdown',()=>{if(S.snd)audio()},{once:true});
+home();
+}
+</script>
+<script data-goatcounter="https://levelupmusicianship.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
