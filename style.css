@@ -601,8 +601,6 @@ img { max-width: 100%; display: block; }
   color: #0B1320;
 }
 
-/* trade mark symbol */
-.tm { font-size: 0.42em; vertical-align: super; margin-left: 2px; line-height: 0; font-weight: 600; position: relative; top: -0.2em; }
 @media (max-width: 380px) {
   .brand .brand-name { font-size: 0.85em; }
 }
