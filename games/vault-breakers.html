@@ -297,7 +297,9 @@ button.iconbtn:hover{border-color:var(--gold-h) !important}
 /* notation strip */
 .rhythm-rail{background:var(--paper) !important;border:0 !important;border-radius:18px !important;box-shadow:0 5px 0 var(--paper-edge);padding:14px 10px !important;min-height:132px;margin:8px 0 18px !important;position:relative}
 .rhythm-rail::before{content:"";position:absolute;left:18px;right:18px;top:calc(50% + 2px);height:2px;background:rgba(42,27,74,.12);border-radius:2px}
-.beat-group{position:relative;z-index:1}
+.rhythm-rail{display:grid !important;grid-template-columns:repeat(8,auto);justify-content:center;align-items:start;column-gap:8px !important;row-gap:12px !important}
+@media (max-width:760px){.rhythm-rail{grid-template-columns:repeat(4,auto)}.rhythm-rail::before{display:none}}
+.beat-group{position:relative;z-index:1;align-items:flex-start !important;height:100%}
 .beat-group.active-listen{background:rgba(255,200,87,.55) !important;box-shadow:0 0 0 2px #E2A93A !important}
 .beat-group.active-tap{background:rgba(139,234,110,.45) !important;box-shadow:0 0 0 2px #3E8E4F !important}
 .syl-label{color:#6B5A93 !important;font-family:var(--display);font-weight:400 !important;font-size:14px !important;letter-spacing:0 !important}
@@ -556,9 +558,9 @@ footer.note{color:var(--ink-dim) !important;opacity:1 !important;font-family:var
     { id:2, name:"Laser Grid",      sub:"+ ta-ti",                       units:["tam","tititi","tati"],                                             length:8,  bpm:62, usesPitch:false },
     { id:3, name:"Camera Loop",     sub:"+ ti-ta",                       units:["tam","tititi","tati","titaa"],                                     length:8,  bpm:66, usesPitch:false },
     { id:4, name:"Server Room",     sub:"+ tika-tika-tika-tika",         units:["tam","tititi","tati","titaa","tikax6"],                            length:8,  bpm:68, usesPitch:false },
-    { id:5, name:"Vault Antechamber", sub:"+ ti-tika-tika & tika-ti-tika", units:["tam","tititi","tati","titaa","tikax6","titikatika","tikatitika"], length:10, bpm:70, usesPitch:false },
-    { id:6, name:"Combination Lock", sub:"+ ti-tika-ti, all rhythms",    units:["tam","tititi","tati","titaa","tikax6","titikatika","tikatitika","titikati"], length:10, bpm:74, usesPitch:false },
-    { id:7, name:"Vault Breach",    sub:"all rhythms, fastest!",         units:["tam","tititi","tati","titaa","tikax6","titikatika","tikatitika","titikati"], length:12, bpm:78, usesPitch:false }
+    { id:5, name:"Vault Antechamber", sub:"+ ti-tika-tika & tika-ti-tika", units:["tam","tititi","tati","titaa","tikax6","titikatika","tikatitika"], length:8,  bpm:70, usesPitch:false },
+    { id:6, name:"Combination Lock", sub:"+ ti-tika-ti, all rhythms",    units:["tam","tititi","tati","titaa","tikax6","titikatika","tikatitika","titikati"], length:8,  bpm:74, usesPitch:false },
+    { id:7, name:"Vault Breach",    sub:"all rhythms, fastest!",         units:["tam","tititi","tati","titaa","tikax6","titikatika","tikatitika","titikati"], length:8,  bpm:78, usesPitch:false }
   ];
 
   /* ===================== STATE ===================== */
@@ -671,19 +673,20 @@ footer.note{color:var(--ink-dim) !important;opacity:1 !important;font-family:var
   // FILLED = every struck/subdivided note (eighths, sixteenths, and the
   // quarter-equivalent "ta" that appears alongside a shorter partner).
   function note(cx, cy, open, big){
-    const rx = big ? 8 : 5.2;
-    const ry = big ? 5.8 : 4;
+    // one notehead size for every rhythm, so tam, ta and ti all read as the same kind of dot
+    const rx = 5.2;
+    const ry = 4;
     const fill = open ? "var(--paper)" : "var(--paper-ink)";
     const stroke = open ? "var(--paper-ink)" : "var(--paper-ink)";
-    const strokeW = open ? 2.6 : (big ? 1.6 : 1.3);
+    const strokeW = open ? 2.6 : 1.3;
     return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>`;
   }
   function stem(cx, cy, big){
-    const sw = big ? 2.8 : 2.2;
-    const x = cx + (big ? 8 : 5.2) - sw;
+    const sw = 2.2;
+    const x = cx + 5.2 - sw;
     return `<rect x="${x}" y="6" width="${sw}" height="${cy-6}" fill="var(--paper-ink)"/>`;
   }
-  function stemX(cx, big){ return cx + (big ? 8 : 5.2) - (big ? 2.8 : 2.2)/2; }
+  function stemX(cx, big){ return cx + 5.2 - 2.2/2; }
 
   function iconSVG(unitKey){
     const CY = 40;
@@ -730,7 +733,7 @@ footer.note{color:var(--ink-dim) !important;opacity:1 !important;font-family:var
         // the full beat, NOT an open/hollow minim-style notehead.
         return `<svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">${baseShadow}
           ${stem(18,CY,true)}${note(18,CY,false,true)}
-          <circle cx="31" cy="${CY}" r="2.2" fill="var(--paper-ink)"/>
+          <circle cx="28" cy="${CY}" r="2.2" fill="var(--paper-ink)"/>
         </svg>`;
       case "tititi": {
         // three even eighths — one continuous beam, no secondary
