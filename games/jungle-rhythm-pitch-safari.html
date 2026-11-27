@@ -874,19 +874,20 @@ footer.note{color:var(--ink-dim) !important;opacity:1 !important;font-size:13px 
     // stem tops and stack upward (further beams sit higher, away from the
     // notehead) — this matches real notation for stems-up notation.
     function note(cx, filled, big){
-      const rx = big ? 7.5 : 5;
-      const ry = big ? 5.5 : 3.8;
+      // one notehead size for every rhythm, so ta, ti and tika all read as the same kind of dot
+      const rx = 5;
+      const ry = 3.8;
       const fill = filled ? noteColor : "var(--cream)";
       const stroke = filled ? filledStroke : openStroke;
-      const strokeW = filled ? (big ? 1.6 : 1.3) : 2.6;
+      const strokeW = filled ? 1.3 : 2.6;
       return `<ellipse cx="${cx}" cy="40" rx="${rx}" ry="${ry}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>`;
     }
     function stem(cx, big){
-      const sw = big ? 2.8 : 2.1;
-      const x = cx + (big ? 7.5 : 5) - sw;
+      const sw = 2.1;
+      const x = cx + 5 - sw;
       return `<rect x="${x}" y="8" width="${sw}" height="32" fill="${stemColor}"/>`;
     }
-    function stemX(cx, big){ return cx + (big ? 7.5 : 5) - (big ? 2.8 : 2.1)/2; }
+    function stemX(cx, big){ return cx + 5 - 2.1/2; }
     // Beams must sit flush with the stem's top (y=8) so there's no bare stem
     // "antenna" poking out above the beam. A second beam (for sixteenths)
     // stacks toward the notehead from there, i.e. slightly further down.
